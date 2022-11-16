@@ -53,7 +53,7 @@
     "rules": {
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": [
-        "warn"
+        "off"
       ],
       "import/no-unresolved": "off",
       "import/extensions": [
