@@ -2,7 +2,11 @@
   "name": "img-frameright",
   "description": "Webcomponent img-frameright following open-wc recommendations",
   "license": "MIT",
-  "author": "img-frameright",
+  "author": {
+    "name": "Frameright (Coberg Ltd)",
+    "email": "hello@frameright.io",
+    "url": "https://frameright.io/"
+  },
   "version": "0.0.0",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
