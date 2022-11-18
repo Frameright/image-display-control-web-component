@@ -12,7 +12,9 @@ jobs:
       - run: npm run lint
       - run: npm run test
       - run: npm run build
+      - run: npm pack
       - uses: actions/upload-artifact@v3
         with:
           name: img-frameright
-          path: img-frameright/dist/src/
+          path: img-frameright/img-frameright-*.tgz
+          if-no-files-found: error
