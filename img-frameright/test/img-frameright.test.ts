@@ -4,30 +4,20 @@ import { ImgFrameright } from '../src/ImgFrameright.js';
 import '../src/img-frameright.js';
 
 describe('ImgFrameright', () => {
-  it('has a default title "Hey there" and counter 5', async () => {
+  it('can set the src via attribute', async () => {
     const el = await fixture<ImgFrameright>(
-      html`<img-frameright></img-frameright>`
+      html`<img-frameright src="myimage.jpg"></img-frameright>`
     );
 
-    expect(el.title).to.equal('Hey there');
-    expect(el.counter).to.equal(5);
+    expect(el.src).to.equal('myimage.jpg');
   });
 
-  it('increases the counter on button click', async () => {
+  it('can set the alt via attribute', async () => {
     const el = await fixture<ImgFrameright>(
-      html`<img-frameright></img-frameright>`
-    );
-    el.shadowRoot!.querySelector('button')!.click();
-
-    expect(el.counter).to.equal(6);
-  });
-
-  it('can override the title via attribute', async () => {
-    const el = await fixture<ImgFrameright>(
-      html`<img-frameright title="attribute title"></img-frameright>`
+      html`<img-frameright src="myimage.jpg" alt="My image"></img-frameright>`
     );
 
-    expect(el.title).to.equal('attribute title');
+    expect(el.alt).to.equal('My image');
   });
 
   it('passes the a11y audit', async () => {
@@ -35,6 +25,6 @@ describe('ImgFrameright', () => {
       html`<img-frameright></img-frameright>`
     );
 
-    await expect(el).shadowDom.to.be.accessible();
+    expect(el).shadowDom.to.be.accessible();
   });
 });

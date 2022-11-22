@@ -1,27 +1,28 @@
-import { html, css, LitElement } from 'lit';
+import { html, css, LitElement, CSSResult, TemplateResult } from 'lit';
 import { property } from 'lit/decorators.js';
 
 export class ImgFrameright extends LitElement {
-  static styles = css`
+  static styles: CSSResult = css`
     :host {
       display: block;
       padding: 25px;
-      color: var(--img-frameright-text-color, #000);
+      background-color: #ccc;
     }
   `;
 
-  @property({ type: String }) title = 'Hey there';
+  @property()
+  src: string = '';
 
-  @property({ type: Number }) counter = 5;
+  @property()
+  alt: string = '';
 
-  __increment() {
-    this.counter += 1;
-  }
+  render(): TemplateResult[] {
+    const result: TemplateResult[] = [];
 
-  render() {
-    return html`
-      <h2>${this.title} Nr. ${this.counter}!</h2>
-      <button @click=${this.__increment}>increment</button>
-    `;
+    if (this.src) {
+      result.push(html`<img src="${this.src}" alt="${this.alt}" />`);
+    }
+
+    return result;
   }
 }
