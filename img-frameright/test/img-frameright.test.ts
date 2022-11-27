@@ -20,6 +20,14 @@ describe('ImgFrameright', () => {
     expect(el.alt).to.equal('My image');
   });
 
+  it('can set the title via attribute', async () => {
+    const el = await fixture<ImgFrameright>(
+      html`<img-frameright src="myimage.jpg" title="My title"></img-frameright>`
+    );
+
+    expect(el.title).to.equal('My title');
+  });
+
   it('passes the a11y audit', async () => {
     const el = await fixture<ImgFrameright>(
       html`<img-frameright></img-frameright>`
