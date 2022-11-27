@@ -9,10 +9,10 @@ interface AccessAnyMemberByName {
 
 export class ImgFrameright extends LitElement {
   static styles: CSSResult = css`
-    :host {
-      display: block;
-      padding: 25px;
-      background-color: #ccc;
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
   `;
 
