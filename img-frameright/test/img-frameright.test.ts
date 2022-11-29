@@ -9,7 +9,7 @@ describe('ImgFrameright', () => {
       html`<img-frameright src="myimage.jpg"></img-frameright>`
     );
 
-    expect(el.src).to.equal('myimage.jpg');
+    expect(el._src).to.equal('myimage.jpg');
   });
 
   it('can set the alt via attribute', async () => {
@@ -17,7 +17,7 @@ describe('ImgFrameright', () => {
       html`<img-frameright src="myimage.jpg" alt="My image"></img-frameright>`
     );
 
-    expect(el.alt).to.equal('My image');
+    expect(el._alt).to.equal('My image');
   });
 
   it('can set the title via attribute', async () => {
@@ -25,7 +25,15 @@ describe('ImgFrameright', () => {
       html`<img-frameright src="myimage.jpg" title="My title"></img-frameright>`
     );
 
-    expect(el.title).to.equal('My title');
+    expect(el._title).to.equal('My title');
+  });
+
+  it('can set the class via attribute', async () => {
+    const el = await fixture<ImgFrameright>(
+      html`<img-frameright src="myimage.jpg" class="original"></img-frameright>`
+    );
+
+    expect(el._class).to.equal('original');
   });
 
   it('passes the a11y audit', async () => {
