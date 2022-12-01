@@ -38,6 +38,7 @@ export class ImgFrameright extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this._populateImageRegions();
     this._sizeObserverIntervalId ||= window.setInterval(() => {
       this._observeSize();
     }, ImgFrameright._SIZE_OBSERVER_PERIOD_MS);
@@ -52,14 +53,20 @@ export class ImgFrameright extends LitElement {
   }
 
   render() {
-    // Note: instead of duplicating here again the full list of HTML attributes
-    // we used to generate it in an earlier version of this code and render it
-    // with:
+    // Notes:
     //
-    //    return unsafeHTML(`<div class="root"><img ${htmlAttrs} /></div>`);
+    // * Instead of duplicating here again the full list of HTML attributes
+    //   we used to generate it in an earlier version of this code and render it
+    //   with:
     //
-    // However this led to Lit deleting and re-creating the elements, so the CSS
-    // `transition: ` styles had no effect and everything was flickering.
+    //      return unsafeHTML(`<div class="root"><img ${htmlAttrs} /></div>`);
+    //
+    //   However this led to Lit deleting and re-creating the elements, so the
+    //   CSS `transition: ` styles had no effect and everything was flickering.
+    //
+    // * On purpose we don't forward the `width=` and `height=` attributes down
+    //   to the `<img>` element as this then messes with our calculated CSS
+    //   scaling and moving.
     return html`
       <div class="root">
         <img
@@ -67,14 +74,12 @@ export class ImgFrameright extends LitElement {
           crossorigin=${this._crossorigin ?? nothing}
           decoding=${this._decoding ?? nothing}
           fetchpriority=${this._fetchpriority ?? nothing}
-          height=${this._height ?? nothing}
           ?ismap=${this._ismap}
           loading=${this._loading ?? nothing}
           referrerpolicy=${this._referrerpolicy ?? nothing}
           sizes=${this._sizes ?? nothing}
           src=${this._src ?? nothing}
           srcset=${this._srcset ?? nothing}
-          width=${this._width ?? nothing}
           usemap=${this._usemap ?? nothing}
           class=${this._class ?? nothing}
           contextmenu=${this._contextmenu ?? nothing}
@@ -110,10 +115,43 @@ export class ImgFrameright extends LitElement {
     secondRatio: number
   ) {
     // Avoid dividing by 0:
-    const first = firstRatio || 0.1;
-    const second = secondRatio || 0.1;
+    const first = Math.max(firstRatio, 0.01);
+    const second = Math.max(secondRatio, 0.01);
 
     return first >= second ? first / second : second / first;
+  }
+
+  // Hydrates this._imageRegions
+  private _populateImageRegions() {
+    const originalRegion = this._imageRegions[0];
+
+    function populateOriginalImageRatio() {
+      // Avoid dividing by 0:
+      originalRegion.width = Math.max(originalRegion.width, 1);
+      originalRegion.height = Math.max(originalRegion.height, 1);
+
+      originalRegion.ratio = originalRegion.width / originalRegion.height;
+    }
+
+    // If the width and height has been passed as HTML attributes, use them:
+    if (this._width) {
+      originalRegion.width = parseInt(this._width, 10);
+    }
+    if (this._height) {
+      originalRegion.height = parseInt(this._height, 10);
+    }
+    if (originalRegion.width >= 0 && originalRegion.height >= 0) {
+      populateOriginalImageRatio();
+    } else if (this._src) {
+      // Else get that information asynchronously by loading the image file:
+      const img = new Image();
+      img.onload = () => {
+        originalRegion.width = img.width;
+        originalRegion.height = img.height;
+        populateOriginalImageRatio();
+      };
+      img.src = this._src;
+    }
   }
 
   // Called periodically in order to observe the size of the component.
@@ -140,35 +178,38 @@ export class ImgFrameright extends LitElement {
     let bestRegion = this._imageRegions[0]; // entire original image
     const originalImageRatio = bestRegion.ratio;
 
-    // avoid div by zero:
+    // Avoid dividing by 0:
     const containerWidth = Math.max(this._currentWidth, 1);
     const containerHeight = Math.max(this._currentHeight, 1);
     const containerRatio = containerWidth / containerHeight;
 
-    let smallestRatioDiff = ImgFrameright._imageRatioDiffFactor(
-      containerRatio,
-      originalImageRatio
-    );
+    if (bestRegion.ratio > 0) {
+      // nothing we can do if this hasn't been set
+      let smallestRatioDiff = ImgFrameright._imageRatioDiffFactor(
+        containerRatio,
+        originalImageRatio
+      );
 
-    // It's only worth looking for an image region if the container ratio and
-    // the original image ratio differ enough:
-    if (smallestRatioDiff > 1.1) {
-      this._imageRegions.slice(1).forEach(region => {
-        const ratioDiff = ImgFrameright._imageRatioDiffFactor(
-          containerRatio,
-          region.ratio
-        );
-        if (ratioDiff < smallestRatioDiff) {
-          smallestRatioDiff = ratioDiff;
-          bestRegion = region;
-        }
-      });
+      // It's only worth looking for an image region if the container ratio and
+      // the original image ratio differ enough:
+      if (smallestRatioDiff > 1.1) {
+        this._imageRegions.slice(1).forEach(region => {
+          const ratioDiff = ImgFrameright._imageRatioDiffFactor(
+            containerRatio,
+            region.ratio
+          );
+          if (ratioDiff < smallestRatioDiff) {
+            smallestRatioDiff = ratioDiff;
+            bestRegion = region;
+          }
+        });
+      }
     }
 
     if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
       style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
     } else {
-      // avoid div by zero:
+      // Avoid dividing by 0:
       const regionWidth = Math.max(bestRegion.width, 1);
       const regionHeight = Math.max(bestRegion.height, 1);
 
@@ -210,7 +251,7 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'loading' }) _loading = null;
   @property({ attribute: 'referrerpolicy' }) _referrerpolicy = null;
   @property({ attribute: 'sizes' }) _sizes = null;
-  @property({ attribute: 'src' }) _src = null;
+  @property({ attribute: 'src' }) _src: string | null = null;
   @property({ attribute: 'srcset' }) _srcset = null;
   @property({ attribute: 'width' }) _width = null;
   @property({ attribute: 'usemap' }) _usemap = null;
@@ -240,14 +281,15 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'translate' }) _translate = null;
 
   private _imageRegions: ImageRegion[] = [
-    // FIXME: should be generated:
     {
       id: ImgFrameright._IMAGE_REGION_ID_ORIGINAL,
       x: 0, // px
       y: 0, // px
-      width: 2000, // px
-      height: 3000, // px
-      ratio: 2000 / 3000, // FIXME should be generated
+
+      // these fields will be populated by _populateImageRegions():
+      width: -1,
+      height: -1,
+      ratio: -1,
     },
     // FIXME: should come from an HTML attribute:
     {
