@@ -14,6 +14,12 @@ export class ImgFrameright extends LitElement {
       height: 100%;
       position: relative;
     }
+
+    img {
+      /* Prevents initial flickering. Will be set to 'visible' later when
+         initial scaling has been calculated: */
+      visibility: hidden;
+    }
   `;
 
   connectedCallback() {
@@ -69,7 +75,8 @@ export class ImgFrameright extends LitElement {
   // some CSS style to the <img> element. This couldn't be done in pure CSS,
   // https://stackoverflow.com/questions/50248577/css-transform-scale-based-on-container-width
   _sizeHasChanged() {
-    const style = [];
+    const style = ['visibility: visible;'];
+
     let region = null;
     if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL !== this._imageRegionId) {
       region = this._imageRegions
