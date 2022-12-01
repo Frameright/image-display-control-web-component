@@ -1,7 +1,22 @@
 import { html, css, LitElement, CSSResult, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
 
+interface ImageRegion {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  ratio: number;
+}
+
 export class ImgFrameright extends LitElement {
+  // Image region ID of the entire original image.
+  private static readonly _IMAGE_REGION_ID_ORIGINAL = '__orig__';
+
+  // Period in milliseconds for the component size observer.
+  private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
+
   static styles: CSSResult = css`
     div.root {
       width: 100%;
@@ -13,6 +28,11 @@ export class ImgFrameright extends LitElement {
       /* Prevents initial flickering. Will be set to 'visible' later when
          initial scaling has been calculated: */
       visibility: hidden;
+
+      transition: all
+        ${parseFloat(
+          ((ImgFrameright._SIZE_OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
+        )}s;
     }
   `;
 
@@ -82,12 +102,19 @@ export class ImgFrameright extends LitElement {
     `;
   }
 
-  // Select this image region ID in order to force rendering the original image
-  // instead of selecting the best region.
-  private static readonly _IMAGE_REGION_ID_ORIGINAL = '__orig__';
+  // Calculates the difference between two image ratios, expressed as the
+  // factor >= 1, so that one ratio multiplied by this factor gives the other
+  // ratio.
+  private static _imageRatioDiffFactor(
+    firstRatio: number,
+    secondRatio: number
+  ) {
+    // Avoid dividing by 0:
+    const first = firstRatio || 0.1;
+    const second = secondRatio || 0.1;
 
-  // Period in milliseconds for the component size observer.
-  private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
+    return first >= second ? first / second : second / first;
+  }
 
   // Called periodically in order to observe the size of the component.
   // See https://stackoverflow.com/questions/8082729/how-to-detect-css3-resize-events
@@ -109,29 +136,50 @@ export class ImgFrameright extends LitElement {
   private _sizeHasChanged() {
     const style = ['visibility: visible;'];
 
-    let region = null;
-    if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL !== this._imageRegionId) {
-      region = this._imageRegions
-        .filter(reg => this._imageRegionId === reg.id)
-        .shift();
+    // Determining the best fitting image region for the current container size.
+    let bestRegion = this._imageRegions[0]; // entire original image
+    const originalImageRatio = bestRegion.ratio;
+
+    // avoid div by zero:
+    const containerWidth = Math.max(this._currentWidth, 1);
+    const containerHeight = Math.max(this._currentHeight, 1);
+    const containerRatio = containerWidth / containerHeight;
+
+    let smallestRatioDiff = ImgFrameright._imageRatioDiffFactor(
+      containerRatio,
+      originalImageRatio
+    );
+
+    // It's only worth looking for an image region if the container ratio and
+    // the original image ratio differ enough:
+    if (smallestRatioDiff > 1.1) {
+      this._imageRegions.slice(1).forEach(region => {
+        const ratioDiff = ImgFrameright._imageRatioDiffFactor(
+          containerRatio,
+          region.ratio
+        );
+        if (ratioDiff < smallestRatioDiff) {
+          smallestRatioDiff = ratioDiff;
+          bestRegion = region;
+        }
+      });
     }
 
-    if (!region) {
+    if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
       style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
     } else {
       // avoid div by zero:
-      const regionWidth = Math.max(region.width, 1);
-      const regionHeight = Math.max(region.height, 1);
-      const containerWidth = Math.max(this._currentWidth, 1);
-      const containerHeight = Math.max(this._currentHeight, 1);
+      const regionWidth = Math.max(bestRegion.width, 1);
+      const regionHeight = Math.max(bestRegion.height, 1);
 
       let xOffset = 0;
       let yOffset = 0;
       let scaleFactor = 1;
-      const containerRatio = containerWidth / containerHeight;
-      if (containerRatio < region.ratio) {
+      if (containerRatio < bestRegion.ratio) {
         scaleFactor = containerWidth / regionWidth;
-        yOffset = Math.round((containerHeight / scaleFactor - regionHeight) / 2);
+        yOffset = Math.round(
+          (containerHeight / scaleFactor - regionHeight) / 2
+        );
       } else {
         scaleFactor = containerHeight / regionHeight;
         xOffset = Math.round((containerWidth / scaleFactor - regionWidth) / 2);
@@ -139,14 +187,12 @@ export class ImgFrameright extends LitElement {
 
       style.push(
         'position: absolute;',
-        `left: ${-region.x + xOffset}px;`,
-        `top: ${-region.y + yOffset}px;`,
-        `transform-origin: ${region.x - xOffset}px ${region.y - yOffset}px;`,
-        `transform: scale(${scaleFactor.toFixed(3)});`,
-        `transition: all ${(
-          (ImgFrameright._SIZE_OBSERVER_PERIOD_MS * 1.5) /
-          1000
-        ).toFixed(3)}s`
+        `left: ${-bestRegion.x + xOffset}px;`,
+        `top: ${-bestRegion.y + yOffset}px;`,
+        `transform-origin: ${bestRegion.x - xOffset}px ${
+          bestRegion.y - yOffset
+        }px;`,
+        `transform: scale(${scaleFactor.toFixed(3)});`
       );
     }
 
@@ -193,21 +239,34 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'title' }) _title = null;
   @property({ attribute: 'translate' }) _translate = null;
 
-  // FIXME: should come from an HTML attribute
-  private _imageRegions = [
+  private _imageRegions: ImageRegion[] = [
+    // FIXME: should be generated:
+    {
+      id: ImgFrameright._IMAGE_REGION_ID_ORIGINAL,
+      x: 0, // px
+      y: 0, // px
+      width: 2000, // px
+      height: 3000, // px
+      ratio: 2000 / 3000, // FIXME should be generated
+    },
+    // FIXME: should come from an HTML attribute:
+    {
+      id: 'oneanimal',
+      x: 217, // px
+      y: 1062, // px
+      width: 456 - 217, // px
+      height: 1282 - 1062, // px
+      ratio: (456 - 217) / (1282 - 1062), // FIXME should be generated
+    },
     {
       id: 'threeanimals',
       x: 245, // px
       y: 1087, // px
       width: 664 - 245, // px
       height: 1269 - 1087, // px
-      ratio: (664 - 245) / (1269 - 1087),
+      ratio: (664 - 245) / (1269 - 1087), // FIXME should be generated
     },
   ];
-
-  // FIXME: should come from an HTML attribute
-  // private _imageRegionId = ImgFrameright._IMAGE_REGION_ID_ORIGINAL;
-  private _imageRegionId = 'threeanimals';
 
   // Interval observing the size of the component in order to react to size
   // changes.
