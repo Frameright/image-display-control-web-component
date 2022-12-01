@@ -1,11 +1,5 @@
-import { html, css, LitElement, CSSResult } from 'lit';
+import { html, css, LitElement, CSSResult, nothing } from 'lit';
 import { property } from 'lit/decorators.js';
-import { unsafeHTML } from 'lit/directives/unsafe-html.js';
-
-// See https://stackoverflow.com/questions/34727936/typescript-bracket-notation-property-access
-interface AccessAnyMemberByName {
-  [key: string]: any;
-}
 
 export class ImgFrameright extends LitElement {
   static styles: CSSResult = css`
@@ -26,7 +20,7 @@ export class ImgFrameright extends LitElement {
     super.connectedCallback();
     this._sizeObserverIntervalId ||= window.setInterval(() => {
       this._observeSize();
-    }, 200);
+    }, ImgFrameright._SIZE_OBSERVER_PERIOD_MS);
   }
 
   disconnectedCallback() {
@@ -38,28 +32,66 @@ export class ImgFrameright extends LitElement {
   }
 
   render() {
-    let htmlAttrs = '';
-    ImgFrameright._supportedHtmlAttrs.forEach((propName, attrName) => {
-      const propValue = (this as AccessAnyMemberByName)[propName];
-      if (propValue !== null) {
-        htmlAttrs += ` ${attrName}="${propValue}"`;
-      }
-    });
-
-    return unsafeHTML(`<div class="root"><img ${htmlAttrs.trim()} /></div>`);
+    // Note: instead of duplicating here again the full list of HTML attributes
+    // we used to generate it in an earlier version of this code and render it
+    // with:
+    //
+    //    return unsafeHTML(`<div class="root"><img ${htmlAttrs} /></div>`);
+    //
+    // However this led to Lit deleting and re-creating the elements, so the CSS
+    // `transition: ` styles had no effect and everything was flickering.
+    return html`
+      <div class="root">
+        <img
+          alt=${this._alt ?? nothing}
+          crossorigin=${this._crossorigin ?? nothing}
+          decoding=${this._decoding ?? nothing}
+          fetchpriority=${this._fetchpriority ?? nothing}
+          height=${this._height ?? nothing}
+          ?ismap=${this._ismap}
+          loading=${this._loading ?? nothing}
+          referrerpolicy=${this._referrerpolicy ?? nothing}
+          sizes=${this._sizes ?? nothing}
+          src=${this._src ?? nothing}
+          srcset=${this._srcset ?? nothing}
+          width=${this._width ?? nothing}
+          usemap=${this._usemap ?? nothing}
+          class=${this._class ?? nothing}
+          contextmenu=${this._contextmenu ?? nothing}
+          dir=${this._dir ?? nothing}
+          enterkeyhint=${this._enterkeyhint ?? nothing}
+          ?hidden=${this._hidden}
+          inert=${this._inert ?? nothing}
+          is=${this._is ?? nothing}
+          itemid=${this._itemid ?? nothing}
+          itemprop=${this._itemprop ?? nothing}
+          itemref=${this._itemref ?? nothing}
+          ?itemscope=${this._itemscope}
+          itemtype=${this._itemtype ?? nothing}
+          lang=${this._lang ?? nothing}
+          nonce=${this._nonce ?? nothing}
+          part=${this._part ?? nothing}
+          role=${this._role ?? nothing}
+          spellcheck=${this._spellcheck ?? nothing}
+          style=${this._style ?? nothing}
+          tabindex=${this._tabindex ?? nothing}
+          title=${this._title ?? nothing}
+          translate=${this._translate ?? nothing}
+        />
+      </div>
+    `;
   }
-
-  // Full list of supported HTML attributes. Will be populated by the
-  // @htmlAttrProp() decorators. Maps attribute names to property names.
-  static _supportedHtmlAttrs: Map<string, string> = new Map();
 
   // Select this image region ID in order to force rendering the original image
   // instead of selecting the best region.
   private static readonly _IMAGE_REGION_ID_ORIGINAL = '__orig__';
 
+  // Period in milliseconds for the component size observer.
+  private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
+
   // Called periodically in order to observe the size of the component.
   // See https://stackoverflow.com/questions/8082729/how-to-detect-css3-resize-events
-  _observeSize() {
+  private _observeSize() {
     const hasChanged =
       this.offsetWidth !== this._currentWidth ||
       this.offsetHeight !== this._currentHeight;
@@ -74,7 +106,7 @@ export class ImgFrameright extends LitElement {
   // Called whenever the size of the component has changed. Applies dynamically
   // some CSS style to the <img> element. This couldn't be done in pure CSS,
   // https://stackoverflow.com/questions/50248577/css-transform-scale-based-on-container-width
-  _sizeHasChanged() {
+  private _sizeHasChanged() {
     const style = ['visibility: visible;'];
 
     let region = null;
@@ -110,7 +142,11 @@ export class ImgFrameright extends LitElement {
         `left: ${-region.x + xOffset}px;`,
         `top: ${-region.y + yOffset}px;`,
         `transform-origin: ${region.x - xOffset}px ${region.y - yOffset}px;`,
-        `transform: scale(${scaleFactor.toFixed(3)});`
+        `transform: scale(${scaleFactor.toFixed(3)});`,
+        `transition: all ${(
+          (ImgFrameright._SIZE_OBSERVER_PERIOD_MS * 1.5) /
+          1000
+        ).toFixed(3)}s`
       );
     }
 
@@ -119,45 +155,43 @@ export class ImgFrameright extends LitElement {
 
   // All <img>-specific HTML attributes, see
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-  @htmlAttrProp('alt', '_alt') _alt = null;
-  @htmlAttrProp('crossorigin', '_crossorigin') _crossorigin = null;
-  @htmlAttrProp('decoding', '_decoding') _decoding = null;
-  @htmlAttrProp('fetchpriority', '_fetchpriority') _fetchpriority = null;
-  @htmlAttrProp('height', '_height') _height = null;
-  @htmlAttrProp('ismap', '_ismap') _ismap = null;
-  @htmlAttrProp('loading', '_loading') _loading = null;
-  @htmlAttrProp('referrerpolicy', '_referrerpolicy') _referrerpolicy = null;
-  @htmlAttrProp('sizes', '_sizes') _sizes = null;
-  @htmlAttrProp('src', '_src') _src = null;
-  @htmlAttrProp('srcset', '_srcset') _srcset = null;
-  @htmlAttrProp('width', '_width') _width = null;
-  @htmlAttrProp('usemap', '_usemap') _usemap = null;
+  @property({ attribute: 'alt' }) _alt = null;
+  @property({ attribute: 'crossorigin' }) _crossorigin = null;
+  @property({ attribute: 'decoding' }) _decoding = null;
+  @property({ attribute: 'fetchpriority' }) _fetchpriority = null;
+  @property({ attribute: 'height' }) _height = null;
+  @property({ attribute: 'ismap' }) _ismap = null;
+  @property({ attribute: 'loading' }) _loading = null;
+  @property({ attribute: 'referrerpolicy' }) _referrerpolicy = null;
+  @property({ attribute: 'sizes' }) _sizes = null;
+  @property({ attribute: 'src' }) _src = null;
+  @property({ attribute: 'srcset' }) _srcset = null;
+  @property({ attribute: 'width' }) _width = null;
+  @property({ attribute: 'usemap' }) _usemap = null;
 
   // Relevant global HTML attributes, see
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-  @htmlAttrProp('accesskey', '_accesskey') _accesskey = null;
-  @htmlAttrProp('autofocus', '_autofocus') _autofocus = null;
-  @htmlAttrProp('class', '_class') _class = null;
-  @htmlAttrProp('contextmenu', '_contextmenu') _contextmenu = null;
-  @htmlAttrProp('dir', '_dir') _dir = null;
-  @htmlAttrProp('enterkeyhint', '_enterkeyhint') _enterkeyhint = null;
-  @htmlAttrProp('hidden', '_hidden') _hidden = null;
-  @htmlAttrProp('inert', '_inert') _inert = null;
-  @htmlAttrProp('is', '_is') _is = null;
-  @htmlAttrProp('itemid', '_itemid') _itemid = null;
-  @htmlAttrProp('itemprop', '_itemprop') _itemprop = null;
-  @htmlAttrProp('itemref', '_itemref') _itemref = null;
-  @htmlAttrProp('itemscope', '_itemscope') _itemscope = null;
-  @htmlAttrProp('itemtype', '_itemtype') _itemtype = null;
-  @htmlAttrProp('lang', '_lang') _lang = null;
-  @htmlAttrProp('nonce', '_nonce') _nonce = null;
-  @htmlAttrProp('part', '_part') _part = null;
-  @htmlAttrProp('role', '_role') _role = null;
-  @htmlAttrProp('spellcheck', '_spellcheck') _spellcheck = null;
-  @htmlAttrProp('style', '_style') _style: string | null = null;
-  @htmlAttrProp('tabindex', '_tabindex') _tabindex = null;
-  @htmlAttrProp('title', '_title') _title = null;
-  @htmlAttrProp('translate', '_translate') _translate = null;
+  @property({ attribute: 'class' }) _class = null;
+  @property({ attribute: 'contextmenu' }) _contextmenu = null;
+  @property({ attribute: 'dir' }) _dir = null;
+  @property({ attribute: 'enterkeyhint' }) _enterkeyhint = null;
+  @property({ attribute: 'hidden' }) _hidden = null;
+  @property({ attribute: 'inert' }) _inert = null;
+  @property({ attribute: 'is' }) _is = null;
+  @property({ attribute: 'itemid' }) _itemid = null;
+  @property({ attribute: 'itemprop' }) _itemprop = null;
+  @property({ attribute: 'itemref' }) _itemref = null;
+  @property({ attribute: 'itemscope' }) _itemscope = null;
+  @property({ attribute: 'itemtype' }) _itemtype = null;
+  @property({ attribute: 'lang' }) _lang = null;
+  @property({ attribute: 'nonce' }) _nonce = null;
+  @property({ attribute: 'part' }) _part = null;
+  @property({ attribute: 'role' }) _role = null;
+  @property({ attribute: 'spellcheck' }) _spellcheck = null;
+  @property({ attribute: 'style' }) _style: string | null = null;
+  @property({ attribute: 'tabindex' }) _tabindex = null;
+  @property({ attribute: 'title' }) _title = null;
+  @property({ attribute: 'translate' }) _translate = null;
 
   // FIXME: should come from an HTML attribute
   private _imageRegions = [
@@ -172,7 +206,8 @@ export class ImgFrameright extends LitElement {
   ];
 
   // FIXME: should come from an HTML attribute
-  private _imageRegionId = ImgFrameright._IMAGE_REGION_ID_ORIGINAL;
+  // private _imageRegionId = ImgFrameright._IMAGE_REGION_ID_ORIGINAL;
+  private _imageRegionId = 'threeanimals';
 
   // Interval observing the size of the component in order to react to size
   // changes.
@@ -181,12 +216,4 @@ export class ImgFrameright extends LitElement {
   // Last observed size of the component in pixel. Populated by _observeSize().
   private _currentWidth = 0;
   private _currentHeight = 0;
-}
-
-function htmlAttrProp(htmlAttrName: string, propName: string) {
-  // Populate the full supported HTML attributes...
-  ImgFrameright._supportedHtmlAttrs.set(htmlAttrName, propName);
-
-  // ... then call the standard Lit @property decorator:
-  return property({ attribute: htmlAttrName });
 }
