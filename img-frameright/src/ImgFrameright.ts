@@ -27,6 +27,9 @@ export class ImgFrameright extends LitElement {
   // Period in milliseconds for the component size observer.
   private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
 
+  // Set to true to enable logging.
+  private static readonly _DEBUG = true;
+
   static styles: CSSResult = css`
     div.root {
       width: 100%;
@@ -148,6 +151,7 @@ export class ImgFrameright extends LitElement {
     ) {
       return; // has been populated already
     }
+    this._log('Populating original image region...');
 
     const self = this;
     function populateRatioAndImageRegionsAndRequestUpdate() {
@@ -160,9 +164,12 @@ export class ImgFrameright extends LitElement {
         self._originalImageRegion.height,
         1
       );
+      self._log(`original image width: ${self._originalImageRegion.width}px`);
+      self._log(`original image height: ${self._originalImageRegion.height}px`);
 
       self._originalImageRegion.ratio =
         self._originalImageRegion.width / self._originalImageRegion.height;
+      self._log(`original image ratio: ${self._originalImageRegion.ratio.toFixed(3)}`);
       self._populateRectangleImageRegions();
       self.requestUpdate();
     }
@@ -178,8 +185,10 @@ export class ImgFrameright extends LitElement {
       this._originalImageRegion.width >= 0 &&
       this._originalImageRegion.height >= 0
     ) {
+      this._log('width= and height= provided');
       populateRatioAndImageRegionsAndRequestUpdate();
     } else if (this._src) {
+      this._log('width= and height= not provided, using src= ...');
       // Else get that information asynchronously by loading the image file:
       const img = new Image();
       img.onload = () => {
@@ -242,6 +251,7 @@ export class ImgFrameright extends LitElement {
       const id: string = region.id ?? window.crypto.randomUUID();
       const ratio: number = width / height;
 
+      this._log(`rectangle region found: id=${id}, x=${x}px, y=${y}px, width=${width}px, height=${height}px, ratio=${ratio.toFixed(3)}`);
       this._rectangleImageRegions.push({
         id,
         x,
@@ -305,6 +315,8 @@ export class ImgFrameright extends LitElement {
       }
     }
 
+    this._log(`Rendering best region: ${bestRegion.id}`)
+
     if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
       style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
     } else {
@@ -339,6 +351,13 @@ export class ImgFrameright extends LitElement {
     this._style = style.join(' ');
   }
 
+  private _log(text: string) {
+    if (ImgFrameright._DEBUG) {
+      // eslint-disable-next-line no-console
+      console.log(this._id ? `[${this._id}] ${text}` : text);
+    }
+  }
+
   // All <img>-specific HTML attributes, see
   // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
   @property({ attribute: 'alt' }) _alt = null;
@@ -362,6 +381,7 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'dir' }) _dir = null;
   @property({ attribute: 'enterkeyhint' }) _enterkeyhint = null;
   @property({ attribute: 'hidden' }) _hidden = null;
+  @property({ attribute: 'id' }) _id = null;
   @property({ attribute: 'inert' }) _inert = null;
   @property({ attribute: 'is' }) _is = null;
   @property({ attribute: 'itemid' }) _itemid = null;

@@ -56,7 +56,6 @@
     ],
     "rules": {
       "no-unused-vars": "off",
-      "no-console": "warn",
       "lines-between-class-members": [
         "error",
         "always",
