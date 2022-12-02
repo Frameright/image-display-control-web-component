@@ -18,7 +18,30 @@
 </head>
 <body>
   <div id="demo">
-    <img-frameright src="assets/deer.jpg" title="Hello my deer">
+    <img-frameright
+      src="assets/deer.jpg"
+      title="Hello my deer"
+      alt="Deer being cute in the nature"
+      image-regions='[{
+        "id": "oneanimal",
+        "names": ["One animal"],
+        "shape": "rectangle",
+        "absolute": true,
+        "x": "217",
+        "y": "1062",
+        "width": "239",
+        "height": "220"
+      }, {
+        "id": "threeanimals",
+        "names": ["Three animals"],
+        "shape": "rectangle",
+        "absolute": true,
+        "x": "245",
+        "y": "1087",
+        "width": "419",
+        "height": "182"
+      }]'
+    >
     </img-frameright>
   </div>
   <script type="module" src="../dist/src/img-frameright.js"></script>

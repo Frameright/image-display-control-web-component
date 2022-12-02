@@ -1,7 +1,17 @@
-import { html, css, LitElement, CSSResult, nothing } from 'lit';
+import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
 import { property } from 'lit/decorators.js';
 
 interface ImageRegion {
+  id?: string;
+  shape?: string;
+  absolute?: boolean;
+  x?: number | string;
+  y?: number | string;
+  width?: number | string;
+  height?: number | string;
+}
+
+interface RectangleImageRegion {
   id: string;
   x: number;
   y: number;
@@ -38,7 +48,7 @@ export class ImgFrameright extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this._populateImageRegions();
+    this._populateOriginalImageRegion();
     this._sizeObserverIntervalId ||= window.setInterval(() => {
       this._observeSize();
     }, ImgFrameright._SIZE_OBSERVER_PERIOD_MS);
@@ -50,6 +60,14 @@ export class ImgFrameright extends LitElement {
       this._sizeObserverIntervalId = 0;
     }
     super.disconnectedCallback();
+  }
+
+  // Called whenever some properties change. We use this opportunity to populate
+  // this._rectangleImageRegions based on this._imageRegions.
+  willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('_imageRegions')) {
+      this._populateRectangleImageRegions();
+    }
   }
 
   render() {
@@ -121,37 +139,109 @@ export class ImgFrameright extends LitElement {
     return first >= second ? first / second : second / first;
   }
 
-  // Hydrates this._imageRegions
-  private _populateImageRegions() {
-    const originalRegion = this._imageRegions[0];
+  // Hydrates this._originalImageRegion
+  private _populateOriginalImageRegion() {
+    if (
+      this._originalImageRegion.width > 0 &&
+      this._originalImageRegion.height > 0 &&
+      this._originalImageRegion.ratio > 0
+    ) {
+      return; // has been populated already
+    }
 
-    function populateOriginalImageRatio() {
+    const self = this;
+    function populateRatio() {
       // Avoid dividing by 0:
-      originalRegion.width = Math.max(originalRegion.width, 1);
-      originalRegion.height = Math.max(originalRegion.height, 1);
+      self._originalImageRegion.width = Math.max(
+        self._originalImageRegion.width,
+        1
+      );
+      self._originalImageRegion.height = Math.max(
+        self._originalImageRegion.height,
+        1
+      );
 
-      originalRegion.ratio = originalRegion.width / originalRegion.height;
+      self._originalImageRegion.ratio =
+        self._originalImageRegion.width / self._originalImageRegion.height;
+      self.requestUpdate();
     }
 
     // If the width and height has been passed as HTML attributes, use them:
     if (this._width) {
-      originalRegion.width = parseInt(this._width, 10);
+      this._originalImageRegion.width = parseInt(this._width, 10);
     }
     if (this._height) {
-      originalRegion.height = parseInt(this._height, 10);
+      this._originalImageRegion.height = parseInt(this._height, 10);
     }
-    if (originalRegion.width >= 0 && originalRegion.height >= 0) {
-      populateOriginalImageRatio();
+    if (
+      this._originalImageRegion.width >= 0 &&
+      this._originalImageRegion.height >= 0
+    ) {
+      populateRatio();
     } else if (this._src) {
       // Else get that information asynchronously by loading the image file:
       const img = new Image();
       img.onload = () => {
-        originalRegion.width = img.width;
-        originalRegion.height = img.height;
-        populateOriginalImageRatio();
+        this._originalImageRegion.width = img.width;
+        this._originalImageRegion.height = img.height;
+        populateRatio();
       };
       img.src = this._src;
     }
+  }
+
+  // Populates this._rectangleImageRegions based on this._imageRegions, passed
+  // as HTML attribute.
+  private _populateRectangleImageRegions() {
+    this._rectangleImageRegions = [];
+    this._imageRegions.forEach(region => {
+      if (
+        region.shape == null ||
+        region.absolute == null ||
+        region.x == null ||
+        region.y == null ||
+        region.width == null ||
+        region.height == null
+      ) {
+        return;
+      }
+
+      if (region.shape.toLowerCase() !== 'rectangle') {
+        return;
+      }
+      if (!region.absolute) {
+        // FIXME: relative case should be supported too
+        return;
+      }
+
+      const x: number = parseInt(`${region.x}`, 10);
+      const y: number = parseInt(`${region.y}`, 10);
+      const width: number = parseInt(`${region.width}`, 10);
+      const height: number = parseInt(`${region.height}`, 10);
+      if (
+        Number.isNaN(x) ||
+        Number.isNaN(y) ||
+        Number.isNaN(width) ||
+        Number.isNaN(height)
+      ) {
+        return;
+      }
+      if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+        return;
+      }
+
+      const id: string = region.id ?? window.crypto.randomUUID();
+      const ratio: number = width / height;
+
+      this._rectangleImageRegions.push({
+        id,
+        x,
+        y,
+        width,
+        height,
+        ratio,
+      });
+    });
   }
 
   // Called periodically in order to observe the size of the component.
@@ -175,7 +265,7 @@ export class ImgFrameright extends LitElement {
     const style = ['visibility: visible;'];
 
     // Determining the best fitting image region for the current container size.
-    let bestRegion = this._imageRegions[0]; // entire original image
+    let bestRegion = this._originalImageRegion;
     const originalImageRatio = bestRegion.ratio;
 
     // Avoid dividing by 0:
@@ -193,7 +283,7 @@ export class ImgFrameright extends LitElement {
       // It's only worth looking for an image region if the container ratio and
       // the original image ratio differ enough:
       if (smallestRatioDiff > 1.1) {
-        this._imageRegions.slice(1).forEach(region => {
+        this._rectangleImageRegions.forEach(region => {
           const ratioDiff = ImgFrameright._imageRatioDiffFactor(
             containerRatio,
             region.ratio
@@ -280,35 +370,24 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'title' }) _title = null;
   @property({ attribute: 'translate' }) _translate = null;
 
-  private _imageRegions: ImageRegion[] = [
-    {
-      id: ImgFrameright._IMAGE_REGION_ID_ORIGINAL,
-      x: 0, // px
-      y: 0, // px
+  // ImgFrameright-specific attributes:
+  @property({ attribute: 'image-regions', type: Array })
+  _imageRegions: ImageRegion[] = [];
 
-      // these fields will be populated by _populateImageRegions():
-      width: -1,
-      height: -1,
-      ratio: -1,
-    },
-    // FIXME: should come from an HTML attribute:
-    {
-      id: 'oneanimal',
-      x: 217, // px
-      y: 1062, // px
-      width: 456 - 217, // px
-      height: 1282 - 1062, // px
-      ratio: (456 - 217) / (1282 - 1062), // FIXME should be generated
-    },
-    {
-      id: 'threeanimals',
-      x: 245, // px
-      y: 1087, // px
-      width: 664 - 245, // px
-      height: 1269 - 1087, // px
-      ratio: (664 - 245) / (1269 - 1087), // FIXME should be generated
-    },
-  ];
+  private _originalImageRegion: RectangleImageRegion = {
+    id: ImgFrameright._IMAGE_REGION_ID_ORIGINAL,
+    x: 0, // px
+    y: 0, // px
+
+    // These fields will be populated by _populateOriginalImageRegion():
+    width: -1, // px
+    height: -1, // px
+    ratio: -1,
+  };
+
+  // Sanitized version of this._imageRegions (passed as HTML attribute).
+  // Populated by _populateRectangleImageRegions().
+  private _rectangleImageRegions: RectangleImageRegion[] = [];
 
   // Interval observing the size of the component in order to react to size
   // changes.

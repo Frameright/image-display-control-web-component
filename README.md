@@ -22,8 +22,8 @@ An easy way to leverage Image Display Control metadata in your DOM. Made with
         "absolute": false,
         "x": "0.31",
         "y": "0.18",
-        "height": "0.385",
-        "width": "0.127"
+        "width": "0.127",
+        "height": "0.385"
      }]'
 ></img-frameright>
 ```
