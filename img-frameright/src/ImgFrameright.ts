@@ -13,10 +13,10 @@ interface ImageRegion {
 
 interface RectangleImageRegion {
   id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+  x: number; // px
+  y: number; // px
+  width: number; // px
+  height: number; // px
   ratio: number;
 }
 
@@ -150,7 +150,7 @@ export class ImgFrameright extends LitElement {
     }
 
     const self = this;
-    function populateRatio() {
+    function populateRatioAndImageRegionsAndRequestUpdate() {
       // Avoid dividing by 0:
       self._originalImageRegion.width = Math.max(
         self._originalImageRegion.width,
@@ -163,6 +163,7 @@ export class ImgFrameright extends LitElement {
 
       self._originalImageRegion.ratio =
         self._originalImageRegion.width / self._originalImageRegion.height;
+      self._populateRectangleImageRegions();
       self.requestUpdate();
     }
 
@@ -177,14 +178,14 @@ export class ImgFrameright extends LitElement {
       this._originalImageRegion.width >= 0 &&
       this._originalImageRegion.height >= 0
     ) {
-      populateRatio();
+      populateRatioAndImageRegionsAndRequestUpdate();
     } else if (this._src) {
       // Else get that information asynchronously by loading the image file:
       const img = new Image();
       img.onload = () => {
         this._originalImageRegion.width = img.width;
         this._originalImageRegion.height = img.height;
-        populateRatio();
+        populateRatioAndImageRegionsAndRequestUpdate();
       };
       img.src = this._src;
     }
@@ -209,15 +210,16 @@ export class ImgFrameright extends LitElement {
       if (region.shape.toLowerCase() !== 'rectangle') {
         return;
       }
-      if (!region.absolute) {
-        // FIXME: relative case should be supported too
+      if (!region.absolute && this._originalImageRegion.ratio <= 0) {
+        // The coordinates are relative to the original image size, which
+        // hasn't been populated yet. Defer.
         return;
       }
 
-      const x: number = parseInt(`${region.x}`, 10);
-      const y: number = parseInt(`${region.y}`, 10);
-      const width: number = parseInt(`${region.width}`, 10);
-      const height: number = parseInt(`${region.height}`, 10);
+      let x: number = parseFloat(`${region.x}`);
+      let y: number = parseFloat(`${region.y}`);
+      let width: number = parseFloat(`${region.width}`);
+      let height: number = parseFloat(`${region.height}`);
       if (
         Number.isNaN(x) ||
         Number.isNaN(y) ||
@@ -228,6 +230,13 @@ export class ImgFrameright extends LitElement {
       }
       if (x < 0 || y < 0 || width <= 0 || height <= 0) {
         return;
+      }
+
+      if (!region.absolute) {
+        x *= this._originalImageRegion.width;
+        y *= this._originalImageRegion.height;
+        width *= this._originalImageRegion.width;
+        height *= this._originalImageRegion.height;
       }
 
       const id: string = region.id ?? window.crypto.randomUUID();
