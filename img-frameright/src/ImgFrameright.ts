@@ -24,11 +24,8 @@ export class ImgFrameright extends LitElement {
   // Image region ID of the entire original image.
   private static readonly _IMAGE_REGION_ID_ORIGINAL = '__orig__';
 
-  // Period in milliseconds for the component size observer.
-  private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
-
-  // Set to true to enable logging.
-  private static readonly _DEBUG = true;
+  // Period in milliseconds for the component observer.
+  private static readonly _OBSERVER_PERIOD_MS = 200;
 
   static styles: CSSResult = css`
     div.root {
@@ -44,23 +41,22 @@ export class ImgFrameright extends LitElement {
 
       transition: all
         ${parseFloat(
-          ((ImgFrameright._SIZE_OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
+          ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
         )}s;
     }
   `;
 
   connectedCallback() {
     super.connectedCallback();
-    this._populateOriginalImageRegion();
-    this._sizeObserverIntervalId ||= window.setInterval(() => {
-      this._observeSize();
-    }, ImgFrameright._SIZE_OBSERVER_PERIOD_MS);
+    this._observerIntervalId ||= window.setInterval(() => {
+      this._observe();
+    }, ImgFrameright._OBSERVER_PERIOD_MS);
   }
 
   disconnectedCallback() {
-    if (this._sizeObserverIntervalId) {
-      window.clearInterval(this._sizeObserverIntervalId);
-      this._sizeObserverIntervalId = 0;
+    if (this._observerIntervalId) {
+      window.clearInterval(this._observerIntervalId);
+      this._observerIntervalId = 0;
     }
     super.disconnectedCallback();
   }
@@ -142,67 +138,36 @@ export class ImgFrameright extends LitElement {
     return first >= second ? first / second : second / first;
   }
 
-  // Hydrates this._originalImageRegion
+  // Hydrates this._originalImageRegion. Doesn't trigger a re-rendering.
   private _populateOriginalImageRegion() {
-    if (
-      this._originalImageRegion.width > 0 &&
-      this._originalImageRegion.height > 0 &&
-      this._originalImageRegion.ratio > 0
-    ) {
-      return; // has been populated already
-    }
     this._log('Populating original image region...');
 
-    const self = this;
-    function populateRatioAndImageRegionsAndRequestUpdate() {
-      // Avoid dividing by 0:
-      self._originalImageRegion.width = Math.max(
-        self._originalImageRegion.width,
-        1
-      );
-      self._originalImageRegion.height = Math.max(
-        self._originalImageRegion.height,
-        1
-      );
-      self._log(`original image width: ${self._originalImageRegion.width}px`);
-      self._log(`original image height: ${self._originalImageRegion.height}px`);
-
-      self._originalImageRegion.ratio =
-        self._originalImageRegion.width / self._originalImageRegion.height;
-      self._log(`original image ratio: ${self._originalImageRegion.ratio.toFixed(3)}`);
-      self._populateRectangleImageRegions();
-      self.requestUpdate();
+    if (this._currentNaturalWidth <= 0 || this._currentNaturalHeight <= 0) {
+      this._log('<img> not fully rendered yet, deferring.');
+      return;
     }
 
-    // If the width and height has been passed as HTML attributes, use them:
-    if (this._width) {
-      this._originalImageRegion.width = parseInt(this._width, 10);
-    }
-    if (this._height) {
-      this._originalImageRegion.height = parseInt(this._height, 10);
-    }
-    if (
-      this._originalImageRegion.width >= 0 &&
-      this._originalImageRegion.height >= 0
-    ) {
-      this._log('width= and height= provided');
-      populateRatioAndImageRegionsAndRequestUpdate();
-    } else if (this._src) {
-      this._log('width= and height= not provided, using src= ...');
-      // Else get that information asynchronously by loading the image file:
-      const img = new Image();
-      img.onload = () => {
-        this._originalImageRegion.width = img.width;
-        this._originalImageRegion.height = img.height;
-        populateRatioAndImageRegionsAndRequestUpdate();
-      };
-      img.src = this._src;
-    }
+    this._originalImageRegion.width = this._currentNaturalWidth;
+    this._originalImageRegion.height = this._currentNaturalHeight;
+    this._log(`original image width: ${this._originalImageRegion.width}px`);
+    this._log(`original image height: ${this._originalImageRegion.height}px`);
+
+    this._originalImageRegion.ratio =
+      this._originalImageRegion.width / this._originalImageRegion.height;
+    this._log(
+      `original image ratio: ${this._originalImageRegion.ratio.toFixed(3)}`
+    );
   }
 
   // Populates this._rectangleImageRegions based on this._imageRegions, passed
-  // as HTML attribute.
+  // as HTML attribute. Doesn't trigger a re-rendering.
   private _populateRectangleImageRegions() {
+    this._log('Populating rectangle image regions...');
+    if (this._originalImageRegion.ratio <= 0) {
+      this._log('Original image size unknown, deferring.');
+      return;
+    }
+
     this._rectangleImageRegions = [];
     this._imageRegions.forEach(region => {
       if (
@@ -217,11 +182,6 @@ export class ImgFrameright extends LitElement {
       }
 
       if (region.shape.toLowerCase() !== 'rectangle') {
-        return;
-      }
-      if (!region.absolute && this._originalImageRegion.ratio <= 0) {
-        // The coordinates are relative to the original image size, which
-        // hasn't been populated yet. Defer.
         return;
       }
 
@@ -241,7 +201,11 @@ export class ImgFrameright extends LitElement {
         return;
       }
 
-      if (!region.absolute) {
+      if (region.absolute) {
+        if (this._srcset) {
+          this._error('Do not use absolute regions together with srcset=');
+        }
+      } else {
         x *= this._originalImageRegion.width;
         y *= this._originalImageRegion.height;
         width *= this._originalImageRegion.width;
@@ -251,7 +215,13 @@ export class ImgFrameright extends LitElement {
       const id: string = region.id ?? window.crypto.randomUUID();
       const ratio: number = width / height;
 
-      this._log(`rectangle region found: id=${id}, x=${x}px, y=${y}px, width=${width}px, height=${height}px, ratio=${ratio.toFixed(3)}`);
+      this._log(
+        `rectangle region found: id=${id}, x=${x.toFixed(3)}px, y=${y.toFixed(
+          3
+        )}px, width=${width.toFixed(3)}px, height=${height.toFixed(
+          3
+        )}px, ratio=${ratio.toFixed(3)}`
+      );
       this._rectangleImageRegions.push({
         id,
         x,
@@ -263,24 +233,52 @@ export class ImgFrameright extends LitElement {
     });
   }
 
-  // Called periodically in order to observe the size of the component.
+  // Called periodically in order to observe the size of the component and
+  // the natural size of the image (useful when using `srcset=`).
   // See https://stackoverflow.com/questions/8082729/how-to-detect-css3-resize-events
-  private _observeSize() {
-    const hasChanged =
-      this.offsetWidth !== this._currentWidth ||
-      this.offsetHeight !== this._currentHeight;
-    if (!hasChanged) {
-      return;
+  private _observe() {
+    let naturalSizeHasChanged = false;
+    let componentSizeHasChanged = false;
+
+    const imgElement = this.renderRoot.querySelector('img');
+    if (imgElement) {
+      const currentNaturalWidth = imgElement.naturalWidth;
+      const currentNaturalHeight = imgElement.naturalHeight;
+      if (
+        currentNaturalWidth !== this._currentNaturalWidth ||
+        currentNaturalHeight !== this._currentNaturalHeight
+      ) {
+        this._currentNaturalWidth = currentNaturalWidth;
+        this._currentNaturalHeight = currentNaturalHeight;
+        naturalSizeHasChanged = true;
+      }
     }
-    this._currentWidth = this.offsetWidth;
-    this._currentHeight = this.offsetHeight;
-    this._sizeHasChanged();
+
+    if (
+      this.offsetWidth !== this._currentWidth ||
+      this.offsetHeight !== this._currentHeight
+    ) {
+      this._currentWidth = this.offsetWidth;
+      this._currentHeight = this.offsetHeight;
+      componentSizeHasChanged = true;
+    }
+
+    if (naturalSizeHasChanged) {
+      this._populateOriginalImageRegion();
+      this._populateRectangleImageRegions();
+    }
+    if (naturalSizeHasChanged || componentSizeHasChanged) {
+      this._panAndZoomToBestFittingRegion();
+    }
   }
 
-  // Called whenever the size of the component has changed. Applies dynamically
-  // some CSS style to the <img> element. This couldn't be done in pure CSS,
+  // Applies dynamically some CSS style to the <img> element. This couldn't be
+  // done in pure CSS, see
   // https://stackoverflow.com/questions/50248577/css-transform-scale-based-on-container-width
-  private _sizeHasChanged() {
+  //
+  // Note: it will automatically triggers a re-rending as it touches the <img>
+  // element's `style=` HTML attribute.
+  private _panAndZoomToBestFittingRegion() {
     const style = ['visibility: visible;'];
 
     // Determining the best fitting image region for the current container size.
@@ -315,7 +313,7 @@ export class ImgFrameright extends LitElement {
       }
     }
 
-    this._log(`Rendering best region: ${bestRegion.id}`)
+    this._log(`Selected region: ${bestRegion.id}`);
 
     if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
       style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
@@ -324,6 +322,9 @@ export class ImgFrameright extends LitElement {
       const regionWidth = Math.max(bestRegion.width, 1);
       const regionHeight = Math.max(bestRegion.height, 1);
 
+      // Note: it took a lot of trial and error to figure out the proper
+      // formula to calculate the image offset, also used as origin of the
+      // scale transformation.
       let xOffset = 0;
       let yOffset = 0;
       let scaleFactor = 1;
@@ -352,9 +353,16 @@ export class ImgFrameright extends LitElement {
   }
 
   private _log(text: string) {
-    if (ImgFrameright._DEBUG) {
+    if (this._debug) {
       // eslint-disable-next-line no-console
       console.log(this._id ? `[${this._id}] ${text}` : text);
+    }
+  }
+
+  private _error(text: string) {
+    if (this._debug) {
+      // eslint-disable-next-line no-console
+      console.error(this._id ? `[${this._id}] ${text}` : text);
     }
   }
 
@@ -402,6 +410,7 @@ export class ImgFrameright extends LitElement {
   // ImgFrameright-specific attributes:
   @property({ attribute: 'image-regions', type: Array })
   _imageRegions: ImageRegion[] = [];
+  @property({ attribute: 'debug', type: Boolean }) _debug: boolean = false;
 
   private _originalImageRegion: RectangleImageRegion = {
     id: ImgFrameright._IMAGE_REGION_ID_ORIGINAL,
@@ -418,11 +427,17 @@ export class ImgFrameright extends LitElement {
   // Populated by _populateRectangleImageRegions().
   private _rectangleImageRegions: RectangleImageRegion[] = [];
 
-  // Interval observing the size of the component in order to react to size
-  // changes.
-  private _sizeObserverIntervalId = 0;
+  // Interval observing the component in order to react to changes in size.
+  private _observerIntervalId = 0;
 
-  // Last observed size of the component in pixel. Populated by _observeSize().
+  // Last observed size of the component in pixels. Populated by _observe().
   private _currentWidth = 0;
   private _currentHeight = 0;
+
+  // Last observed natural size of the rendered image in pixesl. When `srcset=`
+  // isn't used this never changes but when it is used, it changes whenever the
+  // viewport gets resized, and needs to be taken into account in the scaling
+  // calculation.
+  private _currentNaturalWidth = 0;
+  private _currentNaturalHeight = 0;
 }
