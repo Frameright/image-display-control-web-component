@@ -1,12 +1,7 @@
 export class PositionInPixels {
   constructor(x?: number, y?: number) {
-    // Making sure we don't store negative numbers:
-    if (x) {
-      this._x = Math.max(x, 0);
-    }
-    if (y) {
-      this._y = Math.max(y, 0);
-    }
+    this._x = x ?? 0;
+    this._y = y ?? 0;
   }
 
   getX() {

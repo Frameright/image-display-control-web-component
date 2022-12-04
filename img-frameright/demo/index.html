@@ -1,40 +1,40 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en-GB">
-<head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      background: #fafafa;
-      min-height: 1500px;
-    }
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      body {
+        background: #fafafa;
+        min-height: 1500px;
+      }
 
-    .demo {
-      border: solid;
-      resize: both;
-      overflow: hidden;
-    }
+      .demo {
+        border: solid;
+        resize: both;
+        overflow: hidden;
+      }
 
-    .deer {
-      width: 400px;
-      height: 600px;
-    }
+      .deer {
+        width: 400px;
+        height: 600px;
+      }
 
-    .iptc {
-      width: 400px;
-      height: 200px;
-    }
-  </style>
-</head>
-<body>
-  Resize me:
-  <div class="demo deer">
-    <img-frameright
-      src="assets/deer.jpg"
-      title="Hello my deer"
-      alt="Deer being cute in the nature"
-      id="deer"
-      debug
-      image-regions='[{
+      .iptc {
+        width: 400px;
+        height: 200px;
+      }
+    </style>
+  </head>
+  <body>
+    Resize me:
+    <div class="demo deer">
+      <img-frameright
+        src="assets/deer.jpg"
+        title="Hello my deer"
+        alt="Deer being cute in the nature"
+        id="deer"
+        debug
+        image-regions='[{
         "id": "oneanimal",
         "names": ["One animal"],
         "shape": "rectangle",
@@ -53,24 +53,24 @@
         "width": "419",
         "height": "182"
       }]'
-    >
-    </img-frameright>
-  </div>
-  <br />
-  Resize me:
-  <div class="demo iptc">
-    <img-frameright
-      width="2000"
-      height="1000"
-      src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
-      alt="Hello world!"
-      srcset="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg 2000w,
+      >
+      </img-frameright>
+    </div>
+    <br />
+    Resize me:
+    <div class="demo iptc">
+      <img-frameright
+        width="2000"
+        height="1000"
+        src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
+        alt="Hello world!"
+        srcset="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg 2000w,
               assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
               assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg 768w"
-      sizes="(max-width: 2000px) 100vw, 2000px"
-      id="iptc"
-      debug
-      image-regions='[{
+        sizes="(max-width: 2000px) 100vw, 2000px"
+        id="iptc"
+        debug
+        image-regions='[{
         "id": "persltr2",
         "names": ["Listener 1"],
         "shape": "rectangle",
@@ -80,9 +80,9 @@
         "width": "0.127",
         "height": "0.385"
       }]'
-    >
-    </img-frameright>
-  </div>
-  <script type="module" src="../dist/src/img-frameright.js"></script>
-</body>
+      >
+      </img-frameright>
+    </div>
+    <script type="module" src="../dist/src/img-frameright.js"></script>
+  </body>
 </html>
