@@ -28,6 +28,30 @@ export class SizeInPixels {
     return this._unknown;
   }
 
+  // Sets to the new values and returns true if the values have actually
+  // changed.
+  setIfDifferent(newValues: SizeInPixels): boolean {
+    if (this.equals(newValues)) {
+      return false;
+    }
+    this._unknown = newValues.isUnknown();
+    this._width = newValues.getWidth();
+    this._height = newValues.getHeight();
+    this._ratio = newValues.getRatio();
+    return true;
+  }
+
+  // Calculates the difference between two image ratios, expressed as the
+  // factor >= 1, so that one ratio multiplied by this factor gives the other
+  // ratio.
+  ratioDiffFactor(other: SizeInPixels) {
+    const firstRatio = this.getRatio(); // > 0
+    const secondRatio = other.getRatio(); // > 0
+    return firstRatio >= secondRatio
+      ? firstRatio / secondRatio
+      : secondRatio / firstRatio;
+  }
+
   toString() {
     return `{width=${this._width.toFixed(3)}px, height=${this._height.toFixed(
       3
