@@ -58,21 +58,13 @@ export class ImgFrameright extends LitElement {
 
   render() {
     // Notes:
-    //
-    // * Instead of duplicating here again the full list of HTML attributes
-    //   we used to generate it in an earlier version of this code and render it
-    //   with:
-    //
-    //      return unsafeHTML(`<div class="root"><img ${htmlAttrs} /></div>`);
-    //
-    //   However this led to Lit deleting and re-creating the elements, so the
-    //   CSS `transition: ` styles had no effect and everything was flickering.
-    //
-    // * On purpose we don't forward the `width=` and `height=` attributes down
-    //   to the `<img>` element as this then messes with our calculated CSS
+    // * On purpose we don't forward the `width=` and `height=` attributes
+    //   down to the `<img>` element as this then messes with our calculated CSS
     //   scaling and moving.
+    // * Best on experience the `style=` attribute is best applied to the root
+    //   `<div>` element rather than the `<img>` one.
     return html`
-      <div class="root">
+      <div class="root" style=${this._style ?? nothing}>
         <img
           alt=${this._alt ?? nothing}
           crossorigin=${this._crossorigin ?? nothing}
@@ -102,7 +94,7 @@ export class ImgFrameright extends LitElement {
           part=${this._part ?? nothing}
           role=${this._role ?? nothing}
           spellcheck=${this._spellcheck ?? nothing}
-          style=${this._style ?? nothing}
+          style=${this._imgStyle ?? nothing}
           tabindex=${this._tabindex ?? nothing}
           title=${this._title ?? nothing}
           translate=${this._translate ?? nothing}
@@ -206,7 +198,7 @@ export class ImgFrameright extends LitElement {
       );
     }
 
-    this._style = style.join(' ');
+    this._imgStyle = style.join(' ');
   }
 
   // Returns the image region that's the closest to the current component size.
@@ -317,7 +309,7 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'part' }) _part = null;
   @property({ attribute: 'role' }) _role = null;
   @property({ attribute: 'spellcheck' }) _spellcheck = null;
-  @property({ attribute: 'style' }) _style: string | null = null;
+  @property({ attribute: 'style' }) _style = null;
   @property({ attribute: 'tabindex' }) _tabindex = null;
   @property({ attribute: 'title' }) _title = null;
   @property({ attribute: 'translate' }) _translate = null;
@@ -326,6 +318,10 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'image-regions', type: Array })
   _imageRegions: ImageRegionFromHtmlAttr[] = [];
   @property({ attribute: 'debug', type: Boolean }) _debug: boolean = false;
+
+  // Dynamically generated `<img style=` attribute whose main purpose is to pan
+  // and zoom to a specific image region:
+  @property() _imgStyle: string | null = null;
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
