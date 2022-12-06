@@ -15,10 +15,18 @@ export class ImgFrameright extends LitElement {
   private static readonly _OBSERVER_PERIOD_MS = 200;
 
   static styles: CSSResult = css`
-    div.root {
+    :host {
+      /**
+       * In order to behave like a replaced element (e.g. an <img>), see
+       *   * https://developer.mozilla.org/en-US/docs/Web/CSS/display
+       *   * https://developer.mozilla.org/en-US/docs/Web/CSS/Replaced_element
+       */
+      display: inline-block;
+
+      /* By default we want to follow the size of the parent container */
       width: 100%;
       height: 100%;
-      position: relative;
+
       overflow: hidden;
     }
 
@@ -59,48 +67,47 @@ export class ImgFrameright extends LitElement {
 
   render() {
     // Notes:
-    // * On purpose we don't forward the `width=` and `height=` attributes
-    //   down to the `<img>` element as this then messes with our calculated CSS
+    // * On purpose we don't forward the `width=` and `height=` attributes down
+    //   to the `<img>` element as this then messes with our calculated CSS
     //   scaling and moving.
-    // * Best on experience the `style=` attribute is best applied to the root
-    //   `<div>` element rather than the `<img>` one.
+    // * On purpose we don't forward the `style=` attribute down to the `<img>`
+    //   element as it's probably best applied to the root/host element only.
+    //   (Thus we use `this._imgStyle` instead of `this._style` here.)
     return html`
-      <div class="root" style=${this._style ?? nothing}>
-        <img
-          alt=${this._alt ?? nothing}
-          crossorigin=${this._crossorigin ?? nothing}
-          decoding=${this._decoding ?? nothing}
-          fetchpriority=${this._fetchpriority ?? nothing}
-          ?ismap=${this._ismap}
-          loading=${this._loading ?? nothing}
-          referrerpolicy=${this._referrerpolicy ?? nothing}
-          sizes=${this._sizes ?? nothing}
-          src=${this._src ?? nothing}
-          srcset=${this._srcset ?? nothing}
-          usemap=${this._usemap ?? nothing}
-          class=${this._class ?? nothing}
-          contextmenu=${this._contextmenu ?? nothing}
-          dir=${this._dir ?? nothing}
-          enterkeyhint=${this._enterkeyhint ?? nothing}
-          ?hidden=${this._hidden}
-          inert=${this._inert ?? nothing}
-          is=${this._is ?? nothing}
-          itemid=${this._itemid ?? nothing}
-          itemprop=${this._itemprop ?? nothing}
-          itemref=${this._itemref ?? nothing}
-          ?itemscope=${this._itemscope}
-          itemtype=${this._itemtype ?? nothing}
-          lang=${this._lang ?? nothing}
-          nonce=${this._nonce ?? nothing}
-          part=${this._part ?? nothing}
-          role=${this._role ?? nothing}
-          spellcheck=${this._spellcheck ?? nothing}
-          style=${this._imgStyle ?? nothing}
-          tabindex=${this._tabindex ?? nothing}
-          title=${this._title ?? nothing}
-          translate=${this._translate ?? nothing}
-        />
-      </div>
+      <img
+        alt=${this._alt ?? nothing}
+        crossorigin=${this._crossorigin ?? nothing}
+        decoding=${this._decoding ?? nothing}
+        fetchpriority=${this._fetchpriority ?? nothing}
+        ?ismap=${this._ismap}
+        loading=${this._loading ?? nothing}
+        referrerpolicy=${this._referrerpolicy ?? nothing}
+        sizes=${this._sizes ?? nothing}
+        src=${this._src ?? nothing}
+        srcset=${this._srcset ?? nothing}
+        usemap=${this._usemap ?? nothing}
+        class=${this._class ?? nothing}
+        contextmenu=${this._contextmenu ?? nothing}
+        dir=${this._dir ?? nothing}
+        enterkeyhint=${this._enterkeyhint ?? nothing}
+        ?hidden=${this._hidden}
+        inert=${this._inert ?? nothing}
+        is=${this._is ?? nothing}
+        itemid=${this._itemid ?? nothing}
+        itemprop=${this._itemprop ?? nothing}
+        itemref=${this._itemref ?? nothing}
+        ?itemscope=${this._itemscope}
+        itemtype=${this._itemtype ?? nothing}
+        lang=${this._lang ?? nothing}
+        nonce=${this._nonce ?? nothing}
+        part=${this._part ?? nothing}
+        role=${this._role ?? nothing}
+        spellcheck=${this._spellcheck ?? nothing}
+        style=${this._imgStyle ?? nothing}
+        tabindex=${this._tabindex ?? nothing}
+        title=${this._title ?? nothing}
+        translate=${this._translate ?? nothing}
+      />
     `;
   }
 
@@ -168,8 +175,11 @@ export class ImgFrameright extends LitElement {
       this._currentComponentSize.setIfDifferent(currentComponentSize);
 
     if (naturalSizeHasChanged) {
-      this._log(`Natural image size: ${this._originalImageRegion.size}px`);
+      this._log(`Natural image size: ${this._originalImageRegion.size}`);
       this._populateRectangleImageRegions();
+    }
+    if (componentSizeHasChanged) {
+      this._log(`Component size: ${this._currentComponentSize}`);
     }
     if (naturalSizeHasChanged || componentSizeHasChanged) {
       this._panAndZoomToBestFittingRegion();
@@ -191,11 +201,10 @@ export class ImgFrameright extends LitElement {
     } else {
       const cssScaling = this._getCssScaling(bestRegion);
       style.push(
-        'position: absolute;',
-        `left: ${-cssScaling.origin.getX()}px;`,
-        `top: ${-cssScaling.origin.getY()}px;`,
         `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
-        `transform: scale(${cssScaling.factor.toFixed(3)});`
+        `transform: translate(${-cssScaling.origin.getX()}px, ${-cssScaling.origin.getY()}px) scale(${cssScaling.factor.toFixed(
+          3
+        )});`
       );
     }
 
