@@ -23,7 +23,11 @@ export class ImgFrameright extends LitElement {
        */
       display: inline-block;
 
-      /* By default we want to follow the size of the parent container */
+      /**
+       * By default we want to follow the size of the parent container. This
+       * can be shrinked by setting the 'width=' and 'height=' HTML attributes.
+       * see willUpdate().
+       */
       width: 100%;
       height: 100%;
 
@@ -57,11 +61,22 @@ export class ImgFrameright extends LitElement {
     super.disconnectedCallback();
   }
 
-  // Called whenever some properties change. We use this opportunity to populate
-  // this._rectangleImageRegions based on this._imageRegions.
+  // Called whenever some properties (incl. HTML attributes) of the component
+  // change.
   willUpdate(changedProperties: PropertyValues<this>) {
+    // React to changes to the `image-regions=` HTML attribute:
     if (changedProperties.has('_imageRegions')) {
       this._populateRectangleImageRegions();
+    }
+
+    // Translate `width=` and `height=` HTML attributes, which are designed for
+    // replaced elements like `<img>`, into their CSS equivalent for the
+    // root/host element.
+    if (changedProperties.has('_width')) {
+      this._getRootElementStyleObject().maxWidth = `${this._width}px`;
+    }
+    if (changedProperties.has('_height')) {
+      this._getRootElementStyleObject().maxHeight = `${this._height}px`;
     }
   }
 
@@ -69,7 +84,8 @@ export class ImgFrameright extends LitElement {
     // Notes:
     // * On purpose we don't forward the `width=` and `height=` attributes down
     //   to the `<img>` element as this then messes with our calculated CSS
-    //   scaling and moving.
+    //   scaling and moving. Instead we apply them to the root/host element's
+    //   style inside willUpdate().
     // * On purpose we don't forward the `style=` attribute down to the `<img>`
     //   element as it's probably best applied to the root/host element only.
     //   (Thus we use `this._imgStyle` instead of `this._style` here.)
@@ -267,6 +283,19 @@ export class ImgFrameright extends LitElement {
       origin: new PositionInPixels(regionX - xOffset, regionY - yOffset),
       factor: scaleFactor,
     };
+  }
+
+  // Returns the editable style object of the root/host element.
+  private _getRootElementStyleObject() {
+    let styleObject;
+    if ('style' in this.renderRoot) {
+      // HTMLElement
+      styleObject = this.renderRoot.style;
+    } else {
+      // ShadowRoot
+      styleObject = (this.renderRoot.host as HTMLElement).style;
+    }
+    return styleObject;
   }
 
   private _log(text: string) {
