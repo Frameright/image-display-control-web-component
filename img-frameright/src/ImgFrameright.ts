@@ -8,6 +8,9 @@ import {
 import { SizeInPixels } from './SizeInPixels.js';
 
 export class ImgFrameright extends LitElement {
+  // Image region ID of the entire original image.
+  private static readonly _IMAGE_REGION_ID_ORIGINAL = '<no region>';
+
   // Period in milliseconds for the component observer.
   private static readonly _OBSERVER_PERIOD_MS = 200;
 
@@ -21,9 +24,10 @@ export class ImgFrameright extends LitElement {
       display: inline-block;
 
       /**
-       * By default we want to follow the size of the parent container. This
-       * can be shrinked by setting the 'width=' and 'height=' HTML attributes.
-       * see willUpdate().
+       * By default we want to follow the size of the parent container. This can
+       * be shrinked by setting the 'width=' and 'height=' HTML attributes. See
+       * willUpdate(). Or this can be overriden by setting an HTML attribute
+       * like 'style="width: auto;"'.
        */
       width: 100%;
       height: 100%;
@@ -238,16 +242,20 @@ export class ImgFrameright extends LitElement {
       bestRegion = this._findBestFittingRegion();
     }
 
-    const cssScaling = bestRegion.getCssScaling(
-      this._currentComponentSize,
-      this._originalImageRegion.size
-    );
-    style.push(
-      `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
-      `transform: translate(${-cssScaling.origin.getX()}px,`,
-      `${-cssScaling.origin.getY()}px)`,
-      `scale(${cssScaling.factor.toFixed(3)});`
-    );
+    if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
+      style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
+    } else {
+      const cssScaling = bestRegion.getCssScaling(
+        this._currentComponentSize,
+        this._originalImageRegion.size
+      );
+      style.push(
+        `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
+        `transform: translate(${-cssScaling.origin.getX()}px,`,
+        `${-cssScaling.origin.getY()}px)`,
+        `scale(${cssScaling.factor.toFixed(3)});`
+      );
+    }
 
     this._imgStyle = style.join(' ');
   }
@@ -360,7 +368,9 @@ export class ImgFrameright extends LitElement {
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
-  private _originalImageRegion = new RectangleImageRegion('<no region>');
+  private _originalImageRegion = new RectangleImageRegion(
+    ImgFrameright._IMAGE_REGION_ID_ORIGINAL
+  );
 
   // Sanitized version of this._imageRegions (passed as HTML attribute).
   // Populated by _populateRectangleImageRegions().

@@ -171,10 +171,8 @@ export class RectangleImageRegion {
         // We are about to zoom out too much. If we don't fix this here, some
         // blank margin will appear either at the top or at the bottom.
         // Let's zoom less and perform a middle-cropping.
-        // Note that if the region happens to be the original image region, i.e.
-        // the entire image, just applying `object-fit: cover;` instead of doing
-        // all this leads to the exact same result. But we want to support any
-        // region here.
+        // Note that this is similar to the `object-fit: cover;` behavior, which
+        // can only be applied to the entire image unfortunately.
 
         // Take back yOffset to its maximum allowed:
         yOffset = Math.min(regionY, regionYFromBottom);
