@@ -8,9 +8,6 @@ import {
 import { SizeInPixels } from './SizeInPixels.js';
 
 export class ImgFrameright extends LitElement {
-  // Image region ID of the entire original image.
-  private static readonly _IMAGE_REGION_ID_ORIGINAL = '__orig__';
-
   // Period in milliseconds for the component observer.
   private static readonly _OBSERVER_PERIOD_MS = 200;
 
@@ -212,17 +209,13 @@ export class ImgFrameright extends LitElement {
     const style = ['visibility: visible;'];
 
     const bestRegion = this._findBestFittingRegion();
-    if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
-      style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
-    } else {
-      const cssScaling = this._getCssScaling(bestRegion);
-      style.push(
-        `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
-        `transform: translate(${-cssScaling.origin.getX()}px, ${-cssScaling.origin.getY()}px) scale(${cssScaling.factor.toFixed(
-          3
-        )});`
-      );
-    }
+    const cssScaling = this._getCssScaling(bestRegion);
+    style.push(
+      `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
+      `transform: translate(${-cssScaling.origin.getX()}px,`,
+      `${-cssScaling.origin.getY()}px)`,
+      `scale(${cssScaling.factor.toFixed(3)});`
+    );
 
     this._imgStyle = style.join(' ');
   }
@@ -264,19 +257,124 @@ export class ImgFrameright extends LitElement {
     const regionHeight = region.size.getHeight();
     const componentWidth = this._currentComponentSize.getWidth();
     const componentHeight = this._currentComponentSize.getHeight();
+    const originalImageWidth = this._originalImageRegion.size.getWidth();
+    const originalImageHeight = this._originalImageRegion.size.getHeight();
 
-    // Note: it took a lot of trial and error to figure out the proper
-    // formula to calculate the image offset, also used as origin of the
-    // scale transformation.
     let xOffset = 0;
     let yOffset = 0;
     let scaleFactor = 1;
     if (this._currentComponentSize.getRatio() < region.size.getRatio()) {
+      // Here the region to focus on has a higher width/height ratio than the
+      // component, i.e. the region is "flatter". This means that we need to
+      // zoom the region in order to render both boxes with exactly the same
+      // width:
+      //
+      //   +----------------------------------------+  <---
+      //   | component / image around region        |    | yOffset
+      //   |                                        |    |
+      //   +----------------------------------------+  <---
+      //   | region                                 |
+      //   |                                        |
+      //   |                                        |
+      //   +----------------------------------------+
+      //   |                                        |
+      //   | component / image around region        |
+      //   +----------------------------------------+
+      //   ^
+      //   | xOffset = 0
+
       scaleFactor = componentWidth / regionWidth;
       yOffset = Math.round((componentHeight / scaleFactor - regionHeight) / 2);
+
+      // On extreme ratios, the calculations above lead to an extreme zooming
+      // out, leading to blank margins appearing, either
+      //
+      //   * at the top:
+      //
+      //     +---------------------------------+  <---
+      //     | component / no image            |    | yOffset > regionY
+      //     |                                 |    |
+      //     +---------------------------------+  <-|-----
+      //     | component / image around region |    |   | regionY
+      //     |                                 |    |   |
+      //     +---------------------------------+  <-------
+      //     | region                          |
+      //     +---------------------------------+  <---
+      //     |                                 |    | yOffset
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     | component / image around region |    |
+      //     +---------------------------------+  <---
+      //
+      //   * or at the bottom:
+      //
+      //     +---------------------------------+  <---
+      //     | component / image around region |    | yOffset
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     +---------------------------------+  <---
+      //     | region                          |
+      //     +---------------------------------+  <-------
+      //     |                                 |    |   | regionYFromBottom
+      //     | component / image around region |    |   |
+      //     +---------------------------------+  <-|-----
+      //     |                                 |    |
+      //     | component / no image            |    | yOffset > regionYFromBottom
+      //     +---------------------------------+  <---
+      //
+      // Depending which one of regionY and regionYFromBottom, the problem will
+      // appear first at the top or at the bottom of the image.
+
+      const blankAtTop = yOffset - regionY;
+      const regionYFromBottom = originalImageHeight - regionHeight - regionY;
+      const blankAtBottom = yOffset - regionYFromBottom;
+
+      if (blankAtTop > 0 || blankAtBottom > 0) {
+        // We are about to zoom out too much. If we don't fix this here, some
+        // blank margin will appear either at the top or at the bottom.
+        // Let's zoom less and perform a middle-cropping.
+        // Note that if the region happens to be the original image region, i.e.
+        // the entire image, just applying `object-fit: cover;` instead of doing
+        // all this leads to the exact same result. But we want to support any
+        // region here.
+
+        // Take back yOffset to its maximum allowed:
+        yOffset = Math.min(regionY, regionYFromBottom);
+
+        // Now we know from the original yOffset calculation the following
+        // equation:
+        //
+        //   yOffset === (componentHeight / scaleFactor - regionHeight) / 2
+        //
+        // which now becomes:
+        //
+        //   yOffset * 2 === componentHeight / scaleFactor - regionHeight
+        //   yOffset * 2 + regionHeight === componentHeight / scaleFactor
+        //   (yOffset * 2 + regionHeight) / componentHeight === 1 / scaleFactor
+        scaleFactor = componentHeight / (yOffset * 2 + regionHeight);
+
+        // Now center the region on the X axis, in order to middle-crop. Note
+        // the similarity with the original yOffset formula.
+        xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+      }
     } else {
+      // Same calculations as in the other code branch, but simply having
+      // swapped the X and Y axes.
       scaleFactor = componentHeight / regionHeight;
       xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+      const blankAtLeft = xOffset - regionX;
+      const regionXFromRight = originalImageWidth - regionWidth - regionX;
+      const blankAtRight = xOffset - regionXFromRight;
+      if (blankAtLeft > 0 || blankAtRight > 0) {
+        xOffset = Math.min(regionX, regionXFromRight);
+        scaleFactor = componentWidth / (xOffset * 2 + regionWidth);
+        yOffset = Math.round(
+          (componentHeight / scaleFactor - regionHeight) / 2
+        );
+      }
     }
 
     return {
@@ -364,9 +462,7 @@ export class ImgFrameright extends LitElement {
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
-  private _originalImageRegion = new RectangleImageRegion(
-    ImgFrameright._IMAGE_REGION_ID_ORIGINAL
-  );
+  private _originalImageRegion = new RectangleImageRegion('<no region>');
 
   // Sanitized version of this._imageRegions (passed as HTML attribute).
   // Populated by _populateRectangleImageRegions().
