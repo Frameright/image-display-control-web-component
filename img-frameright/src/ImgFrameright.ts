@@ -35,11 +35,6 @@ export class ImgFrameright extends LitElement {
       /* Prevents initial flickering. Will be set to 'visible' later when
          initial scaling has been calculated: */
       visibility: hidden;
-
-      transition: all
-        ${parseFloat(
-          ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
-        )}s;
     }
   `;
 
@@ -211,7 +206,25 @@ export class ImgFrameright extends LitElement {
   // Note: it will automatically triggers a re-rending as it touches the <img>
   // element's `style=` HTML attribute.
   private _panAndZoomToBestFittingRegion() {
+    this._log('Panning and zooming to best fitting region...');
+    if (this._originalImageRegion.size.isUnknown()) {
+      this._log('Natural image size unknown, deferring.');
+      return;
+    }
+
     const style = ['visibility: visible;'];
+
+    // Avoid initial flickering by not having a transition when styling for the
+    // first time:
+    const firstTime = !this._imgStyle;
+    if (!firstTime) {
+      style.push(
+        'transition: all',
+        `${parseFloat(
+          ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
+        )}s;`
+      );
+    }
 
     let bestRegion = null;
     if (this._imageRegionId) {
