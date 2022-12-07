@@ -80,6 +80,144 @@ export class RectangleImageRegion {
     return this._unknown;
   }
 
+  // Returns the necessary scaling factor and origin to apply via CSS in order
+  // to pan and zoom on this region.
+  getCssScaling(
+    currentComponentSize: SizeInPixels,
+    originalImageRegionSize: SizeInPixels
+  ) {
+    const regionX = this.position.getX();
+    const regionY = this.position.getY();
+    const regionWidth = this.size.getWidth();
+    const regionHeight = this.size.getHeight();
+    const componentWidth = currentComponentSize.getWidth();
+    const componentHeight = currentComponentSize.getHeight();
+    const originalImageWidth = originalImageRegionSize.getWidth();
+    const originalImageHeight = originalImageRegionSize.getHeight();
+
+    let xOffset = 0;
+    let yOffset = 0;
+    let scaleFactor = 1;
+    if (currentComponentSize.getRatio() < this.size.getRatio()) {
+      // Here the region to focus on has a higher width/height ratio than the
+      // component, i.e. the region is "flatter". This means that we need to
+      // zoom the region in order to render both boxes with exactly the same
+      // width:
+      //
+      //   +----------------------------------------+  <---
+      //   | component / image around region        |    | yOffset
+      //   |                                        |    |
+      //   +----------------------------------------+  <---
+      //   | region                                 |
+      //   |                                        |
+      //   |                                        |
+      //   +----------------------------------------+
+      //   |                                        |
+      //   | component / image around region        |
+      //   +----------------------------------------+
+      //   ^
+      //   | xOffset = 0
+
+      scaleFactor = componentWidth / regionWidth;
+      yOffset = Math.round((componentHeight / scaleFactor - regionHeight) / 2);
+
+      // On extreme ratios, the calculations above lead to an extreme zooming
+      // out, leading to blank margins appearing, either
+      //
+      //   * at the top:
+      //
+      //     +---------------------------------+  <---
+      //     | component / no image            |    | yOffset > regionY
+      //     |                                 |    |
+      //     +---------------------------------+  <-|-----
+      //     | component / image around region |    |   | regionY
+      //     |                                 |    |   |
+      //     +---------------------------------+  <-------
+      //     | region                          |
+      //     +---------------------------------+  <---
+      //     |                                 |    | yOffset
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     | component / image around region |    |
+      //     +---------------------------------+  <---
+      //
+      //   * or at the bottom:
+      //
+      //     +---------------------------------+  <---
+      //     | component / image around region |    | yOffset
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     |                                 |    |
+      //     +---------------------------------+  <---
+      //     | region                          |
+      //     +---------------------------------+  <-------
+      //     |                                 |    |   | regionYFromBottom
+      //     | component / image around region |    |   |
+      //     +---------------------------------+  <-|-----
+      //     |                                 |    |
+      //     | component / no image            |    | yOffset > regionYFromBottom
+      //     +---------------------------------+  <---
+      //
+      // Depending which one of regionY and regionYFromBottom, the problem will
+      // appear first at the top or at the bottom of the image.
+
+      const blankAtTop = yOffset - regionY;
+      const regionYFromBottom = originalImageHeight - regionHeight - regionY;
+      const blankAtBottom = yOffset - regionYFromBottom;
+
+      if (blankAtTop > 0 || blankAtBottom > 0) {
+        // We are about to zoom out too much. If we don't fix this here, some
+        // blank margin will appear either at the top or at the bottom.
+        // Let's zoom less and perform a middle-cropping.
+        // Note that if the region happens to be the original image region, i.e.
+        // the entire image, just applying `object-fit: cover;` instead of doing
+        // all this leads to the exact same result. But we want to support any
+        // region here.
+
+        // Take back yOffset to its maximum allowed:
+        yOffset = Math.min(regionY, regionYFromBottom);
+
+        // Now we know from the original yOffset calculation the following
+        // equation:
+        //
+        //   yOffset === (componentHeight / scaleFactor - regionHeight) / 2
+        //
+        // which now becomes:
+        //
+        //   yOffset * 2 === componentHeight / scaleFactor - regionHeight
+        //   yOffset * 2 + regionHeight === componentHeight / scaleFactor
+        //   (yOffset * 2 + regionHeight) / componentHeight === 1 / scaleFactor
+        scaleFactor = componentHeight / (yOffset * 2 + regionHeight);
+
+        // Now center the region on the X axis, in order to middle-crop. Note
+        // the similarity with the original yOffset formula.
+        xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+      }
+    } else {
+      // Same calculations as in the other code branch, but simply having
+      // swapped the X and Y axes.
+      scaleFactor = componentHeight / regionHeight;
+      xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+      const blankAtLeft = xOffset - regionX;
+      const regionXFromRight = originalImageWidth - regionWidth - regionX;
+      const blankAtRight = xOffset - regionXFromRight;
+      if (blankAtLeft > 0 || blankAtRight > 0) {
+        xOffset = Math.min(regionX, regionXFromRight);
+        scaleFactor = componentWidth / (xOffset * 2 + regionWidth);
+        yOffset = Math.round(
+          (componentHeight / scaleFactor - regionHeight) / 2
+        );
+      }
+    }
+
+    return {
+      origin: new PositionInPixels(regionX - xOffset, regionY - yOffset),
+      factor: scaleFactor,
+    };
+  }
+
   id = '';
   position = new PositionInPixels();
   size = new SizeInPixels();
