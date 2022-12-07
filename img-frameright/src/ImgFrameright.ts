@@ -66,6 +66,11 @@ export class ImgFrameright extends LitElement {
       this._populateRectangleImageRegions();
     }
 
+    // React to changes to the `image-region-id=` HTML attribute:
+    if (changedProperties.has('_imageRegionId')) {
+      this._panAndZoomToBestFittingRegion();
+    }
+
     // Translate `width=` and `height=` HTML attributes, which are designed for
     // replaced elements like `<img>`, into their CSS equivalent for the
     // root/host element.
@@ -208,7 +213,18 @@ export class ImgFrameright extends LitElement {
   private _panAndZoomToBestFittingRegion() {
     const style = ['visibility: visible;'];
 
-    const bestRegion = this._findBestFittingRegion();
+    let bestRegion = null;
+    if (this._imageRegionId) {
+      // The user has manually selected an image region by ID via HTML
+      // attribute, let's look for it:
+      bestRegion = this._rectangleImageRegions.find(
+        region => region.id === this._imageRegionId
+      );
+    }
+    if (!bestRegion) {
+      bestRegion = this._findBestFittingRegion();
+    }
+
     const cssScaling = this._getCssScaling(bestRegion);
     style.push(
       `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
@@ -454,6 +470,7 @@ export class ImgFrameright extends LitElement {
   // ImgFrameright-specific attributes:
   @property({ attribute: 'image-regions', type: Array })
   _imageRegions: ImageRegionFromHtmlAttr[] = [];
+  @property({ attribute: 'image-region-id' }) _imageRegionId: string = '';
   @property({ attribute: 'debug', type: Boolean }) _debug: boolean = false;
 
   // Dynamically generated `<img style=` attribute whose main purpose is to pan
