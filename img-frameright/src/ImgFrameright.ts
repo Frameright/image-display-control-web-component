@@ -1,6 +1,6 @@
 import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
+// eslint-disable-next-line no-unused-vars
 import { property } from 'lit/decorators.js';
-import { PositionInPixels } from './PositionInPixels.js';
 import {
   ImageRegionFromHtmlAttr,
   RectangleImageRegion,
