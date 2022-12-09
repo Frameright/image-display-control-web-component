@@ -8,9 +8,6 @@ import {
 import { SizeInPixels } from './SizeInPixels.js';
 
 export class ImgFrameright extends LitElement {
-  // Image region ID of the entire original image.
-  private static readonly _IMAGE_REGION_ID_ORIGINAL = '<no region>';
-
   // Period in milliseconds for the component observer.
   private static readonly _OBSERVER_PERIOD_MS = 200;
 
@@ -24,13 +21,19 @@ export class ImgFrameright extends LitElement {
       display: inline-block;
 
       /**
-       * By default we want to follow the size of the parent container. This can
-       * be shrinked by setting the 'width=' and 'height=' HTML attributes. See
-       * willUpdate(). Or this can be overriden by setting an HTML attribute
-       * like 'style="width: auto;"'.
+       * In the case of a DOM looking like
+       *
+       *   <div> <!-- parent container -->
+       *     <img-frameright src="my-very-large-image.jpg"> <!-- web component -->
+       *       <img src="my-very-large-image.jpg"> <!-- image -->
+       *     </img-frameright>
+       *   </div>
+       *
+       * we want the web component to not overflow the parent container, but
+       * instead the image to initially overflow the web component.
        */
-      width: 100%;
-      height: 100%;
+      max-width: 100%;
+      max-height: 100%;
 
       overflow: hidden;
     }
@@ -60,24 +63,14 @@ export class ImgFrameright extends LitElement {
   // Called whenever some properties (incl. HTML attributes) of the component
   // change.
   willUpdate(changedProperties: PropertyValues<this>) {
-    // React to changes to the `image-regions=` HTML attribute:
-    if (changedProperties.has('_imageRegions')) {
+    const imageRegionsHaveChanged = changedProperties.has('_imageRegions');
+    const imageRegionIdHasChanged = changedProperties.has('_imageRegionId');
+
+    if (imageRegionsHaveChanged) {
       this._populateRectangleImageRegions();
     }
-
-    // React to changes to the `image-region-id=` HTML attribute:
-    if (changedProperties.has('_imageRegionId')) {
+    if (imageRegionsHaveChanged || imageRegionIdHasChanged) {
       this._panAndZoomToBestFittingRegion();
-    }
-
-    // Translate `width=` and `height=` HTML attributes, which are designed for
-    // replaced elements like `<img>`, into their CSS equivalent for the
-    // root/host element.
-    if (changedProperties.has('_width')) {
-      this._getRootElementStyleObject().maxWidth = `${this._width}px`;
-    }
-    if (changedProperties.has('_height')) {
-      this._getRootElementStyleObject().maxHeight = `${this._height}px`;
     }
   }
 
@@ -96,12 +89,14 @@ export class ImgFrameright extends LitElement {
         crossorigin=${this._crossorigin ?? nothing}
         decoding=${this._decoding ?? nothing}
         fetchpriority=${this._fetchpriority ?? nothing}
+        height=${this._height ?? nothing}
         ?ismap=${this._ismap}
         loading=${this._loading ?? nothing}
         referrerpolicy=${this._referrerpolicy ?? nothing}
         sizes=${this._sizes ?? nothing}
         src=${this._src ?? nothing}
         srcset=${this._srcset ?? nothing}
+        width=${this._width ?? nothing}
         usemap=${this._usemap ?? nothing}
         class=${this._class ?? nothing}
         contextmenu=${this._contextmenu ?? nothing}
@@ -159,29 +154,49 @@ export class ImgFrameright extends LitElement {
   }
 
   // Called periodically in order to observe the size of the component and the
-  // natural size of the image.
+  // initial size of the image.
   //
-  // We couldn't easily hook resize handlers both on the component's size and
-  // the viewport's size, so instead we monitor them here. See
-  // https://stackoverflow.com/questions/8082729/how-to-detect-css3-resize-events
+  // The initial size of the image is the space it takes up initially in the
+  // document without any CSS applied. It is defined as follows:
+  // * If the `<img width="..." height="..." />` attributes are used, then it is
+  //   them (and the image may be distorted if they don't respect the image's
+  //   natural ratio, otherwise
+  // * If only `<img width="..." />` or `<img height="..." />` is used, then it
+  //   is that, and the missing value is calculated from the image's natural
+  //   ratio, otherwise
+  // * It is the natural size of the image.
   //
-  // Note: When `srcset=` isn't used the natural size of the image never changes
-  // and is the size of the image pointed at by `src=`. When `srcset=` is used
-  // however, it follows the size of the viewport, so it can frequently change.
-  // This is the base size to take into account when calculating the scaling
-  // factor.
+  // The natural size of the image is defined as follows:
+  // * If no `<img srcset="..." sizes="..." />` is used, then it is the size of
+  //   the image pointed at by `src=`, otherwise
+  // * If `<img srcset="..." sizes="..." />` is used, then it is the width
+  //   expressed by `sizes=` and the height is calculated based on one of the
+  //   image's ratios, hoping they all have the same ratio although they have
+  //   different sizes. For example if `sizes="(max-width: 1000px) 100vw,
+  //   1000px"`, then the natural width is the current viewport width capped at
+  //   1000px.
+  //
+  // See:
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalHeight
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/width
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/height
+  //
+  // The initial size of the image is the base size to take into account when
+  // calculating the scaling factor, so it is important to monitor it as it can
+  // change when the viewport size changes.
   private _observe() {
-    let naturalSizeHasChanged = false;
+    let initialSizeHasChanged = false;
     let componentSizeHasChanged = false;
 
     const imgElement = this.renderRoot.querySelector('img');
     if (imgElement) {
-      const currentNaturalSize = new SizeInPixels(
-        imgElement.naturalWidth,
-        imgElement.naturalHeight
+      const currentInitialSize = new SizeInPixels(
+        imgElement.width,
+        imgElement.height
       );
-      naturalSizeHasChanged =
-        this._originalImageRegion.size.setIfDifferent(currentNaturalSize);
+      initialSizeHasChanged =
+        this._originalImageRegion.size.setIfDifferent(currentInitialSize);
     }
 
     const currentComponentSize = new SizeInPixels(
@@ -191,14 +206,14 @@ export class ImgFrameright extends LitElement {
     componentSizeHasChanged =
       this._currentComponentSize.setIfDifferent(currentComponentSize);
 
-    if (naturalSizeHasChanged) {
-      this._log(`Natural image size: ${this._originalImageRegion.size}`);
+    if (initialSizeHasChanged) {
+      this._log(`Initial image size: ${this._originalImageRegion.size}`);
       this._populateRectangleImageRegions();
     }
     if (componentSizeHasChanged) {
       this._log(`Component size: ${this._currentComponentSize}`);
     }
-    if (naturalSizeHasChanged || componentSizeHasChanged) {
+    if (initialSizeHasChanged || componentSizeHasChanged) {
       this._panAndZoomToBestFittingRegion();
     }
   }
@@ -242,20 +257,16 @@ export class ImgFrameright extends LitElement {
       bestRegion = this._findBestFittingRegion();
     }
 
-    if (ImgFrameright._IMAGE_REGION_ID_ORIGINAL === bestRegion.id) {
-      style.push('width: 100%;', 'height: 100%;', 'object-fit: cover;');
-    } else {
-      const cssScaling = bestRegion.getCssScaling(
-        this._currentComponentSize,
-        this._originalImageRegion.size
-      );
-      style.push(
-        `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
-        `transform: translate(${-cssScaling.origin.getX()}px,`,
-        `${-cssScaling.origin.getY()}px)`,
-        `scale(${cssScaling.factor.toFixed(3)});`
-      );
-    }
+    const cssScaling = bestRegion.getCssScaling(
+      this._currentComponentSize,
+      this._originalImageRegion.size
+    );
+    style.push(
+      `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
+      `transform: translate(${-cssScaling.origin.getX()}px,`,
+      `${-cssScaling.origin.getY()}px)`,
+      `scale(${cssScaling.factor.toFixed(3)});`
+    );
 
     this._imgStyle = style.join(' ');
   }
@@ -368,9 +379,7 @@ export class ImgFrameright extends LitElement {
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
-  private _originalImageRegion = new RectangleImageRegion(
-    ImgFrameright._IMAGE_REGION_ID_ORIGINAL
-  );
+  private _originalImageRegion = new RectangleImageRegion('<no region>');
 
   // Sanitized version of this._imageRegions (passed as HTML attribute).
   // Populated by _populateRectangleImageRegions().
