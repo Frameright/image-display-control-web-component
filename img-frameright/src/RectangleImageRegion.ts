@@ -1,10 +1,15 @@
+import { Logger } from './Logger.js';
 import { PositionInPixels } from './PositionInPixels.js';
+import { PositionInRelativeCoord } from './PositionInRelativeCoord.js';
 import { SizeInPixels } from './SizeInPixels.js';
+import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
 export interface ImageRegionFromHtmlAttr {
   id?: string;
-  shape?: string;
-  absolute?: boolean;
+  shape?: string; // only 'rectangle' is supported
+  unit?: string; // 'relative' or 'pixel'
+  imageWidth?: number | string; // in pixels, required when unit is 'relative'
+  imageHeight?: number | string; // in pixels, required when unit is 'relative'
   x?: number | string;
   y?: number | string;
   width?: number | string;
@@ -12,67 +17,102 @@ export interface ImageRegionFromHtmlAttr {
 }
 
 export class RectangleImageRegion {
-  constructor(id?: string) {
-    if (id) {
-      this.id = id;
-      this._unknown = false;
-    }
+  constructor(
+    id?: string,
+    position?: PositionInRelativeCoord,
+    size?: SizeInRelativeCoord
+  ) {
+    this.id = id ?? '';
+    this.position = position ?? new PositionInRelativeCoord();
+    this.size = size ?? new SizeInRelativeCoord();
+    this._unknown = !position || !size;
   }
 
-  // Sets the fields according to the values coming from HTML attributes. The
-  // provided position and size may be absolute, i.e. expressed in pixels, or
-  // relative, i.e. expressed as a fraction of a given base size.
-  setFields(values: ImageRegionFromHtmlAttr, baseSize: SizeInPixels) {
+  // Sets the fields according to the values coming from HTML attributes.
+  setFields(values: ImageRegionFromHtmlAttr, logger: Logger) {
+    const shape = values.shape ? values.shape.toLowerCase() : 'rectangle';
+    if (shape !== 'rectangle') {
+      logger.debug(`Region ${values.id} has unknown shape ${shape}, skipping.`);
+      this._unknown = true;
+      return;
+    }
+
+    let unit = values.unit?.toLowerCase();
+    if (!unit) {
+      if (values.imageWidth && values.imageHeight) {
+        unit = 'pixel';
+      } else if (!values.imageWidth && !values.imageHeight) {
+        unit = 'relative';
+      }
+    }
+    if (unit !== 'relative' && unit !== 'pixel') {
+      logger.debug(`Region ${values.id} has unknown unit ${unit}, skipping.`);
+      this._unknown = true;
+      return;
+    }
+
+    let baseSize = new SizeInPixels();
+    if (unit === 'pixel') {
+      if (values.imageWidth == null || values.imageHeight == null) {
+        logger.warn(
+          `Region ${values.id} has missing imageWidth or imageHeight, skipping.`
+        );
+        this._unknown = true;
+        return;
+      }
+      baseSize = new SizeInPixels(
+        parseFloat(`${values.imageWidth}`),
+        parseFloat(`${values.imageHeight}`)
+      );
+    }
+
     if (
-      values.shape == null ||
-      values.absolute == null ||
       values.x == null ||
       values.y == null ||
       values.width == null ||
       values.height == null
     ) {
+      logger.warn(
+        `Region ${values.id} has missing x, y, width or height, skipping.`
+      );
       this._unknown = true;
       return;
     }
 
-    if (values.shape.toLowerCase() !== 'rectangle') {
-      this._unknown = true;
-      return;
-    }
-
-    let x: number = parseFloat(`${values.x}`);
-    let y: number = parseFloat(`${values.y}`);
-    let width: number = parseFloat(`${values.width}`);
-    let height: number = parseFloat(`${values.height}`);
+    const x: number = parseFloat(`${values.x}`);
+    const y: number = parseFloat(`${values.y}`);
+    const width: number = parseFloat(`${values.width}`);
+    const height: number = parseFloat(`${values.height}`);
     if (
       Number.isNaN(x) ||
       Number.isNaN(y) ||
       Number.isNaN(width) ||
       Number.isNaN(height)
     ) {
+      logger.warn(
+        `Region ${values.id} has non-numeric x, y, width or height, skipping.`
+      );
       this._unknown = true;
       return;
     }
 
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
+      logger.warn(
+        `Region ${values.id} has negative/zero x, y, width or height, skipping.`
+      );
       this._unknown = true;
       return;
     }
 
-    if (!values.absolute) {
-      if (baseSize.isUnknown()) {
-        this._unknown = true;
-        return;
-      }
-      x *= baseSize.getWidth();
-      y *= baseSize.getHeight();
-      width *= baseSize.getWidth();
-      height *= baseSize.getHeight();
+    if (unit === 'relative') {
+      this.position = new PositionInRelativeCoord(x, y);
+      this.size = new SizeInRelativeCoord(width, height);
+    } else {
+      this.position = new PositionInPixels(x, y).getRelativeCoord(baseSize);
+      this.size = new SizeInPixels(width, height).getRelativeCoord(baseSize);
     }
 
     this.id = values.id ?? window.crypto.randomUUID();
-    this.position = new PositionInPixels(x, y);
-    this.size = new SizeInPixels(width, height);
     this._unknown = false;
   }
 
@@ -86,10 +126,12 @@ export class RectangleImageRegion {
     currentComponentSize: SizeInPixels,
     originalImageRegionSize: SizeInPixels
   ) {
-    const regionX = this.position.getX();
-    const regionY = this.position.getY();
-    const regionWidth = this.size.getWidth();
-    const regionHeight = this.size.getHeight();
+    const regionPos = this.position.getPositionInPixels(
+      originalImageRegionSize
+    );
+    const regionSize = this.size.getSizeInPixels(originalImageRegionSize);
+    const regionWidth = regionSize.getWidth();
+    const regionHeight = regionSize.getHeight();
     const componentWidth = currentComponentSize.getWidth();
     const componentHeight = currentComponentSize.getHeight();
     const originalImageWidth = originalImageRegionSize.getWidth();
@@ -98,7 +140,7 @@ export class RectangleImageRegion {
     let xOffset = 0;
     let yOffset = 0;
     let scaleFactor = 1;
-    if (currentComponentSize.getRatio() < this.size.getRatio()) {
+    if (currentComponentSize.getRatio() < regionSize.getRatio()) {
       // Here the region to focus on has a higher width/height ratio than the
       // component, i.e. the region is "flatter". This means that we need to
       // zoom the region in order to render both boxes with exactly the same
@@ -127,10 +169,10 @@ export class RectangleImageRegion {
       //   * at the top:
       //
       //     +---------------------------------+  <---
-      //     | component / no image            |    | yOffset > regionY
+      //     | component / no image            |    | yOffset > regionPos.y
       //     |                                 |    |
       //     +---------------------------------+  <-|-----
-      //     | component / image around region |    |   | regionY
+      //     | component / image around region |    |   | regionPos.y
       //     |                                 |    |   |
       //     +---------------------------------+  <-------
       //     | region                          |
@@ -160,11 +202,13 @@ export class RectangleImageRegion {
       //     | component / no image            |    | yOffset > regionYFromBottom
       //     +---------------------------------+  <---
       //
-      // Depending which one of regionY and regionYFromBottom, the problem will
-      // appear first at the top or at the bottom of the image.
+      // Depending which one of regionPos.y and regionYFromBottom is greater
+      // than yOffset, the problem will appear first at the top or at the bottom
+      // of the image.
 
-      const blankAtTop = yOffset - regionY;
-      const regionYFromBottom = originalImageHeight - regionHeight - regionY;
+      const blankAtTop = yOffset - regionPos.y;
+      const regionYFromBottom =
+        originalImageHeight - regionHeight - regionPos.y;
       const blankAtBottom = yOffset - regionYFromBottom;
 
       if (blankAtTop > 0 || blankAtBottom > 0) {
@@ -175,7 +219,7 @@ export class RectangleImageRegion {
         // can only be applied to the entire image unfortunately.
 
         // Take back yOffset to its maximum allowed:
-        yOffset = Math.min(regionY, regionYFromBottom);
+        yOffset = Math.min(regionPos.y, regionYFromBottom);
 
         // Now we know from the original yOffset calculation the following
         // equation:
@@ -198,11 +242,11 @@ export class RectangleImageRegion {
       // swapped the X and Y axes.
       scaleFactor = componentHeight / regionHeight;
       xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
-      const blankAtLeft = xOffset - regionX;
-      const regionXFromRight = originalImageWidth - regionWidth - regionX;
+      const blankAtLeft = xOffset - regionPos.x;
+      const regionXFromRight = originalImageWidth - regionWidth - regionPos.x;
       const blankAtRight = xOffset - regionXFromRight;
       if (blankAtLeft > 0 || blankAtRight > 0) {
-        xOffset = Math.min(regionX, regionXFromRight);
+        xOffset = Math.min(regionPos.x, regionXFromRight);
         scaleFactor = componentWidth / (xOffset * 2 + regionWidth);
         yOffset = Math.round(
           (componentHeight / scaleFactor - regionHeight) / 2
@@ -211,14 +255,17 @@ export class RectangleImageRegion {
     }
 
     return {
-      origin: new PositionInPixels(regionX - xOffset, regionY - yOffset),
+      origin: new PositionInPixels(
+        regionPos.x - xOffset,
+        regionPos.y - yOffset
+      ),
       factor: scaleFactor,
     };
   }
 
-  id = '';
-  position = new PositionInPixels();
-  size = new SizeInPixels();
+  id: string;
+  position: PositionInRelativeCoord;
+  size: SizeInRelativeCoord;
 
-  _unknown = true;
+  _unknown: boolean;
 }

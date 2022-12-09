@@ -1,21 +1,30 @@
+import { PositionInRelativeCoord } from './PositionInRelativeCoord.js';
+import { SizeInPixels } from './SizeInPixels.js';
+
 export class PositionInPixels {
-  constructor(x?: number, y?: number) {
-    this._x = x ?? 0;
-    this._y = y ?? 0;
+  // Negative values are allowed.
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
   }
 
-  getX() {
-    return this._x;
-  }
+  getRelativeCoord(baseSize: SizeInPixels): PositionInRelativeCoord {
+    if (baseSize.isUnknown()) {
+      return new PositionInRelativeCoord();
+    }
 
-  getY() {
-    return this._y;
+    // SizeInPixels can't have zero width or height, so we're sure we won't
+    // devide by zero:
+    return new PositionInRelativeCoord(
+      this.x / baseSize.getWidth(),
+      this.y / baseSize.getHeight()
+    );
   }
 
   toString() {
-    return `{x=${this._x.toFixed(3)}px, y=${this._y.toFixed(3)}px}`;
+    return `{x=${this.x.toFixed(3)}px, y=${this.y.toFixed(3)}px}`;
   }
 
-  private _x = 0; // px
-  private _y = 0; // px
+  public x: number; // px
+  public y: number; // px
 }

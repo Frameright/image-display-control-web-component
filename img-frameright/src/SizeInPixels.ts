@@ -1,4 +1,7 @@
+import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
+
 export class SizeInPixels {
+  // Only 1px and more are allowed.
   constructor(width?: number, height?: number) {
     if (width == null || height == null) {
       return;
@@ -8,7 +11,6 @@ export class SizeInPixels {
     // anything by them.
     this._width = Math.max(width, 1);
     this._height = Math.max(height, 1);
-    this._ratio = width / height;
     this._unknown = false;
   }
 
@@ -21,7 +23,7 @@ export class SizeInPixels {
   }
 
   getRatio() {
-    return this._ratio;
+    return this._width / this._height;
   }
 
   isUnknown() {
@@ -37,7 +39,6 @@ export class SizeInPixels {
     this._unknown = newValues.isUnknown();
     this._width = newValues.getWidth();
     this._height = newValues.getHeight();
-    this._ratio = newValues.getRatio();
     return true;
   }
 
@@ -52,10 +53,23 @@ export class SizeInPixels {
       : secondRatio / firstRatio;
   }
 
+  getRelativeCoord(baseSize: SizeInPixels): SizeInRelativeCoord {
+    if (baseSize.isUnknown()) {
+      return new SizeInRelativeCoord();
+    }
+
+    // SizeInPixels can't have zero width or height, so we're sure we won't
+    // devide by zero:
+    return new SizeInRelativeCoord(
+      this._width / baseSize.getWidth(),
+      this._height / baseSize.getHeight()
+    );
+  }
+
   toString() {
     return `{width=${this._width.toFixed(3)}px, height=${this._height.toFixed(
       3
-    )}px, ratio=${this._ratio.toFixed(3)}}`;
+    )}px}`;
   }
 
   equals(other: SizeInPixels) {
@@ -67,5 +81,4 @@ export class SizeInPixels {
   private _unknown = true;
   private _width = 1; // px
   private _height = 1; // px
-  private _ratio = 1;
 }

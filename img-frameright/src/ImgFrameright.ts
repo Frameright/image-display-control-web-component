@@ -2,11 +2,13 @@ import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
 // eslint-disable-next-line no-unused-vars
 import { property } from 'lit/decorators.js';
 import { Logger } from './Logger.js';
+import { PositionInRelativeCoord } from './PositionInRelativeCoord.js';
 import {
   ImageRegionFromHtmlAttr,
   RectangleImageRegion,
 } from './RectangleImageRegion.js';
 import { SizeInPixels } from './SizeInPixels.js';
+import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
 export class ImgFrameright extends LitElement {
   // Period in milliseconds for the component observer.
@@ -135,21 +137,13 @@ export class ImgFrameright extends LitElement {
   // as HTML attribute. Doesn't trigger a re-rendering.
   private _populateRectangleImageRegions() {
     this._logger.debug('Populating rectangle image regions...');
-    if (this._originalImageRegion.size.isUnknown()) {
-      this._logger.debug('Natural image size unknown, deferring.');
-      return;
-    }
 
     this._rectangleImageRegions = [];
     this._imageRegions.forEach(region => {
       const rectangleImageRegion = new RectangleImageRegion();
-      rectangleImageRegion.setFields(region, this._originalImageRegion.size);
+      rectangleImageRegion.setFields(region, this._logger);
       if (rectangleImageRegion.isUnknown()) {
         return;
-      }
-
-      if (region.absolute && this._srcset) {
-        this._logger.error('Do not use absolute regions together with srcset=');
       }
 
       this._logger.debug(
@@ -163,36 +157,6 @@ export class ImgFrameright extends LitElement {
 
   // Called periodically in order to observe the size of the component and the
   // initial size of the image.
-  //
-  // The initial size of the image is the space it takes up initially in the
-  // document without any CSS applied. It is defined as follows:
-  // * If the `<img width="..." height="..." />` attributes are used, then it is
-  //   them (and the image may be distorted if they don't respect the image's
-  //   natural ratio, otherwise
-  // * If only `<img width="..." />` or `<img height="..." />` is used, then it
-  //   is that, and the missing value is calculated from the image's natural
-  //   ratio, otherwise
-  // * It is the natural size of the image.
-  //
-  // The natural size of the image is defined as follows:
-  // * If no `<img srcset="..." sizes="..." />` is used, then it is the size of
-  //   the image pointed at by `src=`, otherwise
-  // * If `<img srcset="..." sizes="..." />` is used, then it is the width
-  //   expressed by `sizes=` and the height is calculated based on one of the
-  //   image's ratios, hoping they all have the same ratio although they have
-  //   different sizes. For example if `sizes="(max-width: 1000px) 100vw,
-  //   1000px"`, then the natural width is the current viewport width capped at
-  //   1000px.
-  //
-  // See:
-  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
-  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalHeight
-  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/width
-  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/height
-  //
-  // The initial size of the image is the base size to take into account when
-  // calculating the scaling factor, so it is important to monitor it as it can
-  // change when the viewport size changes.
   private _observe() {
     let initialSizeHasChanged = false;
     let componentSizeHasChanged = false;
@@ -204,7 +168,7 @@ export class ImgFrameright extends LitElement {
         imgElement.height
       );
       initialSizeHasChanged =
-        this._originalImageRegion.size.setIfDifferent(currentInitialSize);
+        this._currentInitialImageSize.setIfDifferent(currentInitialSize);
     }
 
     const currentComponentSize = new SizeInPixels(
@@ -216,9 +180,8 @@ export class ImgFrameright extends LitElement {
 
     if (initialSizeHasChanged) {
       this._logger.debug(
-        `Initial image size: ${this._originalImageRegion.size}`
+        `Initial image size: ${this._currentInitialImageSize}`
       );
-      this._populateRectangleImageRegions();
     }
     if (componentSizeHasChanged) {
       this._logger.debug(`Component size: ${this._currentComponentSize}`);
@@ -236,8 +199,8 @@ export class ImgFrameright extends LitElement {
   // element's `style=` HTML attribute.
   private _panAndZoomToBestFittingRegion() {
     this._logger.debug('Panning and zooming to best fitting region...');
-    if (this._originalImageRegion.size.isUnknown()) {
-      this._logger.debug('Natural image size unknown, deferring.');
+    if (this._currentInitialImageSize.isUnknown()) {
+      this._logger.debug('Initial image size unknown, deferring.');
       return;
     }
 
@@ -269,12 +232,12 @@ export class ImgFrameright extends LitElement {
 
     const cssScaling = bestRegion.getCssScaling(
       this._currentComponentSize,
-      this._originalImageRegion.size
+      this._currentInitialImageSize
     );
     style.push(
-      `transform-origin: ${cssScaling.origin.getX()}px ${cssScaling.origin.getY()}px;`,
-      `transform: translate(${-cssScaling.origin.getX()}px,`,
-      `${-cssScaling.origin.getY()}px)`,
+      `transform-origin: ${cssScaling.origin.x}px ${cssScaling.origin.y}px;`,
+      `transform: translate(${-cssScaling.origin.x}px,`,
+      `${-cssScaling.origin.y}px)`,
       `scale(${cssScaling.factor.toFixed(3)});`
     );
 
@@ -285,24 +248,22 @@ export class ImgFrameright extends LitElement {
   private _findBestFittingRegion(): RectangleImageRegion {
     // Determining the best fitting image region for the current component size.
     let bestRegion = this._originalImageRegion;
-    if (!bestRegion.size.isUnknown()) {
-      let smallestRatioDiff = this._currentComponentSize.ratioDiffFactor(
-        this._originalImageRegion.size
-      );
+    let smallestRatioDiff = this._currentComponentSize.ratioDiffFactor(
+      this._currentInitialImageSize
+    );
 
-      // It's only worth looking for an image region if the component ratio and
-      // the original image ratio differ enough:
-      if (smallestRatioDiff > 1.1) {
-        this._rectangleImageRegions.forEach(region => {
-          const ratioDiff = this._currentComponentSize.ratioDiffFactor(
-            region.size
-          );
-          if (ratioDiff < smallestRatioDiff) {
-            smallestRatioDiff = ratioDiff;
-            bestRegion = region;
-          }
-        });
-      }
+    // It's only worth looking for an image region if the component ratio and
+    // the original image ratio differ enough:
+    if (smallestRatioDiff > 1.1) {
+      this._rectangleImageRegions.forEach(region => {
+        const ratioDiff = this._currentComponentSize.ratioDiffFactor(
+          region.size.getSizeInPixels(this._currentInitialImageSize)
+        );
+        if (ratioDiff < smallestRatioDiff) {
+          smallestRatioDiff = ratioDiff;
+          bestRegion = region;
+        }
+      });
     }
 
     this._logger.debug(`Selected region: ${bestRegion.id}`);
@@ -375,7 +336,11 @@ export class ImgFrameright extends LitElement {
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
-  private _originalImageRegion = new RectangleImageRegion('<no region>');
+  private _originalImageRegion = new RectangleImageRegion(
+    '<no region>',
+    new PositionInRelativeCoord(0, 0),
+    new SizeInRelativeCoord(1, 1)
+  );
 
   // Sanitized version of this._imageRegions (passed as HTML attribute).
   // Populated by _populateRectangleImageRegions().
@@ -386,6 +351,39 @@ export class ImgFrameright extends LitElement {
 
   // Last observed size of the component in pixels. Populated by _observe().
   private _currentComponentSize = new SizeInPixels();
+
+  // Last observed initial size of the image in pixels. Populated by _observe().
+  //
+  // The initial size of the image is the space it would take up initially in
+  // the document without any CSS applied. It is defined as follows:
+  // * If the `<img width="..." height="..." />` attributes are used, then it is
+  //   them (and the image may be distorted if they don't respect the image's
+  //   natural ratio, otherwise
+  // * If only `<img width="..." />` or `<img height="..." />` is used, then it
+  //   is that, and the missing value is calculated from the image's natural
+  //   ratio, otherwise
+  // * It is the natural size of the image.
+  //
+  // The natural size of the image is defined as follows:
+  // * If no `<img srcset="..." sizes="..." />` is used, then it is the size of
+  //   the image pointed at by `src=`, otherwise
+  // * If `<img srcset="..." sizes="..." />` is used, then it is the width
+  //   expressed by `sizes=` and the height is calculated based on one of the
+  //   image's ratios, hoping they all have the same ratio although they have
+  //   different sizes. For example if `sizes="(max-width: 1000px) 100vw,
+  //   1000px"`, then the natural width is the current viewport width capped at
+  //   1000px.
+  //
+  // See:
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalWidth
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/naturalHeight
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/width
+  // * https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/height
+  //
+  // The initial size of the image is the base size to take into account when
+  // calculating the scaling factor, so it is important to monitor it as it can
+  // change when the viewport size changes.
+  private _currentInitialImageSize = new SizeInPixels();
 
   private _logger: Logger = new Logger(this._id, this._loglevel);
 }

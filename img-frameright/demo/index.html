@@ -38,7 +38,7 @@
           "id": "oneanimal",
           "names": ["One animal"],
           "shape": "rectangle",
-          "absolute": false,
+          "unit": "relative",
           "x": "0.217",
           "y": "0.708",
           "width": "0.239",
@@ -47,7 +47,9 @@
           "id": "threeanimals",
           "names": ["Three animals"],
           "shape": "rectangle",
-          "absolute": true,
+          "unit": "pixel",
+          "imageWidth": "1000",
+          "imageHeight": "1500",
           "x": "245",
           "y": "1087",
           "width": "419",
@@ -67,12 +69,12 @@
               assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg 768w"
         sizes="(max-width: 2000px) 100vw, 2000px"
         id="iptc"
-        loglevel="error"
+        loglevel="warn"
         image-regions='[{
           "id": "persltr2",
           "names": ["Listener 1"],
           "shape": "rectangle",
-          "absolute": false,
+          "unit": "relative",
           "x": "0.31",
           "y": "0.18",
           "width": "0.127",
