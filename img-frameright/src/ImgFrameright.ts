@@ -1,6 +1,7 @@
 import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
 // eslint-disable-next-line no-unused-vars
 import { property } from 'lit/decorators.js';
+import { DEBUG, ERROR, LogLevel } from './LogLevel.js';
 import {
   ImageRegionFromHtmlAttr,
   RectangleImageRegion,
@@ -63,6 +64,10 @@ export class ImgFrameright extends LitElement {
   // Called whenever some properties (incl. HTML attributes) of the component
   // change.
   willUpdate(changedProperties: PropertyValues<this>) {
+    if (changedProperties.has('_loglevel')) {
+      this._currentLogLevel = new LogLevel(this._loglevel);
+    }
+
     const imageRegionsHaveChanged = changedProperties.has('_imageRegions');
     const imageRegionIdHasChanged = changedProperties.has('_imageRegionId');
 
@@ -313,14 +318,14 @@ export class ImgFrameright extends LitElement {
   }
 
   private _log(text: string) {
-    if (this._debug) {
+    if (this._currentLogLevel >= DEBUG) {
       // eslint-disable-next-line no-console
       console.log(this._id ? `[${this._id}] ${text}` : text);
     }
   }
 
   private _error(text: string) {
-    if (this._debug) {
+    if (this._currentLogLevel >= ERROR) {
       // eslint-disable-next-line no-console
       console.error(this._id ? `[${this._id}] ${text}` : text);
     }
@@ -371,7 +376,7 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'image-regions', type: Array })
   _imageRegions: ImageRegionFromHtmlAttr[] = [];
   @property({ attribute: 'image-region-id' }) _imageRegionId: string = '';
-  @property({ attribute: 'debug', type: Boolean }) _debug: boolean = false;
+  @property({ attribute: 'loglevel' }) _loglevel: string = '';
 
   // Dynamically generated `<img style=` attribute whose main purpose is to pan
   // and zoom to a specific image region:
@@ -390,4 +395,6 @@ export class ImgFrameright extends LitElement {
 
   // Last observed size of the component in pixels. Populated by _observe().
   private _currentComponentSize = new SizeInPixels();
+
+  private _currentLogLevel: LogLevel = new LogLevel('fatal');
 }
