@@ -235,9 +235,10 @@ export class ImgFrameright extends LitElement {
       this._currentInitialImageSize
     );
     style.push(
-      `transform-origin: ${cssScaling.origin.x}px ${cssScaling.origin.y}px;`,
-      `transform: translate(${-cssScaling.origin.x}px,`,
-      `${-cssScaling.origin.y}px)`,
+      `transform-origin: ${cssScaling.origin.x.toFixed(3)}px`,
+      `${cssScaling.origin.y.toFixed(3)}px;`,
+      `transform: translate(${-cssScaling.origin.x.toFixed(3)}px,`,
+      `${-cssScaling.origin.y.toFixed(3)}px)`,
       `scale(${cssScaling.factor.toFixed(3)});`
     );
 

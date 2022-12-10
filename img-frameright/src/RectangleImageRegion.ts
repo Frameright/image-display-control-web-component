@@ -146,22 +146,41 @@ export class RectangleImageRegion {
       // zoom the region in order to render both boxes with exactly the same
       // width:
       //
-      //   +----------------------------------------+  <---
-      //   | component / image around region        |    | yOffset
-      //   |                                        |    |
-      //   +----------------------------------------+  <---
-      //   | region                                 |
-      //   |                                        |
-      //   |                                        |
-      //   +----------------------------------------+
-      //   |                                        |
-      //   | component / image around region        |
-      //   +----------------------------------------+
-      //   ^
-      //   | xOffset = 0
+      //   +- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+      //   | invisible image outside the component                               |             |
+      //                                                                         |
+      //   |           +----------------------------------------+  <---          | regionPos   |
+      //               | component / image around region        |    | yOffset   |   .y
+      //   |           |                                        |    |           |             |
+      //               +----------------------------------------+  <---------------
+      //   |           | region                                 |                              |
+      //               |                                        |
+      //   |           |                                        |                              |
+      //               +----------------------------------------+
+      //   |           |                                        |                              |
+      //               | component / image around region        |
+      //   |           +----------------------------------------+                              |
+      //               ^
+      //   |           | xOffset = 0                                                           |
+      //               |
+      //   |           |                                                                       |
+      //   +- - - - - -|- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -+
+      //   ^           |
+      //   |-----------|
+      //   | regionPos |
+      //       .x
+      //
+      // As we can see, the image will be shifted to the left, compared to the
+      // compoment's origin (its top left corner), by regionPos.x, so that the
+      // left side of the region and the left side of the component coincide.
+      // If we then shifted the image to the top by regionPos.y, the top side
+      // of the region and the top side of the component would coincide, but
+      // instead we want the region's center and the component's center to
+      // coincide. So the image will be shifted up by (regionPos.y - yOffset)
+      // instead.
 
       scaleFactor = componentWidth / regionWidth;
-      yOffset = Math.round((componentHeight / scaleFactor - regionHeight) / 2);
+      yOffset = (componentHeight / scaleFactor - regionHeight) / 2;
 
       // On extreme ratios, the calculations above lead to an extreme zooming
       // out, leading to blank margins appearing, either
@@ -235,22 +254,20 @@ export class RectangleImageRegion {
 
         // Now center the region on the X axis, in order to middle-crop. Note
         // the similarity with the original yOffset formula.
-        xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+        xOffset = (componentWidth / scaleFactor - regionWidth) / 2;
       }
     } else {
       // Same calculations as in the other code branch, but simply having
       // swapped the X and Y axes.
       scaleFactor = componentHeight / regionHeight;
-      xOffset = Math.round((componentWidth / scaleFactor - regionWidth) / 2);
+      xOffset = (componentWidth / scaleFactor - regionWidth) / 2;
       const blankAtLeft = xOffset - regionPos.x;
       const regionXFromRight = originalImageWidth - regionWidth - regionPos.x;
       const blankAtRight = xOffset - regionXFromRight;
       if (blankAtLeft > 0 || blankAtRight > 0) {
         xOffset = Math.min(regionPos.x, regionXFromRight);
         scaleFactor = componentWidth / (xOffset * 2 + regionWidth);
-        yOffset = Math.round(
-          (componentHeight / scaleFactor - regionHeight) / 2
-        );
+        yOffset = (componentHeight / scaleFactor - regionHeight) / 2;
       }
     }
 
