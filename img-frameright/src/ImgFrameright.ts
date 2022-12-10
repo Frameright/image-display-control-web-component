@@ -1,7 +1,7 @@
 import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
 // eslint-disable-next-line no-unused-vars
 import { property } from 'lit/decorators.js';
-import { DEBUG, ERROR, LogLevel } from './LogLevel.js';
+import { Logger } from './Logger.js';
 import {
   ImageRegionFromHtmlAttr,
   RectangleImageRegion,
@@ -65,7 +65,10 @@ export class ImgFrameright extends LitElement {
   // change.
   willUpdate(changedProperties: PropertyValues<this>) {
     if (changedProperties.has('_loglevel')) {
-      this._currentLogLevel = new LogLevel(this._loglevel);
+      this._logger.setLevel(this._loglevel);
+    }
+    if (changedProperties.has('_id')) {
+      this._logger.setId(this._id);
     }
 
     const imageRegionsHaveChanged = changedProperties.has('_imageRegions');
@@ -131,9 +134,9 @@ export class ImgFrameright extends LitElement {
   // Populates this._rectangleImageRegions based on this._imageRegions, passed
   // as HTML attribute. Doesn't trigger a re-rendering.
   private _populateRectangleImageRegions() {
-    this._log('Populating rectangle image regions...');
+    this._logger.debug('Populating rectangle image regions...');
     if (this._originalImageRegion.size.isUnknown()) {
-      this._log('Natural image size unknown, deferring.');
+      this._logger.debug('Natural image size unknown, deferring.');
       return;
     }
 
@@ -146,10 +149,10 @@ export class ImgFrameright extends LitElement {
       }
 
       if (region.absolute && this._srcset) {
-        this._error('Do not use absolute regions together with srcset=');
+        this._logger.error('Do not use absolute regions together with srcset=');
       }
 
-      this._log(
+      this._logger.debug(
         `Rectangle region found: id=${rectangleImageRegion.id}, ` +
           `position=${rectangleImageRegion.position}, ` +
           `size=${rectangleImageRegion.size}`
@@ -212,11 +215,13 @@ export class ImgFrameright extends LitElement {
       this._currentComponentSize.setIfDifferent(currentComponentSize);
 
     if (initialSizeHasChanged) {
-      this._log(`Initial image size: ${this._originalImageRegion.size}`);
+      this._logger.debug(
+        `Initial image size: ${this._originalImageRegion.size}`
+      );
       this._populateRectangleImageRegions();
     }
     if (componentSizeHasChanged) {
-      this._log(`Component size: ${this._currentComponentSize}`);
+      this._logger.debug(`Component size: ${this._currentComponentSize}`);
     }
     if (initialSizeHasChanged || componentSizeHasChanged) {
       this._panAndZoomToBestFittingRegion();
@@ -230,9 +235,9 @@ export class ImgFrameright extends LitElement {
   // Note: it will automatically triggers a re-rending as it touches the <img>
   // element's `style=` HTML attribute.
   private _panAndZoomToBestFittingRegion() {
-    this._log('Panning and zooming to best fitting region...');
+    this._logger.debug('Panning and zooming to best fitting region...');
     if (this._originalImageRegion.size.isUnknown()) {
-      this._log('Natural image size unknown, deferring.');
+      this._logger.debug('Natural image size unknown, deferring.');
       return;
     }
 
@@ -300,7 +305,7 @@ export class ImgFrameright extends LitElement {
       }
     }
 
-    this._log(`Selected region: ${bestRegion.id}`);
+    this._logger.debug(`Selected region: ${bestRegion.id}`);
     return bestRegion;
   }
 
@@ -315,20 +320,6 @@ export class ImgFrameright extends LitElement {
       styleObject = (this.renderRoot.host as HTMLElement).style;
     }
     return styleObject;
-  }
-
-  private _log(text: string) {
-    if (this._currentLogLevel >= DEBUG) {
-      // eslint-disable-next-line no-console
-      console.log(this._id ? `[${this._id}] ${text}` : text);
-    }
-  }
-
-  private _error(text: string) {
-    if (this._currentLogLevel >= ERROR) {
-      // eslint-disable-next-line no-console
-      console.error(this._id ? `[${this._id}] ${text}` : text);
-    }
   }
 
   // All <img>-specific HTML attributes, see
@@ -354,7 +345,7 @@ export class ImgFrameright extends LitElement {
   @property({ attribute: 'dir' }) _dir = null;
   @property({ attribute: 'enterkeyhint' }) _enterkeyhint = null;
   @property({ attribute: 'hidden' }) _hidden = null;
-  @property({ attribute: 'id' }) _id = null;
+  @property({ attribute: 'id' }) _id: string | null = null;
   @property({ attribute: 'inert' }) _inert = null;
   @property({ attribute: 'is' }) _is = null;
   @property({ attribute: 'itemid' }) _itemid = null;
@@ -396,5 +387,5 @@ export class ImgFrameright extends LitElement {
   // Last observed size of the component in pixels. Populated by _observe().
   private _currentComponentSize = new SizeInPixels();
 
-  private _currentLogLevel: LogLevel = new LogLevel('fatal');
+  private _logger: Logger = new Logger(this._id, this._loglevel);
 }
