@@ -9,19 +9,20 @@
       }
 
       .demo {
+        background: #ddd;
         border: solid;
         resize: both;
         overflow: hidden;
       }
 
       .deer {
-        width: 400px;
-        height: 600px;
+        width: 450px;
+        height: 650px;
       }
 
       .iptc {
-        width: 400px;
-        height: 200px;
+        width: 450px;
+        height: 250px;
       }
     </style>
   </head>
@@ -34,6 +35,7 @@
         alt="Deer being cute in the nature"
         id="deer"
         loglevel="debug"
+        width="400"
         image-regions='[{
           "id": "oneanimal",
           "names": ["One animal"],
@@ -70,6 +72,7 @@
         sizes="(max-width: 2000px) 100vw, 2000px"
         id="iptc"
         loglevel="warn"
+        width="400"
         image-regions='[{
           "id": "persltr2",
           "names": ["Listener 1"],
