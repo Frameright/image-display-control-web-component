@@ -45,6 +45,11 @@ export class ImgFrameright extends LitElement {
       /* Prevents initial flickering. Will be set to 'visible' later when
          initial scaling has been calculated: */
       visibility: hidden;
+
+      /* Otherwise the web component will end up being 5px higher than the
+         image by default. See
+         https://stackoverflow.com/questions/5804256/image-inside-div-has-extra-space-below-the-image */
+      display: block;
     }
   `;
 
