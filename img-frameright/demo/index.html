@@ -16,13 +16,22 @@
       }
 
       .deer {
-        width: 450px;
-        height: 650px;
+        width: 400px;
+        height: 600px;
       }
 
       .iptc {
-        width: 450px;
-        height: 250px;
+        width: 400px;
+        height: 200px;
+      }
+
+      img {
+        transition: all 0.3s;
+
+        /* Otherwise the web component will end up being 5px higher than the
+           image by default. See
+          https://stackoverflow.com/questions/5804256/image-inside-div-has-extra-space-below-the-image */
+        display: block;
       }
     </style>
   </head>
@@ -30,12 +39,8 @@
   <body>
     <div class="demo deer">
       <img-frameright
-        src="assets/deer.jpg"
-        title="Hello my deer"
-        alt="Deer being cute in the nature"
         id="deer"
         loglevel="debug"
-        width="400"
         image-regions='[{
           "id": "oneanimal",
           "names": ["One animal"],
@@ -58,6 +63,11 @@
           "height": "182"
         }]'
       >
+        <img
+          src="assets/deer.jpg"
+          title="Hello my deer"
+          alt="Deer being cute in the nature"
+        />
       </img-frameright>
     </div>
     <label>
@@ -68,20 +78,13 @@
         checked
       />
       Enable web component </label
-    >&emsp;&emsp;&emsp;Resize me&#9650;
+    >&emsp;&emsp;&emsp; Resize me &#9650;
 
     <br /><br />
     <div class="demo iptc">
       <img-frameright
-        src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
-        alt="Hello world!"
-        srcset="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg 2000w,
-              assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
-              assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg 768w"
-        sizes="(max-width: 2000px) 100vw, 2000px"
         id="iptc"
         loglevel="warn"
-        width="400"
         image-regions='[{
           "id": "persltr2",
           "names": ["Listener 1"],
@@ -93,6 +96,16 @@
           "height": "0.385"
         }]'
       >
+        <img
+          src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
+          alt="Hello world!"
+          srcset="
+            assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg          2000w,
+            assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
+            assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg   768w
+          "
+          sizes="(max-width: 2000px) 100vw, 2000px"
+        />
       </img-frameright>
     </div>
     <label>
@@ -103,39 +116,29 @@
         checked
       />
       Enable web component </label
-    >&emsp;&emsp;&emsp;Resize me&#9650;
+    >&emsp;&emsp;&emsp; Resize me &#9650;
 
     <script type="module" src="../dist/src/img-frameright.js"></script>
 
     <script>
       // eslint-disable-next-line no-unused-vars
       function checkboxChanged(id) {
-        // Replace <img ...> with <img-frameright ...></img-frameright> or vice
-        // versa.
-
         const checkboxId = `checkbox-${id}`;
         const checkbox = document.getElementById(checkboxId);
-        const element = document.getElementById(id);
+        const framerightElement = document.getElementById(id);
+        const framerightFirstChild = framerightElement.firstElementChild;
 
-        let newElement = null;
-        if (checkbox.checked && element.tagName.toLowerCase() === 'img') {
-          newElement = document.createElement('img-frameright');
-        } else if (
-          !checkbox.checked &&
-          element.tagName.toLowerCase() === 'img-frameright'
-        ) {
-          newElement = document.createElement('img');
+        if (checkbox.checked && !framerightFirstChild) {
+          // Move <img ...> inside <img-frameright ...>:
+          const imgElement =
+            framerightElement.parentElement.getElementsByTagName('img')[0];
+          framerightElement.appendChild(imgElement);
+        } else if (!checkbox.checked && framerightFirstChild) {
+          // Move <img ...> outside of <img-frameright ...> and reset its
+          // style:
+          framerightElement.before(framerightFirstChild);
+          framerightFirstChild.style = '';
         }
-        if (!newElement) {
-          return;
-        }
-
-        // Copy all attributes from the old element to the new one:
-        Array.from(element.attributes).forEach(attr => {
-          newElement.setAttribute(attr.nodeName, attr.nodeValue);
-        });
-
-        element.parentNode.replaceChild(newElement, element);
       }
     </script>
   </body>

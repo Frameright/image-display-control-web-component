@@ -1,4 +1,4 @@
-import { html, css, LitElement, CSSResult, nothing, PropertyValues } from 'lit';
+import { html, css, LitElement, CSSResult, PropertyValues } from 'lit';
 // eslint-disable-next-line no-unused-vars
 import { property } from 'lit/decorators.js';
 import { Logger } from './Logger.js';
@@ -27,7 +27,7 @@ export class ImgFrameright extends LitElement {
        * In the case of a DOM looking like
        *
        *   <div> <!-- parent container -->
-       *     <img-frameright src="my-very-large-image.jpg"> <!-- web component -->
+       *     <img-frameright> <!-- web component -->
        *       <img src="my-very-large-image.jpg"> <!-- image -->
        *     </img-frameright>
        *   </div>
@@ -39,17 +39,6 @@ export class ImgFrameright extends LitElement {
       max-height: 100%;
 
       overflow: hidden;
-    }
-
-    img {
-      /* Prevents initial flickering. Will be set to 'visible' later when
-         initial scaling has been calculated: */
-      visibility: hidden;
-
-      /* Otherwise the web component will end up being 5px higher than the
-         image by default. See
-         https://stackoverflow.com/questions/5804256/image-inside-div-has-extra-space-below-the-image */
-      display: block;
     }
   `;
 
@@ -85,57 +74,17 @@ export class ImgFrameright extends LitElement {
       this._populateRectangleImageRegions();
     }
     if (imageRegionsHaveChanged || imageRegionIdHasChanged) {
-      this._panAndZoomToBestFittingRegion();
+      const firstChildElement = this.firstElementChild as HTMLElement;
+      if (firstChildElement) {
+        this._panAndZoomToBestFittingRegion(firstChildElement.style);
+      }
     }
   }
 
   render() {
-    // Notes:
-    // * On purpose we don't forward the `width=` and `height=` attributes down
-    //   to the `<img>` element as this then messes with our calculated CSS
-    //   scaling and moving. Instead we apply them to the root/host element's
-    //   style inside willUpdate().
-    // * On purpose we don't forward the `style=` attribute down to the `<img>`
-    //   element as it's probably best applied to the root/host element only.
-    //   (Thus we use `this._imgStyle` instead of `this._style` here.)
-    return html`
-      <img
-        alt=${this._alt ?? nothing}
-        crossorigin=${this._crossorigin ?? nothing}
-        decoding=${this._decoding ?? nothing}
-        fetchpriority=${this._fetchpriority ?? nothing}
-        height=${this._height ?? nothing}
-        ?ismap=${this._ismap}
-        loading=${this._loading ?? nothing}
-        referrerpolicy=${this._referrerpolicy ?? nothing}
-        sizes=${this._sizes ?? nothing}
-        src=${this._src ?? nothing}
-        srcset=${this._srcset ?? nothing}
-        width=${this._width ?? nothing}
-        usemap=${this._usemap ?? nothing}
-        class=${this._class ?? nothing}
-        contextmenu=${this._contextmenu ?? nothing}
-        dir=${this._dir ?? nothing}
-        enterkeyhint=${this._enterkeyhint ?? nothing}
-        ?hidden=${this._hidden}
-        inert=${this._inert ?? nothing}
-        is=${this._is ?? nothing}
-        itemid=${this._itemid ?? nothing}
-        itemprop=${this._itemprop ?? nothing}
-        itemref=${this._itemref ?? nothing}
-        ?itemscope=${this._itemscope}
-        itemtype=${this._itemtype ?? nothing}
-        lang=${this._lang ?? nothing}
-        nonce=${this._nonce ?? nothing}
-        part=${this._part ?? nothing}
-        role=${this._role ?? nothing}
-        spellcheck=${this._spellcheck ?? nothing}
-        style=${this._imgStyle ?? nothing}
-        tabindex=${this._tabindex ?? nothing}
-        title=${this._title ?? nothing}
-        translate=${this._translate ?? nothing}
-      />
-    `;
+    // Simply render any elements passed to the component. Hopefully only one
+    // element will be passed, and it will be an <img> element.
+    return html`<slot></slot>`;
   }
 
   // Populates this._rectangleImageRegions based on this._imageRegions, passed
@@ -163,18 +112,56 @@ export class ImgFrameright extends LitElement {
   // Called periodically in order to observe the size of the component and the
   // initial size of the image.
   private _observe() {
+    let childElementCountHasChanged = false;
     let initialSizeHasChanged = false;
     let componentSizeHasChanged = false;
 
-    const imgElement = this.renderRoot.querySelector('img');
-    if (imgElement) {
-      const currentInitialSize = new SizeInPixels(
-        imgElement.width,
-        imgElement.height
-      );
-      initialSizeHasChanged =
-        this._currentInitialImageSize.setIfDifferent(currentInitialSize);
+    const oldChildElementCount = this._currentChildElementCount;
+    this._currentChildElementCount = this.children.length;
+    childElementCountHasChanged =
+      oldChildElementCount !== this._currentChildElementCount;
+
+    if (childElementCountHasChanged) {
+      // Trace only when the number of children changes in order not to spam
+      // the console.
+
+      if (this._currentChildElementCount < 1) {
+        this._logger.error('<img-frameright> has no child element.');
+      }
+      if (this._currentChildElementCount > 1) {
+        this._logger.warn(
+          '<img-frameright> has more than one child element. ' +
+            'Only the first one will be used.'
+        );
+      }
     }
+
+    const firstChildElement = this.firstElementChild as HTMLElement;
+    if (!firstChildElement) {
+      return;
+    }
+
+    if (childElementCountHasChanged) {
+      // Trace only when the number of children changes in order not to spam
+      // the console.
+      if (firstChildElement.tagName.toLowerCase() !== 'img') {
+        this._logger.warn(
+          "<img-frameright>'s first child isn't an <img> element. " +
+            'This may cause unexpected behavior.'
+        );
+      }
+    }
+
+    // Replaced elements like <img> and <video> have `width` and `height`
+    // attributes but other elements don't:
+    const currentInitialSize = new SizeInPixels(
+      (firstChildElement as HTMLImageElement).width ??
+        firstChildElement.offsetWidth,
+      (firstChildElement as HTMLImageElement).height ??
+        firstChildElement.offsetHeight
+    );
+    initialSizeHasChanged =
+      this._currentInitialImageSize.setIfDifferent(currentInitialSize);
 
     const currentComponentSize = new SizeInPixels(
       this.offsetWidth,
@@ -191,37 +178,34 @@ export class ImgFrameright extends LitElement {
     if (componentSizeHasChanged) {
       this._logger.debug(`Component size: ${this._currentComponentSize}`);
     }
-    if (initialSizeHasChanged || componentSizeHasChanged) {
-      this._panAndZoomToBestFittingRegion();
+    if (
+      initialSizeHasChanged ||
+      componentSizeHasChanged ||
+      childElementCountHasChanged
+    ) {
+      this._panAndZoomToBestFittingRegion(firstChildElement.style);
     }
   }
 
-  // Applies dynamically some CSS style to the <img> element. This couldn't be
+  // Applies dynamically some CSS style to the image element. This couldn't be
   // done in pure CSS, see
   // https://stackoverflow.com/questions/50248577/css-transform-scale-based-on-container-width
   //
-  // Note: it will automatically triggers a re-rending as it touches the <img>
+  // Note: it will automatically trigger a re-rending as it touches the image
   // element's `style=` HTML attribute.
-  private _panAndZoomToBestFittingRegion() {
+  private _panAndZoomToBestFittingRegion(
+    imageStyleToBeSet: CSSStyleDeclaration
+  ) {
     this._logger.debug('Panning and zooming to best fitting region...');
     if (this._currentInitialImageSize.isUnknown()) {
       this._logger.debug('Initial image size unknown, deferring.');
       return;
     }
 
-    const style = ['visibility: visible;'];
-
-    // Avoid initial flickering by not having a transition when styling for the
-    // first time:
-    const firstTime = !this._imgStyle;
-    if (!firstTime) {
-      style.push(
-        'transition: all',
-        `${parseFloat(
-          ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
-        )}s;`
-      );
-    }
+    // eslint-disable-next-line no-param-reassign
+    imageStyleToBeSet.transition = `all ${parseFloat(
+      ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
+    )}s`;
 
     let bestRegion = null;
     if (this._imageRegionId) {
@@ -239,15 +223,16 @@ export class ImgFrameright extends LitElement {
       this._currentComponentSize,
       this._currentInitialImageSize
     );
-    style.push(
-      `transform-origin: ${cssScaling.origin.x.toFixed(3)}px`,
-      `${cssScaling.origin.y.toFixed(3)}px;`,
-      `transform: translate(${-cssScaling.origin.x.toFixed(3)}px,`,
-      `${-cssScaling.origin.y.toFixed(3)}px)`,
-      `scale(${cssScaling.factor.toFixed(3)});`
-    );
-
-    this._imgStyle = style.join(' ');
+    // eslint-disable-next-line no-param-reassign
+    imageStyleToBeSet.transformOrigin = `${cssScaling.origin.x.toFixed(
+      3
+    )}px ${cssScaling.origin.y.toFixed(3)}px`;
+    // eslint-disable-next-line no-param-reassign
+    imageStyleToBeSet.transform = `translate(${-cssScaling.origin.x.toFixed(
+      3
+    )}px, ${-cssScaling.origin.y.toFixed(
+      3
+    )}px) scale(${cssScaling.factor.toFixed(3)})`;
   }
 
   // Returns the image region that's the closest to the current component size.
@@ -276,69 +261,21 @@ export class ImgFrameright extends LitElement {
     return bestRegion;
   }
 
-  // Returns the editable style object of the root/host element.
-  private _getRootElementStyleObject() {
-    let styleObject;
-    if ('style' in this.renderRoot) {
-      // HTMLElement
-      styleObject = this.renderRoot.style;
-    } else {
-      // ShadowRoot
-      styleObject = (this.renderRoot.host as HTMLElement).style;
-    }
-    return styleObject;
-  }
-
-  // All <img>-specific HTML attributes, see
-  // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img
-  @property({ attribute: 'alt' }) _alt = null;
-  @property({ attribute: 'crossorigin' }) _crossorigin = null;
-  @property({ attribute: 'decoding' }) _decoding = null;
-  @property({ attribute: 'fetchpriority' }) _fetchpriority = null;
-  @property({ attribute: 'height' }) _height = null;
-  @property({ attribute: 'ismap' }) _ismap = null;
-  @property({ attribute: 'loading' }) _loading = null;
-  @property({ attribute: 'referrerpolicy' }) _referrerpolicy = null;
-  @property({ attribute: 'sizes' }) _sizes = null;
-  @property({ attribute: 'src' }) _src: string | null = null;
-  @property({ attribute: 'srcset' }) _srcset = null;
-  @property({ attribute: 'width' }) _width = null;
-  @property({ attribute: 'usemap' }) _usemap = null;
-
-  // Relevant global HTML attributes, see
-  // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
-  @property({ attribute: 'class' }) _class = null;
-  @property({ attribute: 'contextmenu' }) _contextmenu = null;
-  @property({ attribute: 'dir' }) _dir = null;
-  @property({ attribute: 'enterkeyhint' }) _enterkeyhint = null;
-  @property({ attribute: 'hidden' }) _hidden = null;
-  @property({ attribute: 'id' }) _id: string | null = null;
-  @property({ attribute: 'inert' }) _inert = null;
-  @property({ attribute: 'is' }) _is = null;
-  @property({ attribute: 'itemid' }) _itemid = null;
-  @property({ attribute: 'itemprop' }) _itemprop = null;
-  @property({ attribute: 'itemref' }) _itemref = null;
-  @property({ attribute: 'itemscope' }) _itemscope = null;
-  @property({ attribute: 'itemtype' }) _itemtype = null;
-  @property({ attribute: 'lang' }) _lang = null;
-  @property({ attribute: 'nonce' }) _nonce = null;
-  @property({ attribute: 'part' }) _part = null;
-  @property({ attribute: 'role' }) _role = null;
-  @property({ attribute: 'spellcheck' }) _spellcheck = null;
-  @property({ attribute: 'style' }) _style = null;
-  @property({ attribute: 'tabindex' }) _tabindex = null;
-  @property({ attribute: 'title' }) _title = null;
-  @property({ attribute: 'translate' }) _translate = null;
-
-  // ImgFrameright-specific attributes:
+  // `image-regions=` HTML attribute accepting a JSON array of image regions.
   @property({ attribute: 'image-regions', type: Array })
   _imageRegions: ImageRegionFromHtmlAttr[] = [];
+
+  // `image-region-id=` HTML attribute for forcing zooming on a specific image
+  // region.
   @property({ attribute: 'image-region-id' }) _imageRegionId: string = '';
+
+  // `loglevel=` HTML attribute for setting the log level (e.g. to 'debug',
+  // 'warn' or 'error').
   @property({ attribute: 'loglevel' }) _loglevel: string = '';
 
-  // Dynamically generated `<img style=` attribute whose main purpose is to pan
-  // and zoom to a specific image region:
-  @property() _imgStyle: string | null = null;
+  // Standard `id=` HTML attribute. See
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes
+  @property({ attribute: 'id' }) _id: string | null = null;
 
   // Special region representing the entire original image. Gets populated and
   // updated by _observe().
@@ -357,6 +294,10 @@ export class ImgFrameright extends LitElement {
 
   // Last observed size of the component in pixels. Populated by _observe().
   private _currentComponentSize = new SizeInPixels();
+
+  // Last observed number of child elements (rendered with `<slot>`). Populated
+  // by _observe().
+  private _currentChildElementCount = -1;
 
   // Last observed initial size of the image in pixels. Populated by _observe().
   //

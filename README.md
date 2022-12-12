@@ -7,25 +7,26 @@
 An easy way to leverage Image Display Control metadata in your DOM. Made with
 :heart: by [Frameright](https://frameright.io). Power to the pictures!
 
-> **WARNING**: not fully implemented yet
-
 ## Basic Usage
 
 ```html
 <img-frameright
+  image-regions='[{
+    "id": "cat",
+    "names": ["Cat"],
+    "shape": "rectangle",
+    "absolute": false,
+    "x": "0.31",
+    "y": "0.18",
+    "width": "0.127",
+    "height": "0.385"
+  }]'
+>
+  <img
     src="./my-image-with-two-dogs-and-a-cat.jpg"
     alt="My image with two dogs and a cat"
-    image-regions='[{
-        "id": "cat",
-        "names": ["Cat"],
-        "shape": "rectangle",
-        "absolute": false,
-        "x": "0.31",
-        "y": "0.18",
-        "width": "0.127",
-        "height": "0.385"
-     }]'
-></img-frameright>
+  />
+</img-frameright>
 ```
 
 &emsp; :airplane: [Advanced usage](img-frameright/)

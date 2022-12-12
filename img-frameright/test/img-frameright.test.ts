@@ -4,36 +4,12 @@ import { ImgFrameright } from '../src/ImgFrameright.js';
 import '../src/img-frameright.js';
 
 describe('ImgFrameright', () => {
-  it('can set the src via attribute', async () => {
+  it('can set the id via attribute', async () => {
     const el = await fixture<ImgFrameright>(
-      html`<img-frameright src="myimage.jpg"></img-frameright>`
+      html`<img-frameright id="myid"></img-frameright>`
     );
 
-    expect(el._src).to.equal('myimage.jpg');
-  });
-
-  it('can set the alt via attribute', async () => {
-    const el = await fixture<ImgFrameright>(
-      html`<img-frameright src="myimage.jpg" alt="My image"></img-frameright>`
-    );
-
-    expect(el._alt).to.equal('My image');
-  });
-
-  it('can set the title via attribute', async () => {
-    const el = await fixture<ImgFrameright>(
-      html`<img-frameright src="myimage.jpg" title="My title"></img-frameright>`
-    );
-
-    expect(el._title).to.equal('My title');
-  });
-
-  it('can set the class via attribute', async () => {
-    const el = await fixture<ImgFrameright>(
-      html`<img-frameright src="myimage.jpg" class="original"></img-frameright>`
-    );
-
-    expect(el._class).to.equal('original');
+    expect(el._id).to.equal('myid');
   });
 
   it('passes the a11y audit', async () => {
