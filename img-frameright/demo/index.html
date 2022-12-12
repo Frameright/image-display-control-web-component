@@ -26,8 +26,8 @@
       }
     </style>
   </head>
+
   <body>
-    Resize me:
     <div class="demo deer">
       <img-frameright
         src="assets/deer.jpg"
@@ -60,8 +60,17 @@
       >
       </img-frameright>
     </div>
-    <br />
-    Resize me:
+    <label>
+      <input
+        type="checkbox"
+        id="checkbox-deer"
+        onchange="checkboxChanged('deer');"
+        checked
+      />
+      Enable web component </label
+    >&emsp;&emsp;&emsp;Resize me&#9650;
+
+    <br /><br />
     <div class="demo iptc">
       <img-frameright
         src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
@@ -86,6 +95,48 @@
       >
       </img-frameright>
     </div>
+    <label>
+      <input
+        type="checkbox"
+        id="checkbox-iptc"
+        onchange="checkboxChanged('iptc');"
+        checked
+      />
+      Enable web component </label
+    >&emsp;&emsp;&emsp;Resize me&#9650;
+
     <script type="module" src="../dist/src/img-frameright.js"></script>
+
+    <script>
+      // eslint-disable-next-line no-unused-vars
+      function checkboxChanged(id) {
+        // Replace <img ...> with <img-frameright ...></img-frameright> or vice
+        // versa.
+
+        const checkboxId = `checkbox-${id}`;
+        const checkbox = document.getElementById(checkboxId);
+        const element = document.getElementById(id);
+
+        let newElement = null;
+        if (checkbox.checked && element.tagName.toLowerCase() === 'img') {
+          newElement = document.createElement('img-frameright');
+        } else if (
+          !checkbox.checked &&
+          element.tagName.toLowerCase() === 'img-frameright'
+        ) {
+          newElement = document.createElement('img');
+        }
+        if (!newElement) {
+          return;
+        }
+
+        // Copy all attributes from the old element to the new one:
+        Array.from(element.attributes).forEach(attr => {
+          newElement.setAttribute(attr.nodeName, attr.nodeValue);
+        });
+
+        element.parentNode.replaceChild(newElement, element);
+      }
+    </script>
   </body>
 </html>
