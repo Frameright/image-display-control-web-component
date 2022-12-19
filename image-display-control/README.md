@@ -1,21 +1,21 @@
-# \<img-frameright>
+# \<image-display-control>
 
 This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
 
 ## Installation
 
 ```bash
-npm i img-frameright
+npm i image-display-control
 ```
 
 ## Usage
 
 ```html
 <script type="module">
-  import 'img-frameright/img-frameright.js';
+  import 'image-display-control/image-display-control.js';
 </script>
 
-<img-frameright></img-frameright>
+<image-display-control></image-display-control>
 ```
 
 ## Linting and formatting

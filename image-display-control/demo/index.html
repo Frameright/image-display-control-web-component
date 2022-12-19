@@ -38,7 +38,7 @@
 
   <body>
     <div class="demo deer">
-      <img-frameright
+      <image-display-control
         id="deer"
         loglevel="debug"
         image-regions='[{
@@ -68,7 +68,7 @@
           title="Hello my deer"
           alt="Deer being cute in the nature"
         />
-      </img-frameright>
+      </image-display-control>
     </div>
     <label>
       <input
@@ -82,7 +82,7 @@
 
     <br /><br />
     <div class="demo iptc">
-      <img-frameright
+      <image-display-control
         id="iptc"
         loglevel="warn"
         image-regions='[{
@@ -106,7 +106,7 @@
           "
           sizes="(max-width: 2000px) 100vw, 2000px"
         />
-      </img-frameright>
+      </image-display-control>
     </div>
     <label>
       <input
@@ -118,26 +118,26 @@
       Enable web component </label
     >&emsp;&emsp;&emsp; Resize me &#9650;
 
-    <script type="module" src="../dist/src/img-frameright.js"></script>
+    <script type="module" src="../dist/src/image-display-control.js"></script>
 
     <script>
       // eslint-disable-next-line no-unused-vars
       function checkboxChanged(id) {
         const checkboxId = `checkbox-${id}`;
         const checkbox = document.getElementById(checkboxId);
-        const framerightElement = document.getElementById(id);
-        const framerightFirstChild = framerightElement.firstElementChild;
+        const idcElement = document.getElementById(id);
+        const idcFirstChild = idcElement.firstElementChild;
 
-        if (checkbox.checked && !framerightFirstChild) {
-          // Move <img ...> inside <img-frameright ...>:
+        if (checkbox.checked && !idcFirstChild) {
+          // Move <img ...> inside <image-display-control ...>:
           const imgElement =
-            framerightElement.parentElement.getElementsByTagName('img')[0];
-          framerightElement.appendChild(imgElement);
-        } else if (!checkbox.checked && framerightFirstChild) {
-          // Move <img ...> outside of <img-frameright ...> and reset its
+            idcElement.parentElement.getElementsByTagName('img')[0];
+          idcElement.appendChild(imgElement);
+        } else if (!checkbox.checked && idcFirstChild) {
+          // Move <img ...> outside of <image-display-control ...> and reset its
           // style:
-          framerightElement.before(framerightFirstChild);
-          framerightFirstChild.style = '';
+          idcElement.before(idcFirstChild);
+          idcFirstChild.style = '';
         }
       }
     </script>

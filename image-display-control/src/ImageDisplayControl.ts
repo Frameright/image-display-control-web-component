@@ -10,7 +10,7 @@ import {
 import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
-export class ImgFrameright extends LitElement {
+export class ImageDisplayControl extends LitElement {
   // Period in milliseconds for the component observer.
   private static readonly _OBSERVER_PERIOD_MS = 200;
 
@@ -27,9 +27,9 @@ export class ImgFrameright extends LitElement {
        * In the case of a DOM looking like
        *
        *   <div> <!-- parent container -->
-       *     <img-frameright> <!-- web component -->
+       *     <image-display-control> <!-- web component -->
        *       <img src="my-very-large-image.jpg"> <!-- image -->
-       *     </img-frameright>
+       *     </image-display-control>
        *   </div>
        *
        * we want the web component to not overflow the parent container, but
@@ -46,7 +46,7 @@ export class ImgFrameright extends LitElement {
     super.connectedCallback();
     this._observerIntervalId ||= window.setInterval(() => {
       this._observe();
-    }, ImgFrameright._OBSERVER_PERIOD_MS);
+    }, ImageDisplayControl._OBSERVER_PERIOD_MS);
   }
 
   disconnectedCallback() {
@@ -126,11 +126,11 @@ export class ImgFrameright extends LitElement {
       // the console.
 
       if (this._currentChildElementCount < 1) {
-        this._logger.error('<img-frameright> has no child element.');
+        this._logger.error('<image-display-control> has no child element.');
       }
       if (this._currentChildElementCount > 1) {
         this._logger.warn(
-          '<img-frameright> has more than one child element. ' +
+          '<image-display-control> has more than one child element. ' +
             'Only the first one will be used.'
         );
       }
@@ -146,7 +146,7 @@ export class ImgFrameright extends LitElement {
       // the console.
       if (firstChildElement.tagName.toLowerCase() !== 'img') {
         this._logger.warn(
-          "<img-frameright>'s first child isn't an <img> element. " +
+          "<image-display-control>'s first child isn't an <img> element. " +
             'This may cause unexpected behavior.'
         );
       }
@@ -204,7 +204,7 @@ export class ImgFrameright extends LitElement {
 
     // eslint-disable-next-line no-param-reassign
     imageStyleToBeSet.transition = `all ${parseFloat(
-      ((ImgFrameright._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
+      ((ImageDisplayControl._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
     )}s`;
 
     let bestRegion = null;

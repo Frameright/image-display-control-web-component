@@ -1,6 +1,6 @@
 {
-  "name": "img-frameright",
-  "description": "Webcomponent img-frameright following open-wc recommendations",
+  "name": "image-display-control",
+  "description": "Webcomponent image-display-control following open-wc recommendations",
   "license": "MIT",
   "author": {
     "name": "Frameright (Coberg Ltd)",
@@ -12,7 +12,7 @@
   "module": "dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
-    "./img-frameright.js": "./dist/src/img-frameright.js"
+    "./image-display-control.js": "./dist/src/image-display-control.js"
   },
   "scripts": {
     "analyze": "cem analyze --litelement",

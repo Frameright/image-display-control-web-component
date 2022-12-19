@@ -2,7 +2,7 @@
 
 [<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="left" width="64" height="64">](https://frameright.io)
 
-# Frameright Web Component
+# Image Display Control Web Component
 
 An easy way to leverage Image Display Control metadata in your DOM. Made with
 :heart: by [Frameright](https://frameright.io). Power to the pictures!
@@ -10,7 +10,7 @@ An easy way to leverage Image Display Control metadata in your DOM. Made with
 ## Basic Usage
 
 ```html
-<img-frameright
+<image-display-control
   image-regions='[{
     "id": "cat",
     "names": ["Cat"],
@@ -26,7 +26,7 @@ An easy way to leverage Image Display Control metadata in your DOM. Made with
     src="./my-image-with-two-dogs-and-a-cat.jpg"
     alt="My image with two dogs and a cat"
   />
-</img-frameright>
+</image-display-control>
 ```
 
-&emsp; :airplane: [Advanced usage](img-frameright/)
+&emsp; :airplane: [Advanced usage](image-display-control/)
