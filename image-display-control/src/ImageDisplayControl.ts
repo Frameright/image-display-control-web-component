@@ -202,11 +202,6 @@ export class ImageDisplayControl extends LitElement {
       return;
     }
 
-    // eslint-disable-next-line no-param-reassign
-    imageStyleToBeSet.transition = `all ${parseFloat(
-      ((ImageDisplayControl._OBSERVER_PERIOD_MS * 1.5) / 1000).toFixed(3)
-    )}s`;
-
     let bestRegion = null;
     if (this._imageRegionId) {
       // The user has manually selected an image region by ID via HTML
