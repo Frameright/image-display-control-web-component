@@ -1,6 +1,6 @@
 {
   "name": "image-display-control",
-  "description": "Webcomponent image-display-control following open-wc recommendations",
+  "description": "Webcomponent image-display-control",
   "license": "MIT",
   "author": {
     "name": "Frameright (Coberg Ltd)",
@@ -15,7 +15,7 @@
     "./image-display-control.js": "./dist/src/image-display-control.js"
   },
   "scripts": {
-    "analyze": "cem analyze --litelement",
+    "analyze": "cem analyze",
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
     "build": "tsc && npm run analyze -- --exclude dist",
     "prepublish": "tsc && npm run analyze -- --exclude dist",
@@ -25,7 +25,6 @@
     "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\""
   },
   "dependencies": {
-    "lit": "^2.0.2"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.4.17",

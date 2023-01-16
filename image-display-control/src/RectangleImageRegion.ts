@@ -120,27 +120,31 @@ export class RectangleImageRegion {
     return this._unknown;
   }
 
-  // Returns the necessary scaling factor and origin to apply via CSS in order
-  // to pan and zoom on this region.
-  getCssScaling(
-    currentComponentSize: SizeInPixels,
-    originalImageRegionSize: SizeInPixels
+  // Returns the necessary scaling factor and origin, and clipping to apply via
+  // CSS in order to pan and zoom on this region.
+  getCssTransformation(
+    currentComponentSize: SizeInPixels, // component = <img> element
+    originalImageRegionSize: SizeInPixels,
+    bottomRightClipMargins: SizeInPixels
   ) {
     const regionPos = this.position.getPositionInPixels(
       originalImageRegionSize
     );
     const regionSize = this.size.getSizeInPixels(originalImageRegionSize);
-    const regionWidth = regionSize.getWidth();
-    const regionHeight = regionSize.getHeight();
-    const componentWidth = currentComponentSize.getWidth();
-    const componentHeight = currentComponentSize.getHeight();
+    const regionWidth = regionSize.getSafeWidth();
+    const regionHeight = regionSize.getSafeHeight();
+    const componentWidth = currentComponentSize.getSafeWidth();
+    const componentHeight = currentComponentSize.getSafeHeight();
     const originalImageWidth = originalImageRegionSize.getWidth();
     const originalImageHeight = originalImageRegionSize.getHeight();
+
+    const regionXFromRight = originalImageWidth - regionWidth - regionPos.x;
+    const regionYFromBottom = originalImageHeight - regionHeight - regionPos.y;
 
     let xOffset = 0;
     let yOffset = 0;
     let scaleFactor = 1;
-    if (currentComponentSize.getRatio() < regionSize.getRatio()) {
+    if (currentComponentSize.getSafeRatio() < regionSize.getSafeRatio()) {
       // Here the region to focus on has a higher width/height ratio than the
       // component, i.e. the region is "flatter". This means that we need to
       // zoom the region in order to render both boxes with exactly the same
@@ -226,8 +230,6 @@ export class RectangleImageRegion {
       // of the image.
 
       const blankAtTop = yOffset - regionPos.y;
-      const regionYFromBottom =
-        originalImageHeight - regionHeight - regionPos.y;
       const blankAtBottom = yOffset - regionYFromBottom;
 
       if (blankAtTop > 0 || blankAtBottom > 0) {
@@ -262,7 +264,6 @@ export class RectangleImageRegion {
       scaleFactor = componentHeight / regionHeight;
       xOffset = (componentWidth / scaleFactor - regionWidth) / 2;
       const blankAtLeft = xOffset - regionPos.x;
-      const regionXFromRight = originalImageWidth - regionWidth - regionPos.x;
       const blankAtRight = xOffset - regionXFromRight;
       if (blankAtLeft > 0 || blankAtRight > 0) {
         xOffset = Math.min(regionPos.x, regionXFromRight);
@@ -271,12 +272,21 @@ export class RectangleImageRegion {
       }
     }
 
+    const origin = new PositionInPixels(
+      regionPos.x - xOffset,
+      regionPos.y - yOffset
+    );
+
     return {
-      origin: new PositionInPixels(
-        regionPos.x - xOffset,
-        regionPos.y - yOffset
-      ),
+      origin,
       factor: scaleFactor,
+
+      // See https://developer.mozilla.org/en-US/docs/Web/CSS/basic-shape/inset
+      insetClipFromTopLeft: new SizeInPixels(origin.x, origin.y),
+      insetClipFromBottomRight: new SizeInPixels(
+        regionXFromRight - xOffset + bottomRightClipMargins.getWidth(),
+        regionYFromBottom - yOffset + bottomRightClipMargins.getHeight()
+      ),
     };
   }
 

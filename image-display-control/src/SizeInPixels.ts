@@ -1,16 +1,15 @@
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
 export class SizeInPixels {
-  // Only 1px and more are allowed.
+  // Negative values aren't allowed.
   constructor(width?: number, height?: number) {
     if (width == null || height == null) {
       return;
     }
 
-    // Making sure that non of these values can be 0, so it's safe to divide
-    // anything by them.
-    this._width = Math.max(width, 1);
-    this._height = Math.max(height, 1);
+    // Making sure values are positive:
+    this._width = Math.max(width, 0);
+    this._height = Math.max(height, 0);
     this._unknown = false;
   }
 
@@ -22,8 +21,19 @@ export class SizeInPixels {
     return this._height;
   }
 
-  getRatio() {
-    return this._width / this._height;
+  // Returns non-zero width, so it's always safe to divide by it.
+  getSafeWidth() {
+    return Math.max(this._width, 1);
+  }
+
+  // Returns non-zero height, so it's always safe to divide by it.
+  getSafeHeight() {
+    return Math.max(this._height, 1);
+  }
+
+  // Returns non-zero ratio, so it's always safe to divide by it.
+  getSafeRatio() {
+    return this.getSafeWidth() / this.getSafeHeight();
   }
 
   isUnknown() {
@@ -46,8 +56,8 @@ export class SizeInPixels {
   // factor >= 1, so that one ratio multiplied by this factor gives the other
   // ratio.
   ratioDiffFactor(other: SizeInPixels) {
-    const firstRatio = this.getRatio(); // > 0
-    const secondRatio = other.getRatio(); // > 0
+    const firstRatio = this.getSafeRatio();
+    const secondRatio = other.getSafeRatio();
     return firstRatio >= secondRatio
       ? firstRatio / secondRatio
       : secondRatio / firstRatio;
@@ -58,11 +68,9 @@ export class SizeInPixels {
       return new SizeInRelativeCoord();
     }
 
-    // SizeInPixels can't have zero width or height, so we're sure we won't
-    // devide by zero:
     return new SizeInRelativeCoord(
-      this._width / baseSize.getWidth(),
-      this._height / baseSize.getHeight()
+      this._width / baseSize.getSafeWidth(),
+      this._height / baseSize.getSafeHeight()
     );
   }
 
@@ -79,6 +87,6 @@ export class SizeInPixels {
   }
 
   private _unknown = true;
-  private _width = 1; // px
-  private _height = 1; // px
+  private _width = 0; // px
+  private _height = 0; // px
 }

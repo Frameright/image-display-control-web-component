@@ -1,6 +1,4 @@
-# \<image-display-control>
-
-This webcomponent follows the [open-wc](https://github.com/open-wc/open-wc) recommendation.
+# \<img is="image-display-control" />
 
 ## Installation
 
@@ -15,7 +13,7 @@ npm i image-display-control
   import 'image-display-control/image-display-control.js';
 </script>
 
-<image-display-control></image-display-control>
+<img is="image-display-control" />
 ```
 
 ## Linting and formatting
@@ -45,7 +43,6 @@ To run the tests in interactive watch mode run:
 ```bash
 npm run test:watch
 ```
-
 
 ## Tooling configs
 

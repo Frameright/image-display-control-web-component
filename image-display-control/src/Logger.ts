@@ -1,14 +1,14 @@
 export class Logger {
-  constructor(id: string | null, level: string) {
+  constructor(id: string, level: string | undefined) {
     this._id = id;
     this._level = Logger._toValue(level);
   }
 
-  setLevel(level: string) {
+  setLevel(level: string | undefined) {
     this._level = Logger._toValue(level);
   }
 
-  setId(id: string | null) {
+  setId(id: string) {
     this._id = id;
   }
 
@@ -40,8 +40,8 @@ export class Logger {
   private static readonly _INFO = 4;
   private static readonly _DEBUG = 5;
 
-  private static _toValue(level: string) {
-    const loglevel = level.toLowerCase();
+  private static _toValue(level: string | undefined): number {
+    const loglevel = (level || '').toLowerCase();
     if (loglevel === 'debug') {
       return Logger._DEBUG;
     }
@@ -70,6 +70,6 @@ export class Logger {
     return this._id ? `[${this._id}] ${text}` : text;
   }
 
-  private _id: string | null;
+  private _id: string;
   private _level: number;
 }

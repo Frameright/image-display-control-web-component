@@ -13,11 +13,9 @@ export class PositionInPixels {
       return new PositionInRelativeCoord();
     }
 
-    // SizeInPixels can't have zero width or height, so we're sure we won't
-    // devide by zero:
     return new PositionInRelativeCoord(
-      this.x / baseSize.getWidth(),
-      this.y / baseSize.getHeight()
+      this.x / baseSize.getSafeWidth(),
+      this.y / baseSize.getSafeHeight()
     );
   }
 

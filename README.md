@@ -10,8 +10,11 @@ An easy way to leverage Image Display Control metadata in your DOM. Made with
 ## Basic Usage
 
 ```html
-<image-display-control
-  image-regions='[{
+<img
+  is="image-display-control"
+  src="./my-image-with-two-dogs-and-a-cat.jpg"
+  alt="My image with two dogs and a cat"
+  data-image-regions='[{
     "id": "cat",
     "names": ["Cat"],
     "shape": "rectangle",
@@ -21,12 +24,7 @@ An easy way to leverage Image Display Control metadata in your DOM. Made with
     "width": "0.127",
     "height": "0.385"
   }]'
->
-  <img
-    src="./my-image-with-two-dogs-and-a-cat.jpg"
-    alt="My image with two dogs and a cat"
-  />
-</image-display-control>
+/>
 ```
 
 &emsp; :airplane: [Advanced usage](image-display-control/)
