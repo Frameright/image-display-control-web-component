@@ -8,9 +8,6 @@ import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
 export class ImageDisplayControl extends HTMLImageElement {
-  // Period in milliseconds for the element observer.
-  private static readonly _SIZE_OBSERVER_PERIOD_MS = 200;
-
   // Special region representing the entire original image.
   private static readonly _ORIGINAL_IMAGE_REGION = new RectangleImageRegion(
     '<no region>',
@@ -59,9 +56,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       ],
     });
 
-    window.setInterval(() => {
-      this._observeElementSize();
-    }, ImageDisplayControl._SIZE_OBSERVER_PERIOD_MS);
+    this._sizeObserver.observe(this);
 
     this._populateRectangleImageRegions();
   }
@@ -101,6 +96,45 @@ export class ImageDisplayControl extends HTMLImageElement {
     });
   }
 
+  // Called whenever the element size has changed.
+  _sizeHasChanged(entries: ResizeObserverEntry[]) {
+    // If several resize events are coming at once, we only want to handle the
+    // last one.
+    const entry = entries.pop();
+    if (!entry) {
+      this._logger.warn('No ResizeObserverEntry, spurious call?');
+      return;
+    }
+    if (entry.target !== this) {
+      this._logger.warn('Unexpected ResizeObserverEntry target');
+      return;
+    }
+
+    let newElementSize = new SizeInPixels();
+    if (entry.contentBoxSize) {
+      // Chrome-specific, see
+      // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+      newElementSize = new SizeInPixels(
+        entry.contentBoxSize[0].inlineSize,
+        entry.contentBoxSize[0].blockSize
+      );
+    } else {
+      newElementSize = new SizeInPixels(
+        entry.contentRect.width,
+        entry.contentRect.height
+      );
+    }
+
+    const elementSizeHasChanged =
+      this._elementSize.setIfDifferent(newElementSize);
+
+    if (elementSizeHasChanged) {
+      this._logger.debug(`Element size: ${this._elementSize}`);
+      this._populateFittedImageSize();
+      this._panAndZoomToBestFittingRegion();
+    }
+  }
+
   // Populates this._rectangleImageRegions based on the 'data-image-regions'
   // HTML attribute.
   private _populateRectangleImageRegions() {
@@ -137,22 +171,6 @@ export class ImageDisplayControl extends HTMLImageElement {
 
     if (!this._rectangleImageRegions.length) {
       this._logger.debug('No rectangle image region found');
-    }
-  }
-
-  // Called periodically in order to observe the size of the element.
-  private _observeElementSize() {
-    const currentElementSize = new SizeInPixels(
-      this.offsetWidth,
-      this.offsetHeight
-    );
-    const elementSizeHasChanged =
-      this._elementSize.setIfDifferent(currentElementSize);
-
-    if (elementSizeHasChanged) {
-      this._logger.debug(`Element size: ${this._elementSize}`);
-      this._populateFittedImageSize();
-      this._panAndZoomToBestFittingRegion();
     }
   }
 
@@ -274,12 +292,15 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _rectangleImageRegions: RectangleImageRegion[] = [];
 
   // Observer that watches for changes in the element's attributes.
-  private _attributeObserver: MutationObserver = new MutationObserver(
+  private _attributeObserver = new MutationObserver(
     this._attributeHasChanged.bind(this)
   );
 
+  // Observer that watches for changes in the element's size.
+  private _sizeObserver = new ResizeObserver(this._sizeHasChanged.bind(this));
+
   // Last observed size of the element in pixels. Populated by
-  // _observeElementSize().
+  // _sizeHasChanged().
   private _elementSize = new SizeInPixels();
 
   // Size of the fitted image in pixels, i.e. size of the image after CSS
