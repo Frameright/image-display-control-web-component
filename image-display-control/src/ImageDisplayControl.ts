@@ -18,16 +18,6 @@ export class ImageDisplayControl extends HTMLImageElement {
   constructor() {
     super();
 
-    // Link the original image size to the element size.
-    this.style.objectFit = 'contain';
-    this.style.objectPosition = 'top left';
-
-    // Remove borders and padding as:
-    // 1. They don't survive zooming and clipping,
-    // 2. They wrong our CSS `transform:` calculations.
-    this.style.border = 'none';
-    this.style.padding = '0';
-
     // Zooming the image with CSS `transform: scale()` creates an overflowing
     // content, even though we clip it with a `clip-path:`. If none of the
     // ancestors has an `overflow: hidden;` property, one of the ancestors,
@@ -80,11 +70,11 @@ export class ImageDisplayControl extends HTMLImageElement {
 
         case 'data-image-regions':
           this._populateRectangleImageRegions();
-          this._panAndZoomToBestFittingRegion();
+          this._panAndZoomToBestRegion();
           break;
 
         case 'data-image-region-id':
-          this._panAndZoomToBestFittingRegion();
+          this._panAndZoomToBestRegion();
           break;
 
         default:
@@ -131,7 +121,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     if (elementSizeHasChanged) {
       this._logger.debug(`Element size: ${this._elementSize}`);
       this._populateFittedImageSize();
-      this._panAndZoomToBestFittingRegion();
+      this._panAndZoomToBestRegion();
     }
   }
 
@@ -222,8 +212,8 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Applies dynamically some CSS style to the image element. This couldn't be
   // done in pure CSS, see
   // https://stackoverflow.com/questions/50248577/css-transform-scale-based-on-container-width
-  private _panAndZoomToBestFittingRegion() {
-    this._logger.debug('Panning and zooming to best fitting region...');
+  private _panAndZoomToBestRegion() {
+    this._logger.debug('Panning and zooming to best region...');
     if (this._fittedImageSize.isUnknown()) {
       this._logger.debug('Fitted image size unknown, deferring.');
       return;
@@ -238,32 +228,65 @@ export class ImageDisplayControl extends HTMLImageElement {
       );
     }
     if (!bestRegion) {
-      bestRegion = this._findBestFittingRegion();
+      bestRegion = this._findBestRegion();
     }
 
-    const cssScaling = bestRegion.getCssTransformation(
-      this._elementSize,
-      this._fittedImageSize,
-      this._fittedImageBottomRightMargin
-    );
-    this.style.transformOrigin = `${cssScaling.origin.x.toFixed(
-      3
-    )}px ${cssScaling.origin.y.toFixed(3)}px`;
-    this.style.transform = `translate(${-cssScaling.origin.x.toFixed(
-      3
-    )}px, ${-cssScaling.origin.y.toFixed(
-      3
-    )}px) scale(${cssScaling.factor.toFixed(3)})`;
-    this.style.clipPath =
-      `inset(${cssScaling.insetClipFromTopLeft.getHeight()}px ` +
-      `${cssScaling.insetClipFromBottomRight.getWidth()}px ` +
-      `${cssScaling.insetClipFromBottomRight.getHeight()}px ` +
-      `${cssScaling.insetClipFromTopLeft.getWidth()}px)`;
+    if (ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id) {
+      // Resurrect original border and padding:
+      if (this._cssBorderToResurrect !== null) {
+        this.style.border = this._cssBorderToResurrect;
+        this._cssBorderToResurrect = null;
+      }
+      if (this._cssPaddingToResurrect !== null) {
+        this.style.padding = this._cssPaddingToResurrect;
+        this._cssPaddingToResurrect = null;
+      }
+
+      // Let the browser middle crop for us:
+      this.style.objectFit = 'cover';
+      this.style.objectPosition = 'center';
+      this.style.transformOrigin = '0 0';
+      this.style.transform = 'none';
+      this.style.clipPath = 'none';
+    } else {
+      // Stash away the original border and padding:
+      if (this._cssBorderToResurrect === null) {
+        this._cssBorderToResurrect = this.style.border;
+        this.style.border = 'none';
+      }
+      if (this._cssPaddingToResurrect === null) {
+        this._cssPaddingToResurrect = this.style.padding;
+        this.style.padding = '0';
+      }
+
+      // Link the original image size to the element size.
+      this.style.objectFit = 'contain';
+      this.style.objectPosition = 'top left';
+
+      const cssScaling = bestRegion.getCssTransformation(
+        this._elementSize,
+        this._fittedImageSize,
+        this._fittedImageBottomRightMargin
+      );
+      this.style.transformOrigin = `${cssScaling.origin.x.toFixed(
+        3
+      )}px ${cssScaling.origin.y.toFixed(3)}px`;
+      this.style.transform = `translate(${-cssScaling.origin.x.toFixed(
+        3
+      )}px, ${-cssScaling.origin.y.toFixed(
+        3
+      )}px) scale(${cssScaling.factor.toFixed(3)})`;
+      this.style.clipPath =
+        `inset(${cssScaling.insetClipFromTopLeft.getHeight()}px ` +
+        `${cssScaling.insetClipFromBottomRight.getWidth()}px ` +
+        `${cssScaling.insetClipFromBottomRight.getHeight()}px ` +
+        `${cssScaling.insetClipFromTopLeft.getWidth()}px)`;
+    }
   }
 
   // Returns the image region that's the closest to the current element size.
-  private _findBestFittingRegion(): RectangleImageRegion {
-    // Determining the best fitting image region for the current element size.
+  private _findBestRegion(): RectangleImageRegion {
+    // Determining the best image region for the current element size.
     let bestRegion = ImageDisplayControl._ORIGINAL_IMAGE_REGION;
     let smallestRatioDiff = this._elementSize.ratioDiffFactor(
       this._fittedImageSize
@@ -307,18 +330,27 @@ export class ImageDisplayControl extends HTMLImageElement {
   // `object-fit:` has been applied but before we apply `transform:`. Populated
   // by _populateFittedImageSize().
   //
-  // The size of the image has been linked to the element size in the
-  // constructor by using `object-fit: contain;`. This gives us a base size to
-  // apply transformations on, which doesn't depend on `srcset=` and `sizes=`.
-  // This simplifies the logic because `sizes=` might be using the `vw` unit,
-  // thus we would have to monitor changes to the viewport size in order to
-  // recalculate the scaling factor.
+  // The size of the image is linked to the element size in the by using
+  // `object-fit: contain;`. This gives us a base size to apply transformations
+  // on, which doesn't depend on `srcset=` and `sizes=`. This simplifies the
+  // logic because `sizes=` might be using the `vw` unit, thus we would have to
+  // monitor changes to the viewport size in order to recalculate the scaling
+  // factor.
   private _fittedImageSize = new SizeInPixels();
 
   // Margins between the fitted image and the element after CSS
   // `object-fit: contain; object-position: top left;` has been applied but
   // before we apply `transform:`. Populated by _populateFittedImageSize().
   private _fittedImageBottomRightMargin = new SizeInPixels();
+
+  // When zooming on a region, we remove borders and padding as:
+  // 1. They don't survive zooming and clipping,
+  // 2. They wrong our CSS `transform:` calculations.
+  // However, when the best region is the original image itself, we rely on
+  // the browser to perform a middle-crop by applying `object-fit: cover;` and
+  // we resurrect the borders and padding, as it knows how to handle them.
+  private _cssBorderToResurrect: string | null = null;
+  private _cssPaddingToResurrect: string | null = null;
 
   private _logger: Logger = new Logger(this.id, this.dataset.loglevel);
 }
