@@ -93,7 +93,9 @@
             Enable web component
           </label>
         </td>
-        <td class="resize-hint">Resize me &#9650;</td>
+        <td class="resize-hint">
+          <button onclick="resizeClicked('deer');">Resize me</button> &#9650;
+        </td>
       </tr>
     </table>
     <br />
@@ -139,7 +141,9 @@
             Enable web component
           </label>
         </td>
-        <td class="resize-hint">Resize me &#9650;</td>
+        <td class="resize-hint">
+          <button onclick="resizeClicked('iptc');">Resize me</button> &#9650;
+        </td>
       </tr>
     </table>
 
@@ -154,6 +158,14 @@
           'data-disabled',
           checkbox.checked ? 'false' : 'true'
         );
+      }
+
+      // eslint-disable-next-line no-unused-vars
+      function resizeClicked(id) {
+        const imgElement = document.getElementById(id);
+        const parentDiv = imgElement.parentElement;
+        parentDiv.style.width = '400px';
+        parentDiv.style.height = '400px';
       }
     </script>
   </body>
