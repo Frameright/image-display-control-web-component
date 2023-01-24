@@ -17,27 +17,32 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   constructor() {
     super();
+    this._sizeObserver.observe(this);
+  }
 
-    // Zooming the image with CSS `transform: scale()` creates an overflowing
-    // content, even though we clip it with a `clip-path:`. If none of the
-    // ancestors has an `overflow: hidden;` property, one of the ancestors,
-    // usually `<body>` will end up having to display scrollbars for this
-    // clipped image part, which we don't want. This can be prevented with CSS
-    // containment by setting the parent's `contain:` property to `paint`,
-    // `layout` or `content`. See:
-    // * https://developer.mozilla.org/en-US/docs/Web/CSS/contain
-    // * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment
-    if (this.parentElement) {
+  connectedCallback() {
+    // Adapt CSS containment, see this._parentCssContainToResurrect.
+    this._parentElement = this.parentElement;
+    if (this._parentElement) {
       if (
-        this.parentElement.style.contain !== 'paint' &&
-        this.parentElement.style.contain !== 'layout' &&
-        this.parentElement.style.contain !== 'content'
+        this._parentElement.style.contain !== 'paint' &&
+        this._parentElement.style.contain !== 'layout' &&
+        this._parentElement.style.contain !== 'content'
       ) {
-        this.parentElement.style.contain = 'paint';
+        this._parentCssContainToResurrect = this._parentElement.style.contain;
+        this._parentElement.style.contain = 'paint';
       }
     }
+  }
 
-    this._sizeObserver.observe(this);
+  disconnectedCallback() {
+    // Restore CSS containment to its original value.
+    if (this._parentElement) {
+      if (this._parentCssContainToResurrect !== null) {
+        this._parentElement.style.contain = this._parentCssContainToResurrect;
+        this._parentCssContainToResurrect = null;
+      }
+    }
   }
 
   // See
@@ -78,7 +83,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   }
 
   // Called whenever the element size has changed.
-  _sizeHasChanged(entries: ResizeObserverEntry[]) {
+  _resizeCallback(entries: ResizeObserverEntry[]) {
     // If several resize events are coming at once, we only want to handle the
     // last one.
     const entry = entries.pop();
@@ -306,10 +311,10 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _rectangleImageRegions: RectangleImageRegion[] = [];
 
   // Observer that watches for changes in the element's size.
-  private _sizeObserver = new ResizeObserver(this._sizeHasChanged.bind(this));
+  private _sizeObserver = new ResizeObserver(this._resizeCallback.bind(this));
 
   // Last observed size of the element in pixels. Populated by
-  // _sizeHasChanged().
+  // _resizeCallback().
   private _elementSize = new SizeInPixels();
 
   // Size of the fitted image in pixels, i.e. size of the image after CSS
@@ -329,6 +334,28 @@ export class ImageDisplayControl extends HTMLImageElement {
   // before we apply `transform:`. Populated by _populateFittedImageSize().
   private _fittedImageBottomRightMargin = new SizeInPixels();
 
+  // We need to remember the parent element as this.parentElement will be null
+  // already in the `disconnectedCallback()` and we won't be able to resurrect
+  // the CSS `contain:` property on it if we don't remember it.
+  private _parentElement: HTMLElement | null = null;
+
+  // Old CSS `contain:` value that we have touched on our parent and want to
+  // restore later.
+  //
+  // Zooming the image with CSS `transform: scale()` creates an overflowing
+  // content, even though we clip it with a `clip-path:`. If none of the
+  // ancestors has an `overflow: hidden;` property, one of the ancestors,
+  // usually `<body>` will end up having to display scrollbars for this
+  // clipped image part, which we don't want. This can be prevented with CSS
+  // containment by setting the parent's `contain:` property to `paint`,
+  // `layout` or `content`. See:
+  // * https://developer.mozilla.org/en-US/docs/Web/CSS/contain
+  // * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment
+  private _parentCssContainToResurrect: string | null = null;
+
+  // Old CSS `border:` and `padding:` values that we have touched and want to
+  // restore later.
+  //
   // When zooming on a region, we remove borders and padding as:
   // 1. They don't survive zooming and clipping,
   // 2. They wrong our CSS `transform:` calculations.
