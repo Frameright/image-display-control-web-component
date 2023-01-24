@@ -37,53 +37,44 @@ export class ImageDisplayControl extends HTMLImageElement {
       }
     }
 
-    this._attributeObserver.observe(this, {
-      attributeFilter: [
-        'id',
-        'data-loglevel',
-        'data-image-regions', // JSON array of image regions
-        'data-image-region-id', // forces zooming on a specific image region
-      ],
-    });
-
     this._sizeObserver.observe(this);
+  }
 
-    this._populateRectangleImageRegions();
+  // See
+  // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#using_the_lifecycle_callbacks
+  static get observedAttributes() {
+    return [
+      'id',
+      'data-loglevel',
+      'data-image-regions', // JSON array of image regions
+      'data-image-region-id', // forces zooming on a specific image region
+    ];
   }
 
   // Called whenever an HTML attribute of the element has changed.
-  _attributeHasChanged(mutationList: MutationRecord[]) {
-    mutationList.forEach(mutation => {
-      if (mutation.type !== 'attributes') {
-        this._logger.warn(`Unexpected mutation type: ${mutation.type}`);
-        return;
-      }
+  attributeChangedCallback(attributeName: string) {
+    switch (attributeName) {
+      case 'id':
+        this._logger.setId(this.id);
+        break;
 
-      switch (mutation.attributeName) {
-        case 'id':
-          this._logger.setId(this.id);
-          break;
+      case 'data-loglevel':
+        this._logger.setLevel(this.dataset.loglevel);
+        break;
 
-        case 'data-loglevel':
-          this._logger.setLevel(this.dataset.loglevel);
-          break;
+      case 'data-image-regions':
+        this._populateRectangleImageRegions();
+        this._panAndZoomToBestRegion();
+        break;
 
-        case 'data-image-regions':
-          this._populateRectangleImageRegions();
-          this._panAndZoomToBestRegion();
-          break;
+      case 'data-image-region-id':
+        this._panAndZoomToBestRegion();
+        break;
 
-        case 'data-image-region-id':
-          this._panAndZoomToBestRegion();
-          break;
-
-        default:
-          this._logger.warn(
-            `Unexpected attribute mutation: ${mutation.attributeName}`
-          );
-          break;
-      }
-    });
+      default:
+        this._logger.warn(`Unexpected attribute mutation: ${attributeName}`);
+        break;
+    }
   }
 
   // Called whenever the element size has changed.
@@ -313,11 +304,6 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Sanitized version of the 'data-image-regions' HTML attribute.
   // Populated by _populateRectangleImageRegions().
   private _rectangleImageRegions: RectangleImageRegion[] = [];
-
-  // Observer that watches for changes in the element's attributes.
-  private _attributeObserver = new MutationObserver(
-    this._attributeHasChanged.bind(this)
-  );
 
   // Observer that watches for changes in the element's size.
   private _sizeObserver = new ResizeObserver(this._sizeHasChanged.bind(this));
