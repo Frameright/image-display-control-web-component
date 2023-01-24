@@ -33,6 +33,11 @@
         height: 100%;
       }
 
+      td {
+        vertical-align: bottom;
+        padding-right: 2em;
+      }
+
       td.resize-hint {
         text-align: right;
       }
@@ -42,7 +47,7 @@
   <body>
     <table>
       <tr>
-        <td>
+        <td colspan="2">
           <div class="resizable deer">
             <img
               id="deer"
@@ -77,13 +82,24 @@
         </td>
       </tr>
       <tr>
+        <td>
+          <label>
+            <input
+              type="checkbox"
+              id="checkbox-deer"
+              onchange="checkboxChanged('deer');"
+              checked
+            />
+            Enable web component
+          </label>
+        </td>
         <td class="resize-hint">Resize me &#9650;</td>
       </tr>
     </table>
     <br />
     <table>
       <tr>
-        <td>
+        <td colspan="2">
           <div class="resizable iptc">
             <img
               id="iptc"
@@ -112,10 +128,33 @@
         </td>
       </tr>
       <tr>
+        <td>
+          <label>
+            <input
+              type="checkbox"
+              id="checkbox-iptc"
+              onchange="checkboxChanged('iptc');"
+              checked
+            />
+            Enable web component
+          </label>
+        </td>
         <td class="resize-hint">Resize me &#9650;</td>
       </tr>
     </table>
 
     <script type="module" src="../dist/src/image-display-control.js"></script>
+    <script>
+      // eslint-disable-next-line no-unused-vars
+      function checkboxChanged(id) {
+        const checkboxId = `checkbox-${id}`;
+        const checkbox = document.getElementById(checkboxId);
+        const imgElement = document.getElementById(id);
+        imgElement.setAttribute(
+          'data-disabled',
+          checkbox.checked ? 'false' : 'true'
+        );
+      }
+    </script>
   </body>
 </html>

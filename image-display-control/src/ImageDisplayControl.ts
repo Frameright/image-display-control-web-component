@@ -8,6 +8,18 @@ import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 
 export class ImageDisplayControl extends HTMLImageElement {
+  // See
+  // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#using_the_lifecycle_callbacks
+  static get observedAttributes() {
+    return [
+      'id',
+      'data-loglevel',
+      'data-disabled',
+      'data-image-regions', // JSON array of image regions
+      'data-image-region-id', // forces zooming on a specific image region
+    ];
+  }
+
   // Special region representing the entire original image.
   private static readonly _ORIGINAL_IMAGE_REGION = new RectangleImageRegion(
     '<no region>',
@@ -15,48 +27,19 @@ export class ImageDisplayControl extends HTMLImageElement {
     new SizeInRelativeCoord(1, 1)
   );
 
-  constructor() {
-    super();
-    this._sizeObserver.observe(this);
-  }
-
   connectedCallback() {
-    // Adapt CSS containment, see this._parentCssContainToResurrect.
-    this._parentElement = this.parentElement;
-    if (this._parentElement) {
-      if (
-        this._parentElement.style.contain !== 'paint' &&
-        this._parentElement.style.contain !== 'layout' &&
-        this._parentElement.style.contain !== 'content'
-      ) {
-        this._parentCssContainToResurrect = this._parentElement.style.contain;
-        this._parentElement.style.contain = 'paint';
-      }
-    }
+    this._logger.debug('Connected');
+    this._enabledCallback();
   }
 
   disconnectedCallback() {
-    // Restore CSS containment to its original value.
-    if (this._parentElement) {
-      if (this._parentCssContainToResurrect !== null) {
-        this._parentElement.style.contain = this._parentCssContainToResurrect;
-        this._parentCssContainToResurrect = null;
-      }
-    }
+    this._logger.debug('Disconnected');
+    this._restoreOriginalParentCssContainment();
   }
 
-  // See
-  // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#using_the_lifecycle_callbacks
-  static get observedAttributes() {
-    return [
-      'id',
-      'data-loglevel',
-      'data-image-regions', // JSON array of image regions
-      'data-image-region-id', // forces zooming on a specific image region
-    ];
-  }
-
-  // Called whenever an HTML attribute of the element has changed.
+  // Called whenever an HTML attribute of the element has changed. Guaranteed
+  // to be called at least once for each explicitly set attribute after the
+  // element has been created.
   attributeChangedCallback(attributeName: string) {
     switch (attributeName) {
       case 'id':
@@ -67,13 +50,28 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._logger.setLevel(this.dataset.loglevel);
         break;
 
+      case 'data-disabled':
+        if (
+          this.dataset.disabled !== undefined &&
+          this.dataset.disabled !== 'false'
+        ) {
+          this._disabledCallback();
+        } else {
+          this._enabledCallback();
+        }
+        break;
+
       case 'data-image-regions':
-        this._populateRectangleImageRegions();
-        this._panAndZoomToBestRegion();
+        if (!this.dataset.disabled) {
+          this._populateRectangleImageRegions();
+          this._panAndZoomToBestRegion();
+        }
         break;
 
       case 'data-image-region-id':
-        this._panAndZoomToBestRegion();
+        if (!this.dataset.disabled) {
+          this._panAndZoomToBestRegion();
+        }
         break;
 
       default:
@@ -82,7 +80,26 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  // Called whenever the element size has changed.
+  // Called whenever the element should having its intended custom behaviour.
+  _enabledCallback() {
+    this._logger.debug('Enabled');
+    this._adaptParentCssContainment();
+    this._populateRectangleImageRegions();
+    this._sizeObserver.observe(this);
+  }
+
+  // Called whenever the element should stop its custom behaviour and behave
+  // like a normal <img> element instead.
+  _disabledCallback() {
+    this._logger.debug('Disabled');
+    this._sizeObserver.unobserve(this);
+    this._restoreOriginalBorderAndPadding();
+    this._setCssToMiddleCropOriginalImage();
+    this._restoreOriginalParentCssContainment();
+  }
+
+  // Called whenever the element size has changed. Guaranteed to be called at
+  // least once after the observer has been started.
   _resizeCallback(entries: ResizeObserverEntry[]) {
     // If several resize events are coming at once, we only want to handle the
     // last one.
@@ -228,30 +245,16 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
 
     if (ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id) {
-      // Resurrect original border and padding:
-      if (this._cssBorderToResurrect !== null) {
-        this.style.border = this._cssBorderToResurrect;
-        this._cssBorderToResurrect = null;
-      }
-      if (this._cssPaddingToResurrect !== null) {
-        this.style.padding = this._cssPaddingToResurrect;
-        this._cssPaddingToResurrect = null;
-      }
-
-      // Let the browser middle crop for us:
-      this.style.objectFit = 'cover';
-      this.style.objectPosition = 'center';
-      this.style.transformOrigin = '0 0';
-      this.style.transform = 'none';
-      this.style.clipPath = 'none';
+      this._restoreOriginalBorderAndPadding();
+      this._setCssToMiddleCropOriginalImage();
     } else {
       // Stash away the original border and padding:
-      if (this._cssBorderToResurrect === null) {
-        this._cssBorderToResurrect = this.style.border;
+      if (this._cssBorderToRestore === null) {
+        this._cssBorderToRestore = this.style.border;
         this.style.border = 'none';
       }
-      if (this._cssPaddingToResurrect === null) {
-        this._cssPaddingToResurrect = this.style.padding;
+      if (this._cssPaddingToRestore === null) {
+        this._cssPaddingToRestore = this.style.padding;
         this.style.padding = '0';
       }
 
@@ -306,6 +309,50 @@ export class ImageDisplayControl extends HTMLImageElement {
     return bestRegion;
   }
 
+  _adaptParentCssContainment() {
+    this._parentElement = this.parentElement;
+    if (this._parentElement) {
+      if (
+        this._parentElement.style.contain !== 'paint' &&
+        this._parentElement.style.contain !== 'layout' &&
+        this._parentElement.style.contain !== 'content'
+      ) {
+        if (this._parentCssContainToRestore === null) {
+          this._parentCssContainToRestore = this._parentElement.style.contain;
+        }
+        this._parentElement.style.contain = 'paint';
+      }
+    }
+  }
+
+  _restoreOriginalParentCssContainment() {
+    if (this._parentElement) {
+      if (this._parentCssContainToRestore !== null) {
+        this._parentElement.style.contain = this._parentCssContainToRestore;
+        this._parentCssContainToRestore = null;
+      }
+    }
+  }
+
+  _restoreOriginalBorderAndPadding() {
+    if (this._cssBorderToRestore !== null) {
+      this.style.border = this._cssBorderToRestore;
+      this._cssBorderToRestore = null;
+    }
+    if (this._cssPaddingToRestore !== null) {
+      this.style.padding = this._cssPaddingToRestore;
+      this._cssPaddingToRestore = null;
+    }
+  }
+
+  _setCssToMiddleCropOriginalImage() {
+    this.style.objectFit = 'cover';
+    this.style.objectPosition = 'center';
+    this.style.transformOrigin = '0 0';
+    this.style.transform = 'none';
+    this.style.clipPath = 'none';
+  }
+
   // Sanitized version of the 'data-image-regions' HTML attribute.
   // Populated by _populateRectangleImageRegions().
   private _rectangleImageRegions: RectangleImageRegion[] = [];
@@ -335,7 +382,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _fittedImageBottomRightMargin = new SizeInPixels();
 
   // We need to remember the parent element as this.parentElement will be null
-  // already in the `disconnectedCallback()` and we won't be able to resurrect
+  // already in the `disconnectedCallback()` and we won't be able to restore
   // the CSS `contain:` property on it if we don't remember it.
   private _parentElement: HTMLElement | null = null;
 
@@ -351,7 +398,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   // `layout` or `content`. See:
   // * https://developer.mozilla.org/en-US/docs/Web/CSS/contain
   // * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment
-  private _parentCssContainToResurrect: string | null = null;
+  private _parentCssContainToRestore: string | null = null;
 
   // Old CSS `border:` and `padding:` values that we have touched and want to
   // restore later.
@@ -361,9 +408,9 @@ export class ImageDisplayControl extends HTMLImageElement {
   // 2. They wrong our CSS `transform:` calculations.
   // However, when the best region is the original image itself, we rely on
   // the browser to perform a middle-crop by applying `object-fit: cover;` and
-  // we resurrect the borders and padding, as it knows how to handle them.
-  private _cssBorderToResurrect: string | null = null;
-  private _cssPaddingToResurrect: string | null = null;
+  // we restore the borders and padding, as it knows how to handle them.
+  private _cssBorderToRestore: string | null = null;
+  private _cssPaddingToRestore: string | null = null;
 
   private _logger: Logger = new Logger(this.id, this.dataset.loglevel);
 }
