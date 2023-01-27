@@ -1,59 +1,81 @@
-# \<img is="image-display-control" />
+# `<img is="image-display-control" />`
+
+## Table of Contents
+
+<!-- toc -->
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Local demo](#local-demo)
+
+<!-- tocstop -->
 
 ## Installation
 
+Provided that you are using a bundler (e.g. [Webpack](https://webpack.js.org/)
+or [Rollup](https://rollupjs.org/)), you can add the web component to your
+project with:
+
 ```bash
-npm i image-display-control
+npm install image-display-control
 ```
+
+> :warning: **WARNING**: This web component has not yet been published on
+> [NPM](https://www.npmjs.com/). See
+> [here](https://github.com/Frameright/image-display-control-wordpress/tree/master/src/assets/js/thirdparty)
+> an example on how to pull it in your project at the moment.
+
+&emsp; :floppy_disk: [Importing in your project](docs/explanation/importing.md)
 
 ## Usage
 
 ```html
-<script type="module">
-  import 'image-display-control/image-display-control.js';
-</script>
-
-<img is="image-display-control" />
+<html>
+  <head></head>
+  <body>
+    <img
+      is="image-display-control"
+      src="https://images.pexels.com/photos/3625715/pexels-photo-3625715.jpeg"
+      width="200"
+      height="200"
+      data-image-regions='[{
+        "id": "oneanimal",
+        "names": ["One animal"],
+        "shape": "rectangle",
+        "unit": "relative",
+        "x": "0.217",
+        "y": "0.708",
+        "width": "0.239",
+        "height": "0.1467"
+      }, {
+        "id": "threeanimals",
+        "names": ["Three animals"],
+        "shape": "rectangle",
+        "unit": "relative",
+        "x": "0.245",
+        "y": "0.725",
+        "width": "0.419",
+        "height": "0.121"
+      }]'
+    />
+    <!-- Built with Webpack or Rollup. Contains the web component: -->
+    <script src="mybundle.js"></script>
+  </body>
+</html>
 ```
 
-## Linting and formatting
+&emsp; :airplane: [Advanced usage](docs/usage.md)
 
-To scan the project for linting and formatting errors, run
+## Local demo
 
-```bash
-npm run lint
-```
-
-To automatically fix linting and formatting errors, run
+To run a local development server that serves the basic demo located in
+[`demo/`](demo/), run:
 
 ```bash
-npm run format
-```
-
-## Testing with Web Test Runner
-
-To execute a single test run:
-
-```bash
-npm run test
-```
-
-To run the tests in interactive watch mode run:
-
-```bash
-npm run test:watch
-```
-
-## Tooling configs
-
-For most of the tools, the configuration is in the `package.json` to reduce the amount of files in your project.
-
-If you customize the configuration a lot, you can consider moving them to individual files.
-
-## Local Demo with `web-dev-server`
-
-```bash
+npm install
 npm start
 ```
 
-To run a local development server that serves the basic demo located in `demo/index.html`
+![Demo](docs/assets/demo.gif)
+
+&emsp; :wrench: [Contributing](docs/contributing.md)

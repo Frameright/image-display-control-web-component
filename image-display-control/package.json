@@ -19,10 +19,12 @@
     "start": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wds\"",
     "build": "tsc && npm run analyze -- --exclude dist",
     "prepublish": "tsc && npm run analyze -- --exclude dist",
-    "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier \"**/*.ts\" --check --ignore-path .gitignore",
-    "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier \"**/*.ts\" --write --ignore-path .gitignore",
+    "lint": "eslint --ext .ts,.html . --ignore-path .gitignore && prettier --check .",
+    "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier --write .",
     "test": "tsc && wtr --coverage",
-    "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\""
+    "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
+    "gentoc": "./bin/gentoc.sh",
+    "spellcheck": "npx mdspell '../**/*.md' '!../**/node_modules/**' --ignore-acronyms --ignore-numbers --no-suggestions --en-us"
   },
   "dependencies": {
     "@ungap/custom-elements": "^1.1.1"
@@ -42,7 +44,9 @@
     "lint-staged": "^10.5.4",
     "prettier": "^2.4.1",
     "tslib": "^2.3.1",
-    "typescript": "^4.5.2"
+    "typescript": "^4.5.2",
+    "markdown-spellcheck": "^1.3.1",
+    "markdown-toc": "^1.2.0"
   },
   "customElements": "custom-elements.json",
   "eslintConfig": {
@@ -65,10 +69,6 @@
         }
       ]
     }
-  },
-  "prettier": {
-    "singleQuote": true,
-    "arrowParens": "avoid"
   },
   "husky": {
     "hooks": {

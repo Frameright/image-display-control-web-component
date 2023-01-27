@@ -18,3 +18,13 @@ jobs:
           name: image-display-control
           path: image-display-control/image-display-control-*.tgz
           if-no-files-found: error
+
+  spellchecker:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: image-display-control/
+    steps:
+      - uses: actions/checkout@v3
+      - run: npm install
+      - run: npm run spellcheck

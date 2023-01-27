@@ -1,0 +1,15 @@
+/_site/
+/coverage/
+/dist/
+/npm-debug.log
+/out-tsc/
+
+.DS_Store
+.idea/
+.tmp/
+.vscode/
+custom-elements.json
+node_modules/
+package-lock.json
+storybook-static
+*.md
