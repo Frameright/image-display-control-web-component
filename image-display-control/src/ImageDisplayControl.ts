@@ -14,7 +14,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     return [
       'id',
       'data-loglevel',
-      'data-disabled',
+      'data-disabled', // 'none' (default), 'all' or 'css-contain'
       'data-image-regions', // JSON array of image regions
       'data-image-region-id', // forces zooming on a specific image region
     ];
@@ -29,7 +29,7 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   connectedCallback() {
     this._logger.debug('Connected');
-    this._enabledCallback();
+    this._behaviorChanged();
   }
 
   disconnectedCallback() {
@@ -51,14 +51,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'data-disabled':
-        if (
-          this.dataset.disabled !== undefined &&
-          this.dataset.disabled !== 'false'
-        ) {
-          this._disabledCallback();
-        } else {
-          this._enabledCallback();
-        }
+        this._behaviorChanged();
         break;
 
       case 'data-image-regions':
@@ -80,22 +73,39 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  // Called whenever the element should having its intended custom behaviour.
-  _enabledCallback() {
-    this._logger.debug('Enabled');
-    this._adaptParentCssContainment();
-    this._populateRectangleImageRegions();
-    this._sizeObserver.observe(this);
-  }
+  // Called whenever the element should start/stop having some of its intended
+  // custom behaviors.
+  _behaviorChanged() {
+    const disabled: string = this.dataset.disabled || 'none';
+    switch (disabled) {
+      case 'all':
+      case 'true':
+      case 'yes':
+        // We should behave like a normal <img> element.
+        this._logger.debug('Disabled');
+        this._sizeObserver.unobserve(this);
+        this._restoreOriginalBorderAndPadding();
+        this._setCssToMiddleCropOriginalImage();
+        this._restoreOriginalParentCssContainment();
+        break;
 
-  // Called whenever the element should stop its custom behaviour and behave
-  // like a normal <img> element instead.
-  _disabledCallback() {
-    this._logger.debug('Disabled');
-    this._sizeObserver.unobserve(this);
-    this._restoreOriginalBorderAndPadding();
-    this._setCssToMiddleCropOriginalImage();
-    this._restoreOriginalParentCssContainment();
+      case 'css-contain':
+      case 'css-containment':
+        this._logger.debug('Disabled CSS containment only');
+        this._restoreOriginalParentCssContainment();
+        break;
+
+      case 'none':
+      case 'false':
+      case 'no':
+      default:
+        this._logger.debug('Enabled');
+        this._adaptParentCssContainment();
+        this._populateRectangleImageRegions();
+        this._panAndZoomToBestRegion();
+        this._sizeObserver.observe(this);
+        break;
+    }
   }
 
   // Called whenever the element size has changed. Guaranteed to be called at

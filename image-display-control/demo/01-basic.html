@@ -45,8 +45,8 @@
       <li>
         These attributes get reset into a middle-cropping behavior (<code
           >object-fit: cover</code
-        >) when setting the <code>data-disabled</code> attribute. Test it by
-        clicking the <code>Enable web component</code> checkbox.
+        >) when setting the <code>data-disabled="all"</code> attribute. Test it
+        by clicking the <code>Enable web component</code> checkbox.
       </li>
       <li>
         Regions are defined in the JSON-formatted
@@ -100,7 +100,7 @@
             <input
               type="checkbox"
               id="checkbox"
-              onchange="checkboxChanged();"
+              onchange="enableCheckboxChanged();"
               checked
             />
             Enable web component

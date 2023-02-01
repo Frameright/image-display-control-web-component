@@ -1,10 +1,10 @@
 const _IMG_ELEMENT_ID = 'myimg';
 
 // eslint-disable-next-line no-unused-vars
-function checkboxChanged() {
+function enableCheckboxChanged() {
   const checkbox = document.getElementById('checkbox');
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
-  imgElement.setAttribute('data-disabled', checkbox.checked ? 'false' : 'true');
+  imgElement.setAttribute('data-disabled', checkbox.checked ? 'none' : 'all');
 }
 
 // eslint-disable-next-line no-unused-vars

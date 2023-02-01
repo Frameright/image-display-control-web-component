@@ -30,3 +30,7 @@ div.spacer {
   margin-top: 2em;
   padding: 5em;
 }
+
+.bigfont {
+  font-size: 4em;
+}
