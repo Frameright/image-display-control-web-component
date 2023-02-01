@@ -37,8 +37,9 @@ CSS property in order to scale and middle-crop it:
 <td style="border: none;"><img src="docs/assets/middlecrop.png"></td>
 </tr></table>
 
-This is less than optimal, as there might be a better square-ish region in the
-image that could be displayed instead of the middle-crop.
+This is less than optimal, as there might be, in the example above, a better
+square-ish region in the image that could be displayed instead of the
+middle-crop.
 
 ## Basic usage
 

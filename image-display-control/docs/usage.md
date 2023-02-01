@@ -11,8 +11,8 @@
 
 <!-- tocstop -->
 
-A comprehensive demo is available in [`../demo/`](../demo/). Another
-hypothetical example could look like this:
+A comprehensive demo is available at [`../demo/`](../demo/), covering various
+aspects of the web component. A typical example could look like this:
 
 ```html
 <html>
@@ -24,7 +24,7 @@ hypothetical example could look like this:
 
         /* Make it resizable: */
         resize: both;
-        overflow: hidden;
+        overflow: hidden; /* needed in order the get a bottom-right resize handle */
       }
 
       img {

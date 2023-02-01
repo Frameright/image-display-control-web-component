@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Contains some trivial logic common to several examples, but not central
+         to the examples themselves. -->
+    <link rel="stylesheet" href="common.css" />
+    <script type="text/javascript" src="common.js"></script>
+
+    <style>
+      div.resizable {
+        width: 400px;
+        height: 600px;
+        resize: both;
+        overflow: hidden; /* needed in order the get a bottom-right resize handle */
+      }
+
+      img {
+        /* Follow the parent resizable div: */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="index.html">Back to index</a>
+    <p class="explanation">
+      This example demonstrates the following aspects of the web component:
+    </p>
+    <ul class="explanation">
+      <li>
+        When resizing the web component (<code>&lt;img&gt;</code> element) to a
+        ratio close to one of the depicted image regions (green and red
+        rectangles), the component will automatically zoom in on them. If you
+        have a mouse, you can resize the element by dragging its bottom-right
+        corner. Otherwise you can click the <code>Resize me</code> button.
+      </li>
+      <li>
+        The component achieves zooming in on a region by simply changing the
+        following styles: <code>object-*</code>, <code>transform*</code>, and
+        <code>clip-path</code>.
+      </li>
+      <li>
+        These attributes get reset into a middle-cropping behavior (<code
+          >object-fit: cover</code
+        >) when setting the <code>data-disabled</code> attribute. Test it by
+        clicking the <code>Enable web component</code> checkbox.
+      </li>
+      <li>
+        Regions are defined in the JSON-formatted
+        <code>data-image-regions=</code> attribute, either as relative or
+        absolute coordinates.
+      </li>
+      <li>
+        Logs are enabled via the <code>data-loglevel=</code> attribute. Log
+        entries are prefixed with the element's <code>id</code>.
+      </li>
+    </ul>
+    <table>
+      <tr>
+        <td colspan="2">
+          <div class="resizable">
+            <img
+              id="myimg"
+              is="image-display-control"
+              src="assets/deer.jpg"
+              title="Hello my deer"
+              alt="Deer being cute in the nature"
+              data-loglevel="debug"
+              data-image-regions='[{
+                "id": "oneanimal",
+                "names": ["One animal"],
+                "shape": "rectangle",
+                "unit": "relative",
+                "x": "0.217",
+                "y": "0.708",
+                "width": "0.239",
+                "height": "0.1467"
+              }, {
+                "id": "threeanimals",
+                "names": ["Three animals"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "1000",
+                "imageHeight": "1500",
+                "x": "245",
+                "y": "1087",
+                "width": "419",
+                "height": "182"
+              }]'
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>
+            <input
+              type="checkbox"
+              id="checkbox"
+              onchange="checkboxChanged();"
+              checked
+            />
+            Enable web component
+          </label>
+        </td>
+        <td class="resize-hint">
+          <button onclick="resizeClicked();">Resize me</button> &#9650;
+        </td>
+      </tr>
+    </table>
+
+    <div class="spacer">
+      (Space at the bottom so you can drag and increase the height of the web
+      component)
+    </div>
+
+    <script type="module" src="../dist/src/image-display-control.js"></script>
+  </body>
+</html>

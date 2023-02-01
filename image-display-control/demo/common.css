@@ -1,0 +1,32 @@
+body {
+  background: #fafafa;
+}
+
+.explanation {
+  max-width: 35em;
+}
+
+li {
+  margin-bottom: 0.5em;
+}
+
+code {
+  background-color: #ddd;
+}
+
+div.resizable {
+  background: #ddd;
+  border: solid;
+}
+
+td.resize-hint {
+  text-align: right;
+  padding-left: 2em;
+}
+
+div.spacer {
+  background-color: #ddd;
+  text-align: center;
+  margin-top: 2em;
+  padding: 5em;
+}

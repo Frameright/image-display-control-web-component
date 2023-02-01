@@ -2,171 +2,21 @@
 <html lang="en-GB">
   <head>
     <meta charset="utf-8" />
-    <style>
-      body {
-        background: #fafafa;
-        min-height: 1500px;
-      }
-
-      div.resizable {
-        background: #ddd;
-        border: solid;
-        resize: both;
-        overflow: hidden;
-      }
-
-      div.deer {
-        width: 400px;
-        height: 600px;
-      }
-
-      div.iptc {
-        width: 400px;
-        height: 200px;
-      }
-
-      img {
-        /* Follow the parent resizable div: */
-        box-sizing: border-box;
-        border: 5px dashed red;
-        width: 100%;
-        height: 100%;
-      }
-
-      td {
-        vertical-align: bottom;
-        padding-right: 2em;
-      }
-
-      td.resize-hint {
-        text-align: right;
-      }
-    </style>
+    <link rel="stylesheet" href="common.css" />
   </head>
 
   <body>
-    <table>
-      <tr>
-        <td colspan="2">
-          <div class="resizable deer">
-            <img
-              id="deer"
-              is="image-display-control"
-              src="assets/deer.jpg"
-              title="Hello my deer"
-              alt="Deer being cute in the nature"
-              data-loglevel="debug"
-              data-image-regions='[{
-                "id": "oneanimal",
-                "names": ["One animal"],
-                "shape": "rectangle",
-                "unit": "relative",
-                "x": "0.217",
-                "y": "0.708",
-                "width": "0.239",
-                "height": "0.1467"
-              }, {
-                "id": "threeanimals",
-                "names": ["Three animals"],
-                "shape": "rectangle",
-                "unit": "pixel",
-                "imageWidth": "1000",
-                "imageHeight": "1500",
-                "x": "245",
-                "y": "1087",
-                "width": "419",
-                "height": "182"
-              }]'
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <label>
-            <input
-              type="checkbox"
-              id="checkbox-deer"
-              onchange="checkboxChanged('deer');"
-              checked
-            />
-            Enable web component
-          </label>
-        </td>
-        <td class="resize-hint">
-          <button onclick="resizeClicked('deer');">Resize me</button> &#9650;
-        </td>
-      </tr>
-    </table>
-    <br />
-    <table>
-      <tr>
-        <td colspan="2">
-          <div class="resizable iptc">
-            <img
-              id="iptc"
-              is="image-display-control"
-              src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
-              alt="Hello world!"
-              srcset="
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg          2000w,
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg   768w
-              "
-              sizes="(max-width: 2000px) 100vw, 2000px"
-              data-loglevel="warn"
-              data-image-regions='[{
-                "id": "persltr2",
-                "names": ["Listener 1"],
-                "shape": "rectangle",
-                "unit": "relative",
-                "x": "0.31",
-                "y": "0.18",
-                "width": "0.127",
-                "height": "0.385"
-              }]'
-            />
-          </div>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          <label>
-            <input
-              type="checkbox"
-              id="checkbox-iptc"
-              onchange="checkboxChanged('iptc');"
-              checked
-            />
-            Enable web component
-          </label>
-        </td>
-        <td class="resize-hint">
-          <button onclick="resizeClicked('iptc');">Resize me</button> &#9650;
-        </td>
-      </tr>
-    </table>
-
-    <script type="module" src="../dist/src/image-display-control.js"></script>
-    <script>
-      // eslint-disable-next-line no-unused-vars
-      function checkboxChanged(id) {
-        const checkboxId = `checkbox-${id}`;
-        const checkbox = document.getElementById(checkboxId);
-        const imgElement = document.getElementById(id);
-        imgElement.setAttribute(
-          'data-disabled',
-          checkbox.checked ? 'false' : 'true'
-        );
-      }
-
-      // eslint-disable-next-line no-unused-vars
-      function resizeClicked(id) {
-        const imgElement = document.getElementById(id);
-        const parentDiv = imgElement.parentElement;
-        parentDiv.style.width = '400px';
-        parentDiv.style.height = '400px';
-      }
-    </script>
+    <p>
+      These examples demonstrate various aspects of the web component:
+      <ul>
+        <li><a href="01-basic.html">01-basic.html</a></li>
+      </ul>
+      <ul>
+        <li><a href="02-srcset.html">02-srcset.html</a></li>
+      </ul>
+      <ul>
+        <li><a href="03-borders.html">03-borders.html</a></li>
+      </ul>
+    </p>
   </body>
 </html>
