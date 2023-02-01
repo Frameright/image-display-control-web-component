@@ -9,21 +9,23 @@
     <script type="text/javascript" src="common.js"></script>
 
     <style>
-      div.flex-container {
-        display: flex;
-        flex-wrap: wrap;
+      div.grid-container {
+        display: grid;
+        grid-template-columns: repeat(3, 200px);
+        grid-gap: 1em;
       }
 
-      div.flex-item {
-        width: 200px;
-        height: 200px;
-        margin: 1em;
-
+      div.grid-item {
         background-color: #f1f1f1;
+        height: 200px;
 
         text-align: center;
         font-size: 2em;
         line-height: 5em;
+      }
+
+      div.large-item {
+        grid-column: span 2;
       }
 
       img {
@@ -39,13 +41,10 @@
       This example demonstrates the following aspects of the web component:
     </p>
     <ul class="explanation">
-      <li>
-        It behaves as expected in a flex layout. Play with the size of your
-        viewport to confirm.
-      </li>
+      <li>It behaves as expected in a grid layout.</li>
       <li>
         CSS containment still has to be enabled in order not to get rogue
-        scrollbars, especially with a small viewport.
+        scrollbars.
       </li>
     </ul>
     <p class="explanation">
@@ -66,12 +65,12 @@
         Enable CSS containment
       </label>
     </div>
-    <div class="flex-container">
-      <div class="flex-item">1</div>
-      <div class="flex-item">2</div>
-      <div class="flex-item">3</div>
-      <div class="flex-item">4</div>
-      <div class="flex-item">
+    <div class="grid-container">
+      <div class="grid-item">1</div>
+      <div class="grid-item">2</div>
+      <div class="grid-item">3</div>
+      <div class="grid-item">4</div>
+      <div class="grid-item large-item">
         <img
           id="myimg"
           is="image-display-control"
@@ -102,11 +101,9 @@
           }]'
         />
       </div>
-      <div class="flex-item">6</div>
-      <div class="flex-item">7</div>
-      <div class="flex-item">8</div>
-      <div class="flex-item">9</div>
-      <div class="flex-item">10</div>
+      <div class="grid-item">7</div>
+      <div class="grid-item">8</div>
+      <div class="grid-item">9</div>
     </div>
 
     <script type="module" src="../dist/src/image-display-control.js"></script>
