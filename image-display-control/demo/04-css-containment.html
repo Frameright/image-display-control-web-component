@@ -92,18 +92,5 @@
     </p>
 
     <script type="module" src="../dist/src/image-display-control.js"></script>
-
-    <script>
-      // eslint-disable-next-line no-unused-vars
-      function cssCheckboxChanged() {
-        const checkbox = document.getElementById('checkbox');
-        // eslint-disable-next-line no-undef
-        const imgElement = document.getElementById(_IMG_ELEMENT_ID);
-        imgElement.setAttribute(
-          'data-disabled',
-          checkbox.checked ? 'none' : 'css-contain'
-        );
-      }
-    </script>
   </body>
 </html>
