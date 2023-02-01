@@ -151,4 +151,12 @@ See the [Attribute reference](../reference/attributes.md) for more details.
 
 ## Web-component-specific attributes
 
-TODO
+Image regions are passed to the web component via the JSON-formatted
+`data-image-regions=` attribute. The component will then responsively assess
+which region to zoom in based on the current element size. To force the
+component to zoom in on a specific region, use the `data-image-region-id=`
+attribute. To disable parts or all of the web components functionality, e.g. in
+order to force it to behave like a standard `<img>` tag, use the
+`data-disabled=` attribute. In order to control the console output, use the
+`data-loglevel=` attribute. See the
+[Attribute reference](../reference/attributes.md) for more details.
