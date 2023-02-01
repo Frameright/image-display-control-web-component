@@ -97,7 +97,7 @@ It touches on the following aspects.
   element are supported, e.g. `src=`, `srcset=`, `sizes=`, `width=`, etc.
 * The `is=` attribute is what makes the web component's implementation kick in.
 * Information specific to the web component is passed via `data-*=` attributes.
-* Image regions can be specified with relative or absolute coordinates.
+* Image regions can be specified with relative or pixel coordinates.
 * The web component plays nicely with
   [pixel-density-specific image candidates](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset)
   described with `srcset=` and `sizes=`. Our hypothetical image has three

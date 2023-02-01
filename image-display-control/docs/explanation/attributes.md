@@ -17,6 +17,8 @@ supports all the
 [standard attributes of the `<img>` tag](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/img),
 such as `src=`, `srcset=`, `sizes=`, `width=`, etc.
 
+The following standard attributes see their meaning extended.
+
 ### `is=` attribute
 
 The `is=` attribute is what makes the web component's implementation kick in:
@@ -58,7 +60,7 @@ class. Adding the `is=` attribute later will have no effect.
 
 ### `srcset=` and `sizes=` attributes
 
-The [`srcset=`]((https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset))
+The [`srcset=`](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset)
 and `sizes=` attributes are supported. They can be used to provide different
 versions of the image for different screen sizes:
 
@@ -99,10 +101,13 @@ versions of the image for different screen sizes:
 ```
 
 Because there are now several source images with different resolutions, defining
-image regions with absolute coordinates in pixels wouldn't make much sense. We
-made it possible by specifying a reference `imageWidth`/`imageHeight` based on
+image regions with coordinates in pixels wouldn't make much sense. We made it
+possible by specifying a reference `imageWidth`/`imageHeight` based on
 which the regions are defined. See the
 [Attribute reference](../reference/attributes.md) for more details.
+
+Any changes to the `srcset=` and `sizes=` attributes will be picked up by the
+web component.
 
 ### `id=` attribute
 
@@ -149,6 +154,8 @@ Here the console output will start with:
 
 See the [Attribute reference](../reference/attributes.md) for more details.
 
+Any changes to the `id=` attribute will be picked up by the web component.
+
 ## Web-component-specific attributes
 
 Image regions are passed to the web component via the JSON-formatted
@@ -160,3 +167,5 @@ order to force it to behave like a standard `<img>` tag, use the
 `data-disabled=` attribute. In order to control the console output, use the
 `data-loglevel=` attribute. See the
 [Attribute reference](../reference/attributes.md) for more details.
+
+Any changes to the `data-*` attributes will be picked up by the web component.
