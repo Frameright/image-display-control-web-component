@@ -1,4 +1,4 @@
-[![validate-on-push](https://github.com/AurelienLourot/frameright-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/AurelienLourot/frameright-web-component/actions/workflows/validate-on-push.yml)
+[![validate-on-push](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml)
 
 [<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="left" width="64" height="64">](https://frameright.io)
 
