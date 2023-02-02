@@ -1,6 +1,5 @@
+[<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="right" width="64" height="64">](https://frameright.io)
 [![validate-on-push](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml)
-
-[<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="left" width="64" height="64">](https://frameright.io)
 
 <!-- Note: make sure all URLs in this document are absolute, and not relative
      within GitHub, as we are publishing this file to NPM and want URLs to
@@ -38,18 +37,16 @@ offer nowadays is to use the
 [`object-fit: cover;`](https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit)
 CSS property in order to scale and middle-crop it:
 
-<table style="border: none;"><tr style="border: none;">
-<td style="border: none;"><pre>
-&lt;img
+<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/middlecrop.png" align="right">
+
+```html
+<img
   src="https://images.pexels.com/photos/3625715/pexels-photo-3625715.jpeg"
   width="200"
   height="200"
   style="object-fit: cover;"
-/&gt;
-</pre></td>
-<td style="border: none;">
-<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/middlecrop.png">
-</td></tr></table>
+/>
+```
 
 This is less than optimal, as there might be, in the example above, a better
 square-ish region in the image that could be displayed instead of the
@@ -60,9 +57,10 @@ middle-crop.
 This web component extends the `<img>` tag with the ability to accept a list of
 image regions, and to zoom in on the best one for the current element size:
 
-<table style="border: none;"><tr style="border: none;">
-<td style="border: none;"><pre>
-&lt;img
+<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/oneanimal.png" align="right">
+
+```html
+<img
   is="image-display-control"
   src="https://images.pexels.com/photos/3625715/pexels-photo-3625715.jpeg"
   width="200"
@@ -86,11 +84,8 @@ image regions, and to zoom in on the best one for the current element size:
     "width": "0.419",
     "height": "0.121"
   }]'
-/&gt;
-</pre></td>
-<td style="border: none;">
-<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/oneanimal.png">
-</td></tr></table>
+/>
+```
 
 The resulting HTML element is
 [responsive](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design)
@@ -171,6 +166,9 @@ npm start
   [WebReflection](https://github.com/WebReflection)!
 
 ### Changelog
+
+**0.0.3** (2023-02-02):
+  * Improved NPM documentation.
 
 **0.0.2** (2023-02-02):
   * Improved NPM documentation.
