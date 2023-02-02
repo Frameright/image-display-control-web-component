@@ -1,7 +1,7 @@
 /bin/
 /coverage/
 /demo/
-/docs/assets/demo.gif
+/docs/assets/
 /dist/test/
 /test/
 /web-*.config.mjs

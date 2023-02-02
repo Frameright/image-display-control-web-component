@@ -143,8 +143,7 @@ npm login --scope=@frameright
 npm publish
 ```
 
-> **NOTES**:
->
-> * If it fails with 301, see
->   [publish - npm login error 301](https://stackoverflow.com/a/50580349/1855917).
-> * On the first publication do `npm publish --access public` instead.
+> **NOTE**: on the first publication do `npm publish --access public` instead.
+
+And check that the package looks well-formed at
+`https://www.npmjs.com/package/@frameright/image-display-control-web-component/v/1.2.3`.

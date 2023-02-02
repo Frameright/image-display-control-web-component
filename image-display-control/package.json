@@ -1,13 +1,28 @@
 {
   "name": "@frameright/image-display-control-web-component",
   "description": "Image Display Control Web Component",
+  "keywords": [
+    "metadata",
+    "image",
+    "web-components",
+    "image-manipulation",
+    "responsive-design",
+    "responsive-layout",
+    "responsive-images",
+    "metadata-extraction",
+    "metadata-parser",
+    "iptc-metadata",
+    "image-display-control",
+    "frameright",
+    "image-publishing"
+  ],
   "license": "MIT",
   "author": {
     "name": "Frameright (Coberg Ltd)",
     "email": "hello@frameright.io",
     "url": "https://frameright.io/"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
@@ -24,7 +39,7 @@
     "test": "tsc && wtr --coverage",
     "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
     "gentoc": "./bin/gentoc.sh",
-    "spellcheck": "npx mdspell '../**/*.md' '!../**/node_modules/**' --ignore-acronyms --ignore-numbers --no-suggestions --en-us"
+    "spellcheck": "npx mdspell '**/*.md' '!**/node_modules/**' --ignore-acronyms --ignore-numbers --no-suggestions --en-us"
   },
   "dependencies": {
     "@ungap/custom-elements": "^1.1.1"
