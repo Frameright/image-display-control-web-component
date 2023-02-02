@@ -1,6 +1,8 @@
 [<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="right" width="64" height="64">](https://frameright.io)
 [![validate-on-push](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml)
 
+&nbsp;
+
 <!-- Note: make sure all URLs in this document are absolute, and not relative
      within GitHub, as we are publishing this file to NPM and want URLs to
      remain valid there. -->
@@ -166,6 +168,9 @@ npm start
   [WebReflection](https://github.com/WebReflection)!
 
 ### Changelog
+
+**0.0.4** (2023-02-02):
+  * Improved NPM documentation.
 
 **0.0.3** (2023-02-02):
   * Improved NPM documentation.
