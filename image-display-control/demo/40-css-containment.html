@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Contains some trivial logic common to several examples, but not central
+         to the examples themselves. -->
+    <link rel="stylesheet" href="common.css" />
+    <script type="text/javascript" src="common.js"></script>
+
+    <style>
+      img {
+        width: 400px;
+        height: 400px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="index.html">Back to index</a>
+    <p class="explanation">
+      This example demonstrates the following aspects of the web component:
+    </p>
+    <ul class="explanation">
+      <li>
+        Zooming in on a region by using CSS <code>transform*</code> and
+        <code>clip-path</code> would normally cause an overflow and thus
+        unwanted scrollbars. To prevent this, the web component sets CSS
+        containment (<code>contain: paint;</code>) on its parent. This does not
+        prevent scrollbars altogether: the scrollbars caused by other elements
+        are still there.
+      </li>
+      <li>
+        This behavior can be disabled by setting the
+        <code>data-disabled="css-contain"</code> HTML attribute. Test it by
+        clicking the <code>Enable CSS containment</code> checkbox.
+      </li>
+    </ul>
+    <p class="explanation">
+      <i
+        ><b>NOTE:</b> on Safari, toggling the checkbox has no effect until the
+        viewport gets resized or the component's CSS <code>transform*</code> is
+        touched.</i
+      >
+    </p>
+    <div>
+      <label>
+        <input
+          type="checkbox"
+          id="checkbox"
+          onchange="cssCheckboxChanged();"
+          checked
+        />
+        Enable CSS containment
+      </label>
+    </div>
+    <div>
+      <img
+        id="myimg"
+        is="image-display-control"
+        src="assets/deer.jpg"
+        title="Hello my deer"
+        alt="Deer being cute in the nature"
+        data-loglevel="debug"
+        data-image-regions='[{
+          "id": "oneanimal",
+          "names": ["One animal"],
+          "shape": "rectangle",
+          "unit": "relative",
+          "x": "0.217",
+          "y": "0.708",
+          "width": "0.239",
+          "height": "0.1467"
+        }, {
+          "id": "threeanimals",
+          "names": ["Three animals"],
+          "shape": "rectangle",
+          "unit": "pixel",
+          "imageWidth": "1000",
+          "imageHeight": "1500",
+          "x": "245",
+          "y": "1087",
+          "width": "419",
+          "height": "182"
+        }]'
+      />
+    </div>
+    <p class="bigfont">
+      <b>Text designed to provoke a scrollbar.</b><br />
+      Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy
+      eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam
+      voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet
+      clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor sit
+      amet. Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam
+      nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed
+      diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum.
+      Stet clita kasd gubergren, no sea takimata sanctus est Lorem ipsum dolor
+      sit amet.
+    </p>
+
+    <script type="module" src="../dist/src/image-display-control.js"></script>
+  </body>
+</html>

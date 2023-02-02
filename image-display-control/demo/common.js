@@ -18,6 +18,16 @@ function cssCheckboxChanged() {
 }
 
 // eslint-disable-next-line no-unused-vars
+function drawRegionsCheckboxChanged() {
+  const checkbox = document.getElementById('checkbox');
+  const imgElement = document.getElementById(_IMG_ELEMENT_ID);
+  imgElement.setAttribute(
+    'data-debug-draw-regions',
+    checkbox.checked ? 'on' : 'off'
+  );
+}
+
+// eslint-disable-next-line no-unused-vars
 function resizeClicked() {
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
   const parentDiv = imgElement.parentElement;

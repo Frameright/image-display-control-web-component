@@ -6,6 +6,7 @@ import {
 } from './RectangleImageRegion.js';
 import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
+import { Transformation } from './Transformation.js';
 
 export class ImageDisplayControl extends HTMLImageElement {
   // See
@@ -17,6 +18,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       'data-disabled', // 'none' (default), 'all' or 'css-contain'
       'data-image-regions', // JSON array of image regions
       'data-image-region-id', // forces zooming on a specific image region
+      'data-debug-draw-regions', // 'off' (default) or 'on'
     ];
   }
 
@@ -67,6 +69,10 @@ export class ImageDisplayControl extends HTMLImageElement {
         }
         break;
 
+      case 'data-debug-draw-regions':
+        this._behaviorChanged();
+        break;
+
       default:
         this._logger.warn(`Unexpected attribute mutation: ${attributeName}`);
         break;
@@ -76,6 +82,15 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Called whenever the element should start/stop having some of its intended
   // custom behaviors.
   _behaviorChanged() {
+    const debugDrawRegionsStr: string = this.dataset.debugDrawRegions || 'off';
+    const debugDrawRegions: boolean =
+      debugDrawRegionsStr === 'on' ||
+      debugDrawRegionsStr === 'true' ||
+      debugDrawRegionsStr === 'yes' ||
+      debugDrawRegionsStr === '1' ||
+      debugDrawRegionsStr === 'enabled' ||
+      debugDrawRegionsStr === 'all';
+
     const disabled: string = this.dataset.disabled || 'none';
     switch (disabled) {
       case 'all':
@@ -85,6 +100,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._logger.debug('Disabled');
         this._sizeObserver.unobserve(this);
         this._restoreOriginalBorderAndPadding();
+        this._removeDebugRegionOverlays();
         this._setCssToMiddleCropOriginalImage();
         this._restoreOriginalParentCssContainment();
         break;
@@ -93,6 +109,14 @@ export class ImageDisplayControl extends HTMLImageElement {
       case 'css-containment':
         this._logger.debug('Disabled CSS containment only');
         this._restoreOriginalParentCssContainment();
+
+        if (debugDrawRegions) {
+          this._recreateDebugRegionOverlays();
+          this._panAndZoomToBestRegion();
+        } else {
+          this._removeDebugRegionOverlays();
+        }
+
         break;
 
       case 'none':
@@ -102,6 +126,13 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._logger.debug('Enabled');
         this._adaptParentCssContainment();
         this._populateRectangleImageRegions();
+
+        if (debugDrawRegions) {
+          this._recreateDebugRegionOverlays();
+        } else {
+          this._removeDebugRegionOverlays();
+        }
+
         this._panAndZoomToBestRegion();
         this._sizeObserver.observe(this);
         break;
@@ -245,16 +276,30 @@ export class ImageDisplayControl extends HTMLImageElement {
     let bestRegion = null;
     if (this.dataset.imageRegionId) {
       // The user has manually selected an image region by ID via HTML
-      // attribute, let's look for it:
-      bestRegion = this._rectangleImageRegions.find(
-        region => region.id === this.dataset.imageRegionId
-      );
+      // attribute, let's look for it.
+      if (
+        this.dataset.imageRegionId ===
+        ImageDisplayControl._ORIGINAL_IMAGE_REGION.id
+      ) {
+        bestRegion = ImageDisplayControl._ORIGINAL_IMAGE_REGION;
+      } else {
+        bestRegion = this._rectangleImageRegions.find(
+          region => region.id === this.dataset.imageRegionId
+        );
+      }
     }
     if (!bestRegion) {
       bestRegion = this._findBestRegion();
     }
 
-    if (ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id) {
+    // Optimization: we let the browser doing the middle-crop by itself if the
+    // best region is the original image. However we skip the optimization if
+    // the region overlay drawing is enabled, because we need to then perform
+    // all the calculations ourselves anyway.
+    if (
+      ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id &&
+      !this._debugRegionOverlayContainer
+    ) {
       this._restoreOriginalBorderAndPadding();
       this._setCssToMiddleCropOriginalImage();
     } else {
@@ -268,28 +313,15 @@ export class ImageDisplayControl extends HTMLImageElement {
         this.style.padding = '0';
       }
 
-      // Link the original image size to the element size.
-      this.style.objectFit = 'contain';
-      this.style.objectPosition = 'top left';
-
-      const cssScaling = bestRegion.getCssTransformation(
+      const transformation = bestRegion.getTransformation(
         this._elementSize,
         this._fittedImageSize,
         this._fittedImageBottomRightMargin
       );
-      this.style.transformOrigin = `${cssScaling.origin.x.toFixed(
-        3
-      )}px ${cssScaling.origin.y.toFixed(3)}px`;
-      this.style.transform = `translate(${-cssScaling.origin.x.toFixed(
-        3
-      )}px, ${-cssScaling.origin.y.toFixed(
-        3
-      )}px) scale(${cssScaling.factor.toFixed(3)})`;
-      this.style.clipPath =
-        `inset(${cssScaling.insetClipFromTopLeft.getHeight()}px ` +
-        `${cssScaling.insetClipFromBottomRight.getWidth()}px ` +
-        `${cssScaling.insetClipFromBottomRight.getHeight()}px ` +
-        `${cssScaling.insetClipFromTopLeft.getWidth()}px)`;
+      this._setCssToPanAndZoomToRegion(transformation);
+      if (this._debugRegionOverlayContainer) {
+        this._drawDebugRegionOverlays(transformation);
+      }
     }
   }
 
@@ -319,7 +351,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     return bestRegion;
   }
 
-  _adaptParentCssContainment() {
+  private _adaptParentCssContainment() {
     this._parentElement = this.parentElement;
     if (this._parentElement) {
       if (
@@ -335,7 +367,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  _restoreOriginalParentCssContainment() {
+  private _restoreOriginalParentCssContainment() {
     if (this._parentElement) {
       if (this._parentCssContainToRestore !== null) {
         this._parentElement.style.contain = this._parentCssContainToRestore;
@@ -344,7 +376,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  _restoreOriginalBorderAndPadding() {
+  private _restoreOriginalBorderAndPadding() {
     if (this._cssBorderToRestore !== null) {
       this.style.border = this._cssBorderToRestore;
       this._cssBorderToRestore = null;
@@ -355,12 +387,88 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  _setCssToMiddleCropOriginalImage() {
+  private _setCssToMiddleCropOriginalImage() {
     this.style.objectFit = 'cover';
     this.style.objectPosition = 'center';
     this.style.transformOrigin = '0 0';
     this.style.transform = 'none';
     this.style.clipPath = 'none';
+  }
+
+  private _setCssToPanAndZoomToRegion(transformation: Transformation) {
+    // Link the original image size to the element size.
+    this.style.objectFit = 'contain';
+    this.style.objectPosition = 'top left';
+
+    this.style.transformOrigin = `${transformation.origin.x.toFixed(
+      3
+    )}px ${transformation.origin.y.toFixed(3)}px`;
+    this.style.transform = `translate(${-transformation.origin.x.toFixed(
+      3
+    )}px, ${-transformation.origin.y.toFixed(
+      3
+    )}px) scale(${transformation.factor.toFixed(3)})`;
+    this.style.clipPath =
+      `inset(${transformation.insetClipFromTopLeft.getHeight()}px ` +
+      `${transformation.insetClipFromBottomRight.getWidth()}px ` +
+      `${transformation.insetClipFromBottomRight.getHeight()}px ` +
+      `${transformation.insetClipFromTopLeft.getWidth()}px)`;
+  }
+
+  private _recreateDebugRegionOverlays() {
+    if (this._debugRegionOverlayContainer) {
+      this._removeDebugRegionOverlays();
+    }
+    this._debugRegionOverlayContainer = document.createElement('div');
+
+    // Let the container take no space, so we don't affect the web component's
+    // flow:
+    this._debugRegionOverlayContainer.style.position = 'absolute';
+    this._parentElement?.insertBefore(this._debugRegionOverlayContainer, this);
+  }
+
+  private _removeDebugRegionOverlays() {
+    if (this._debugRegionOverlayContainer) {
+      this._parentElement?.removeChild(this._debugRegionOverlayContainer);
+      this._debugRegionOverlayContainer = null;
+    }
+    this._debugRegionOverlays.clear();
+  }
+
+  // Draw/Move all debug region overlays to the correct position according to
+  // the given image transformation being performed.
+  private _drawDebugRegionOverlays(transformation: Transformation) {
+    this._rectangleImageRegions.forEach(region => {
+      this._drawDebugRegionOverlay(region, transformation);
+    });
+  }
+
+  // Create element from this._debugRegionOverlays if it doesn't exist yet.
+  // Then move it to the correct position.
+  private _drawDebugRegionOverlay(
+    region: RectangleImageRegion,
+    transformation: Transformation
+  ) {
+    let overlay = this._debugRegionOverlays.get(region.id);
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.style.position = 'absolute';
+      overlay.style.boxSizing = 'border-box';
+      overlay.style.border = '5px solid rgba(255, 0, 0, 0.8)';
+      overlay.style.zIndex = '999';
+      this._debugRegionOverlayContainer?.appendChild(overlay);
+      this._debugRegionOverlays.set(region.id, overlay);
+    }
+
+    const boundingBox = region.getBoundingBox(
+      this._elementSize,
+      this._fittedImageSize,
+      transformation
+    );
+    overlay.style.left = `${boundingBox.position.x}px`;
+    overlay.style.top = `${boundingBox.position.y}px`;
+    overlay.style.width = `${boundingBox.size.getWidth()}px`;
+    overlay.style.height = `${boundingBox.size.getHeight()}px`;
   }
 
   // Sanitized version of the 'data-image-regions' HTML attribute.
@@ -423,4 +531,12 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _cssPaddingToRestore: string | null = null;
 
   private _logger: Logger = new Logger(this.id, this.dataset.loglevel);
+
+  // Sibbling element of the web component that we use as a parent to <div>
+  // elements displaying regions as overlays over the web component.
+  private _debugRegionOverlayContainer: HTMLDivElement | null = null;
+
+  // Map of region ID to <div> element displaying the region as an overlay over
+  // the web component.
+  private _debugRegionOverlays = new Map<string, HTMLDivElement>();
 }

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Contains some trivial logic common to several examples, but not central
+         to the examples themselves. -->
+    <link rel="stylesheet" href="common.css" />
+    <script type="text/javascript" src="common.js"></script>
+
+    <style>
+      div.resizable {
+        width: 720px;
+        height: 480px;
+        resize: both;
+        overflow: hidden; /* needed in order the get a bottom-right resize handle */
+      }
+
+      img {
+        /* Follow the parent resizable div: */
+        width: 100%;
+        height: 100%;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="index.html">Back to index</a>
+    <p class="explanation">
+      This example demonstrates the following aspects of the web component:
+    </p>
+    <ul class="explanation">
+      <li>
+        For debugging purposes, the component can draw the regions on top of the
+        image. This is enabled by setting the
+        <code>data-debug-draw-regions="on"</code> attribute. Test it by clicking
+        the <code>Draw regions</code> checkbox.
+      </li>
+    </ul>
+    <table>
+      <tr>
+        <td colspan="2">
+          <div class="resizable">
+            <img
+              id="myimg"
+              is="image-display-control"
+              src="assets/skater.webp"
+              title="Skater"
+              alt="Skater making a jump"
+              data-loglevel="warn"
+              data-image-regions='[{
+                "id": "horizontalbanner",
+                "names": ["Horizontal banner"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2343",
+                "y": "858",
+                "width": "3417",
+                "height": "1281"
+              }, {
+                "id": "square",
+                "names": ["Square"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2462",
+                "y": "1097",
+                "width": "782",
+                "height": "782"
+              }, {
+                "id": "tallportrait",
+                "names": ["Tall portrait"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2345",
+                "y": "850",
+                "width": "1122",
+                "height": "2990"
+              }]'
+              data-debug-draw-regions="on"
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>
+            <input
+              type="checkbox"
+              id="checkbox"
+              onchange="drawRegionsCheckboxChanged();"
+              checked
+            />
+            Draw regions
+          </label>
+        </td>
+        <td class="resize-hint">Resize me &#9650;</td>
+      </tr>
+    </table>
+
+    <script type="module" src="../dist/src/image-display-control.js"></script>
+  </body>
+</html>

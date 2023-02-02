@@ -9,6 +9,7 @@ For a more high-level overview of the attributes, see the
 - [`data-image-region-id=`](#data-image-region-id)
 - [`data-disabled=`](#data-disabled)
 - [`data-loglevel=`](#data-loglevel)
+- [`data-debug-draw-regions=`](#data-debug-draw-regions)
 
 <!-- tocstop -->
 
@@ -51,9 +52,14 @@ following properties:
 Type: string.
 
 Uniquely identifies a region within `data-image-regions=`. If set, the web
-component will zoom in on the region with the matching `id` property. If not
-set, the web component will zoom in on the region that best fits the current
-element size.
+component will zoom in on the region with the matching `id` property, no matter
+what. If not set, the web component will zoom in on the region that best fits
+the current element size.
+
+To force the web component not to zoom in on any region, essentialy behaving
+like a standard `<img>` tag with `object-fit: cover`, you can set this attribute
+to `data-image-region-id="<no region>"`. This is essentially the same as setting
+`data-disabled="all"`, although the CSS containment will still be applied.
 
 ## `data-disabled=`
 
@@ -87,3 +93,19 @@ Logging level for console output. Supported values:
 * `warn`: Only warning, error and fatal messages.
 * `info`: Only info, warning, error and fatal messages.
 * `debug`: All messages.
+
+## `data-debug-draw-regions=`
+
+Type: string.
+
+Whether or not to draw the image regions as an overlay on top of the image, for
+debugging purposes. Supported values:
+
+* `off` (default): No drawing.
+* `on`: Drawing is performed by creating sibbling `<div>` elements, giving them
+  a border and letting them overlay the image.
+
+> **NOTE**: this will only work if:
+>
+> * The web component is not in `data-disabled="all"` mode.
+> * The web component is at the top-right corner of its parent element.

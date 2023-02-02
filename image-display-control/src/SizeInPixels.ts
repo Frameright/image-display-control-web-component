@@ -36,6 +36,17 @@ export class SizeInPixels {
     return this.getSafeWidth() / this.getSafeHeight();
   }
 
+  // Returns a new size multiplied by the given positive factor.
+  getScaled(factor: number): SizeInPixels {
+    if (this.isUnknown()) {
+      return new SizeInPixels();
+    }
+
+    const newWidth = this._width * factor;
+    const newHeight = this._height * factor;
+    return new SizeInPixels(newWidth, newHeight);
+  }
+
   isUnknown() {
     return this._unknown;
   }

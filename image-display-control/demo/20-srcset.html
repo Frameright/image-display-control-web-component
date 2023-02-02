@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+
+    <!-- Contains some trivial logic common to several examples, but not central
+         to the examples themselves. -->
+    <link rel="stylesheet" href="common.css" />
+    <script type="text/javascript" src="common.js"></script>
+
+    <style>
+      div.resizable {
+        width: 400px;
+        height: 200px;
+        resize: both;
+        overflow: hidden; /* needed in order the get a bottom-right resize handle */
+      }
+
+      img {
+        /* Follow the parent resizable div: */
+        width: 100%;
+        height: 100%;
+      }
+
+      td {
+        vertical-align: bottom;
+        padding-right: 2em;
+      }
+
+      td.resize-hint {
+        text-align: right;
+      }
+    </style>
+  </head>
+
+  <body>
+    <a href="index.html">Back to index</a>
+    <p class="explanation">
+      This example demonstrates the following aspects of the web component:
+    </p>
+    <ul class="explanation">
+      <li>
+        The web component supports
+        <a
+          href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset"
+          >pixel-density-specific image candidates</a
+        >, defined with the <code>srcset=</code> and <code>sizes=</code>
+        attributes. Start with a small viewport, then resize the component to
+        have it zoom in on the region defined in the
+        <code>data-image-regions=</code> attribute. Now progressively increase
+        the width of the viewport to see the browser fetch higher-definition
+        images while the component remains zoomed in on the region.
+      </li>
+    </ul>
+    <table>
+      <tr>
+        <td colspan="2">
+          <div class="resizable">
+            <img
+              id="myimg"
+              is="image-display-control"
+              src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
+              alt="Hello world!"
+              srcset="
+                assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg          2000w,
+                assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
+                assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg   768w
+              "
+              sizes="(max-width: 2000px) 100vw, 2000px"
+              data-loglevel="warn"
+              data-image-regions='[{
+                "id": "persltr2",
+                "names": ["Listener 1"],
+                "shape": "rectangle",
+                "unit": "relative",
+                "x": "0.31",
+                "y": "0.18",
+                "width": "0.127",
+                "height": "0.385"
+              }]'
+            />
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <label>
+            <input
+              type="checkbox"
+              id="checkbox"
+              onchange="enableCheckboxChanged();"
+              checked
+            />
+            Enable web component
+          </label>
+        </td>
+        <td class="resize-hint">
+          <button onclick="resizeClicked();">Resize me</button> &#9650;
+        </td>
+      </tr>
+    </table>
+
+    <script type="module" src="../dist/src/image-display-control.js"></script>
+  </body>
+</html>

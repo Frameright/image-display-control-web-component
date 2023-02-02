@@ -3,6 +3,7 @@ import { PositionInPixels } from './PositionInPixels.js';
 import { PositionInRelativeCoord } from './PositionInRelativeCoord.js';
 import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
+import { Transformation } from './Transformation.js';
 
 export interface ImageRegionFromHtmlAttr {
   id?: string;
@@ -122,11 +123,11 @@ export class RectangleImageRegion {
 
   // Returns the necessary scaling factor and origin, and clipping to apply via
   // CSS in order to pan and zoom on this region.
-  getCssTransformation(
+  getTransformation(
     currentComponentSize: SizeInPixels, // component = <img> element
     originalImageRegionSize: SizeInPixels,
     bottomRightClipMargins: SizeInPixels
-  ) {
+  ): Transformation {
     const regionPos = this.position.getPositionInPixels(
       originalImageRegionSize
     );
@@ -287,6 +288,35 @@ export class RectangleImageRegion {
         regionXFromRight - xOffset + bottomRightClipMargins.getWidth(),
         regionYFromBottom - yOffset + bottomRightClipMargins.getHeight()
       ),
+    };
+  }
+
+  // Returns the position and size of the region in the component's coordinate
+  // system.
+  getBoundingBox(
+    currentComponentSize: SizeInPixels, // component = <img> element
+    originalImageRegionSize: SizeInPixels,
+    transformation: Transformation // current image transformation being applied
+  ) {
+    const transformedImagePositionInComponent = new PositionInPixels(
+      -transformation.origin.x * transformation.factor,
+      -transformation.origin.y * transformation.factor
+    );
+    const transformedImageSize = originalImageRegionSize.getScaled(
+      transformation.factor
+    );
+
+    const regionPositionInTransformedImage =
+      this.position.getPositionInPixels(transformedImageSize);
+
+    return {
+      position: new PositionInPixels(
+        regionPositionInTransformedImage.x +
+          transformedImagePositionInComponent.x,
+        regionPositionInTransformedImage.y +
+          transformedImagePositionInComponent.y
+      ),
+      size: this.size.getSizeInPixels(transformedImageSize),
     };
   }
 
