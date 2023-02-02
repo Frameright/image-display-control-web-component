@@ -25,3 +25,6 @@ polyfill
 WebReflection
 JSON-formatted
 scrollbars
+changelog
+versioning
+package.json

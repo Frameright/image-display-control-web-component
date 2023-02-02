@@ -16,7 +16,7 @@ jobs:
       - uses: actions/upload-artifact@v3
         with:
           name: image-display-control
-          path: image-display-control/image-display-control-*.tgz
+          path: image-display-control/frameright-image-display-control-web-component-*.tgz
           if-no-files-found: error
 
   spellchecker:

@@ -1,0 +1,13 @@
+/bin/
+/coverage/
+/demo/
+/docs/assets/demo.gif
+/dist/test/
+/test/
+/web-*.config.mjs
+
+.editorconfig
+.prettier*
+.spelling
+.vscode/
+tsconfig.tsbuildinfo

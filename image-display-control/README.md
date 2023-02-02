@@ -1,3 +1,7 @@
+<!-- Note: make sure all URLs in this document are absolute, and not relative
+     within GitHub, as we are publishing this file to NPM and want URLs to
+     remain valid there. -->
+
 # `<img is="image-display-control" />`
 
 ## Table of Contents
@@ -7,6 +11,7 @@
 - [Installation](#installation)
 - [Usage](#usage)
 - [Local demo](#local-demo)
+- [Changelog](#changelog)
 
 <!-- tocstop -->
 
@@ -17,15 +22,11 @@ or [Rollup](https://rollupjs.org/)), you can add the web component to your
 project with:
 
 ```bash
-npm install image-display-control
+npm install @frameright/image-display-control-web-component
 ```
 
-> :warning: **WARNING**: This web component has not yet been published on
-> [NPM](https://www.npmjs.com/). See
-> [here](https://github.com/Frameright/image-display-control-wordpress/tree/master/src/assets/js/thirdparty)
-> an example on how to pull it in your project at the moment.
-
-&emsp; :floppy_disk: [Importing in your project](docs/explanation/importing.md)
+&emsp; :floppy_disk:
+[Importing in your project](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/importing.md)
 
 ## Usage
 
@@ -64,7 +65,8 @@ npm install image-display-control
 </html>
 ```
 
-&emsp; :airplane: [Advanced usage](docs/usage.md)
+&emsp; :airplane:
+[Advanced usage](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/usage.md)
 
 ## Local demo
 
@@ -76,6 +78,11 @@ npm install
 npm start
 ```
 
-![Demo](docs/assets/demo.gif)
+![Demo](https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/demo.gif)
 
-&emsp; :wrench: [Contributing](docs/contributing.md)
+&emsp; :wrench: [Contributing](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/contributing.md)
+
+## Changelog
+
+**0.0.1** (2023-02-02):
+  * Initial version.

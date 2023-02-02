@@ -1,13 +1,13 @@
 {
-  "name": "image-display-control",
-  "description": "Webcomponent image-display-control",
+  "name": "@frameright/image-display-control-web-component",
+  "description": "Image Display Control Web Component",
   "license": "MIT",
   "author": {
     "name": "Frameright (Coberg Ltd)",
     "email": "hello@frameright.io",
     "url": "https://frameright.io/"
   },
-  "version": "0.0.0",
+  "version": "0.0.1",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
