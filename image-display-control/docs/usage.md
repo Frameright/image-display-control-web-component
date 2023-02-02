@@ -124,8 +124,6 @@ See [CSS styling](explanation/styling.md) for more details.
 * The web component takes exactly the same space as a standard `<img>` element
   would under the same circumstances and styling.
 
-See [HTML and CSS sizing](explanation/sizing.md) for more details.
-
 ## Building and importing
 
 The web component would typically be bundled inside your web app project, using
