@@ -56,7 +56,7 @@ component will zoom in on the region with the matching `id` property, no matter
 what. If not set, the web component will zoom in on the region that best fits
 the current element size.
 
-To force the web component not to zoom in on any region, essentialy behaving
+To force the web component not to zoom in on any region, essentially behaving
 like a standard `<img>` tag with `object-fit: cover`, you can set this attribute
 to `data-image-region-id="<no region>"`. This is essentially the same as setting
 `data-disabled="all"`, although the CSS containment will still be applied.
@@ -102,7 +102,7 @@ Whether or not to draw the image regions as an overlay on top of the image, for
 debugging purposes. Supported values:
 
 * `off` (default): No drawing.
-* `on`: Drawing is performed by creating sibbling `<div>` elements, giving them
+* `on`: Drawing is performed by creating sibling `<div>` elements, giving them
   a border and letting them overlay the image.
 
 > **NOTE**: this will only work if:

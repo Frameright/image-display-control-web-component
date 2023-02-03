@@ -542,7 +542,7 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   private _logger: Logger = new Logger(this.id, this.dataset.loglevel);
 
-  // Sibbling element of the web component that we use as a parent to <div>
+  // Sibling element of the web component that we use as a parent to <div>
   // elements displaying regions as overlays over the web component.
   private _debugRegionOverlayContainer: HTMLDivElement | null = null;
 
