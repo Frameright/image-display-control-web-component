@@ -2,6 +2,7 @@
 <html lang="en-GB">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
     <!-- Demo targetted at mobile, designed to be served with a simple static
          web server, e.g. with:
@@ -20,10 +21,52 @@
     <!-- https://interactjs.io/ for a resizable div on mobile -->
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
 
+    <!-- Semantic UI for toggle checkboxes -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.css"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"
+      integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.5.0/dist/semantic.min.js"></script>
+
     <!-- Polyfill for Safari, see https://github.com/ungap/custom-elements -->
     <script src="https://unpkg.com/@ungap/custom-elements/es.js"></script>
 
     <style>
+      body {
+        font-size: min(5vw, 5vh, 25px);
+      }
+
+      div.flex-container {
+        display: flex;
+        flex-wrap: wrap;
+      }
+
+      .distanced {
+        margin: 1em;
+      }
+
+      .distanced-left {
+        margin-left: 1em;
+      }
+
+      .distanced-right {
+        margin-right: 1em;
+      }
+
+      .distanced-top {
+        margin-top: 1em;
+      }
+
+      .distanced-bottom {
+        margin-bottom: 1em;
+      }
+
       div.resizable {
         width: min(70vw, 70vh);
         aspect-ratio: 1.5;
@@ -31,7 +74,6 @@
         /* See https://interactjs.io/docs/resizable/ */
         touch-action: none;
         user-select: none;
-        margin: 1rem;
       }
 
       div.overflow-hider {
@@ -39,7 +81,7 @@
         width: 100%;
         height: 100%;
 
-        border-radius: 1em;
+        border-radius: 0.3em;
         overflow: hidden;
       }
 
@@ -52,62 +94,139 @@
       div.resizer {
         float: right;
         position: relative;
-        left: 10em;
+        left: 2em;
+        z-index: 999;
 
-        background-color: #29e;
+        background-color: #7f0f82;
         border-radius: 50%;
-        width: 10em;
-        height: 10em;
+        width: 2em;
+        height: 2em;
+      }
+
+      div.hint {
+        font-size: 0.7em;
+        white-space: nowrap;
+        text-align: center;
+      }
+
+      img.logo {
+        width: 2em;
+        height: 2em;
+      }
+
+      div.qr {
+        text-align: center;
+      }
+
+      img.qr {
+        width: min(40vw, 40vh);
+        aspect-ratio: 1;
+      }
+
+      a {
+        color: unset !important;
       }
     </style>
   </head>
 
   <body>
-    <div class="resizable">
-      <div class="overflow-hider">
-        <img
-          id="myimg"
-          is="image-display-control"
-          src="demo/assets/skater.webp"
-          data-image-regions='[{
-            "id": "horizontalbanner",
-            "names": ["Horizontal banner"],
-            "shape": "rectangle",
-            "unit": "pixel",
-            "imageWidth": "5760",
-            "imageHeight": "3840",
-            "x": "2343",
-            "y": "858",
-            "width": "3417",
-            "height": "1281"
-          }, {
-            "id": "square",
-            "names": ["Square"],
-            "shape": "rectangle",
-            "unit": "pixel",
-            "imageWidth": "5760",
-            "imageHeight": "3840",
-            "x": "2462",
-            "y": "1097",
-            "width": "782",
-            "height": "782"
-          }, {
-            "id": "tallportrait",
-            "names": ["Tall portrait"],
-            "shape": "rectangle",
-            "unit": "pixel",
-            "imageWidth": "5760",
-            "imageHeight": "3840",
-            "x": "2345",
-            "y": "850",
-            "width": "1122",
-            "height": "2990"
-          }]'
-          data-debug-draw-regions="on"
-        />
+    <div class="flex-container">
+      <div class="flex-item">
+        <div class="distanced">
+          <span class="distanced-right">
+            <a href="https://frameright.io">
+              <img
+                class="logo"
+                src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4"
+              />
+            </a>
+          </span>
+          <span class="distanced-right">
+            <a
+              href="https://github.com/Frameright/image-display-control-web-component"
+            >
+              <img
+                class="logo"
+                src="https://logos-download.com/wp-content/uploads/2016/09/GitHub_logo.png"
+              />
+            </a>
+          </span>
+        </div>
+        <div class="distanced resizable">
+          <div class="overflow-hider">
+            <img
+              id="myimg"
+              is="image-display-control"
+              src="demo/assets/skater.webp"
+              data-image-regions='[{
+                "id": "horizontalbanner",
+                "names": ["Horizontal banner"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2343",
+                "y": "858",
+                "width": "3417",
+                "height": "1281"
+              }, {
+                "id": "square",
+                "names": ["Square"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2462",
+                "y": "1097",
+                "width": "782",
+                "height": "782"
+              }, {
+                "id": "tallportrait",
+                "names": ["Tall portrait"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "5760",
+                "imageHeight": "3840",
+                "x": "2345",
+                "y": "850",
+                "width": "1122",
+                "height": "2990"
+              }]'
+            />
+          </div>
+          <div>
+            <div class="resizer"></div>
+          </div>
+          <div class="hint">Drag the purple dot around &nbsp; &gt;&gt;</div>
+        </div>
       </div>
-      <div>
-        <div class="resizer"></div>
+      <div class="flex-item">
+        <div class="distanced">
+          <div class="ui buttons">
+            <button class="ui button">Skater</button>
+            <button class="ui button">[not impl]</button>
+            <button class="ui button">[not impl]</button>
+          </div>
+          <div>
+            <div class="ui toggle checkbox distanced-top">
+              <input
+                type="checkbox"
+                id="checkbox"
+                onchange="drawRegionsCheckboxChanged();"
+              />
+              <label>Regions</label>
+            </div>
+          </div>
+          <div class="distanced-top qr">
+            <a href="https://frameright.lourot.dev">
+              <img
+                class="qr"
+                src="https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=https://frameright.lourot.dev"
+              />
+              <div class="hint">frameright.lourot.dev</div>
+            </a>
+          </div>
+        </div>
       </div>
     </div>
 
