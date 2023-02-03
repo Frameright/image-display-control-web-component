@@ -454,7 +454,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       overlay = document.createElement('div');
       overlay.style.position = 'absolute';
       overlay.style.boxSizing = 'border-box';
-      overlay.style.border = '5px solid rgba(255, 0, 0, 0.8)';
+      overlay.style.border = this._pickNextOvelayStyle();
       overlay.style.zIndex = '999';
       this._debugRegionOverlayContainer?.appendChild(overlay);
       this._debugRegionOverlays.set(region.id, overlay);
@@ -469,6 +469,16 @@ export class ImageDisplayControl extends HTMLImageElement {
     overlay.style.top = `${boundingBox.position.y}px`;
     overlay.style.width = `${boundingBox.size.getWidth()}px`;
     overlay.style.height = `${boundingBox.size.getHeight()}px`;
+  }
+
+  private _pickNextOvelayStyle(): string {
+    // Remove the first style from the beginning of the array and add it to the
+    // end, then return it.
+    const defaultStyleInCaseArrayIsEmpty = '5px solid rgba(255, 0, 0, 0.7)';
+    const nextStyle =
+      this._debugRegionOverlayStyles.shift() || defaultStyleInCaseArrayIsEmpty;
+    this._debugRegionOverlayStyles.push(nextStyle);
+    return nextStyle;
   }
 
   // Sanitized version of the 'data-image-regions' HTML attribute.
@@ -539,4 +549,12 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Map of region ID to <div> element displaying the region as an overlay over
   // the web component.
   private _debugRegionOverlays = new Map<string, HTMLDivElement>();
+
+  // List of `border:` CSS values to be applied alternatively to the debug
+  // region overlays.
+  private _debugRegionOverlayStyles: string[] = [
+    '5px solid rgba(240, 69, 141, 0.7)',
+    '5px solid rgba(127, 15, 130, 0.7)',
+    '5px solid rgba(48, 0, 150, 0.7)',
+  ];
 }
