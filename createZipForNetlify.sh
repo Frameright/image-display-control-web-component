@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Builds a mobile demo that can directly shipped to Netlify
+# Builds a mobile demo that can directly be shipped to Netlify
 
 rm -f netlify.zip
 
