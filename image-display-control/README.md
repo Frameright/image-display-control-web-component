@@ -94,6 +94,8 @@ The resulting HTML element is
 and will automatically reassess the best region to zoom in on when it gets
 resized, e.g. when the user turns their phone from portrait to landscape.
 
+&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
+
 ### Installation
 
 Provided that you are using a bundler (e.g. [Webpack](https://webpack.js.org/)
@@ -160,6 +162,8 @@ npm start
 ![Demo](https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/demo.gif)
 
 &emsp; :wrench: [Contributing](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/contributing.md)
+
+&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
 
 ### Dependency tree / credits
 
