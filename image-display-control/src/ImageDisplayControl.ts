@@ -57,14 +57,14 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'data-image-regions':
-        if (!this.dataset.disabled) {
-          this._populateRectangleImageRegions();
+        this._populateRectangleImageRegions();
+        if (this.dataset.disabled !== 'all') {
           this._panAndZoomToBestRegion();
         }
         break;
 
       case 'data-image-region-id':
-        if (!this.dataset.disabled) {
+        if (this.dataset.disabled !== 'all') {
           this._panAndZoomToBestRegion();
         }
         break;
@@ -81,21 +81,13 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   // Called whenever the element should start/stop having some of its intended
   // custom behaviors.
-  _behaviorChanged() {
+  private _behaviorChanged() {
     const debugDrawRegionsStr: string = this.dataset.debugDrawRegions || 'off';
-    const debugDrawRegions: boolean =
-      debugDrawRegionsStr === 'on' ||
-      debugDrawRegionsStr === 'true' ||
-      debugDrawRegionsStr === 'yes' ||
-      debugDrawRegionsStr === '1' ||
-      debugDrawRegionsStr === 'enabled' ||
-      debugDrawRegionsStr === 'all';
+    const debugDrawRegions: boolean = debugDrawRegionsStr === 'on';
 
     const disabled: string = this.dataset.disabled || 'none';
     switch (disabled) {
       case 'all':
-      case 'true':
-      case 'yes':
         // We should behave like a normal <img> element.
         this._logger.debug('Disabled');
         this._sizeObserver.unobserve(this);
@@ -106,7 +98,6 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'css-contain':
-      case 'css-containment':
         this._logger.debug('Disabled CSS containment only');
         this._restoreOriginalParentCssContainment();
 
@@ -120,12 +111,9 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'none':
-      case 'false':
-      case 'no':
       default:
         this._logger.debug('Enabled');
         this._adaptParentCssContainment();
-        this._populateRectangleImageRegions();
 
         if (debugDrawRegions) {
           this._recreateDebugRegionOverlays();
@@ -141,7 +129,7 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   // Called whenever the element size has changed. Guaranteed to be called at
   // least once after the observer has been started.
-  _resizeCallback(entries: ResizeObserverEntry[]) {
+  private _resizeCallback(entries: ResizeObserverEntry[]) {
     // If several resize events are coming at once, we only want to handle the
     // last one.
     const entry = entries.pop();
