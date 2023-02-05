@@ -64,45 +64,7 @@
         </div>
         <div class="distanced resizable">
           <div class="overflow-hider">
-            <img
-              id="myimg"
-              is="image-display-control"
-              src="demo/assets/pics/skater.webp"
-              data-image-regions='[{
-                "id": "horizontalbanner",
-                "names": ["Horizontal banner"],
-                "shape": "rectangle",
-                "unit": "pixel",
-                "imageWidth": "5760",
-                "imageHeight": "3840",
-                "x": "2343",
-                "y": "858",
-                "width": "3417",
-                "height": "1281"
-              }, {
-                "id": "square",
-                "names": ["Square"],
-                "shape": "rectangle",
-                "unit": "pixel",
-                "imageWidth": "5760",
-                "imageHeight": "3840",
-                "x": "2462",
-                "y": "1097",
-                "width": "782",
-                "height": "782"
-              }, {
-                "id": "tallportrait",
-                "names": ["Tall portrait"],
-                "shape": "rectangle",
-                "unit": "pixel",
-                "imageWidth": "5760",
-                "imageHeight": "3840",
-                "x": "2345",
-                "y": "850",
-                "width": "1122",
-                "height": "2990"
-              }]'
-            />
+            <img id="myimg" is="image-display-control" />
           </div>
           <div>
             <div class="resizer"></div>
@@ -116,9 +78,27 @@
       <div>
         <div class="distanced">
           <div class="ui buttons">
-            <button class="ui button">Skater</button>
-            <button class="ui button">[not impl]</button>
-            <button class="ui button">[not impl]</button>
+            <button
+              class="ui button pic-selector"
+              id="skater"
+              onclick="picSelectorClicked('skater')"
+            >
+              Skater
+            </button>
+            <button
+              class="ui button pic-selector"
+              id="car"
+              onclick="picSelectorClicked('car')"
+            >
+              Car
+            </button>
+            <button
+              class="ui button pic-selector"
+              id="surfer"
+              onclick="picSelectorClicked('surfer')"
+            >
+              Surfer
+            </button>
           </div>
           <div>
             <div class="ui toggle checkbox distanced-top">
@@ -147,6 +127,7 @@
       type="module"
       src="dist/src/image-display-control-without-external-deps.js"
     ></script>
+
     <script
       type="text/javascript"
       src="demo/assets/js/50-mobile-demo.js"
