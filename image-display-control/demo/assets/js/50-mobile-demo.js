@@ -154,16 +154,19 @@ function modeSelectorClicked(buttonId) {
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
   switch (buttonId) {
     case 'off':
+      imgElement.dataset.loglevel = 'off';
       imgElement.dataset.disabled = 'all';
       break;
 
     case 'debug':
+      imgElement.dataset.loglevel = 'debug';
       imgElement.dataset.disabled = 'none';
       imgElement.dataset.debugDrawRegions = 'on';
       break;
 
     case 'on':
     default:
+      imgElement.dataset.loglevel = 'off';
       imgElement.dataset.disabled = 'none';
       imgElement.dataset.debugDrawRegions = 'off';
       break;
