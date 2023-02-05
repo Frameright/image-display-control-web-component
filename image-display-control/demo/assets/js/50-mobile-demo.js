@@ -149,4 +149,34 @@ function picSelectorClicked(buttonId) {
   });
 }
 
+function modeSelectorClicked(buttonId) {
+  // eslint-disable-next-line no-undef
+  const imgElement = document.getElementById(_IMG_ELEMENT_ID);
+  switch (buttonId) {
+    case 'off':
+      imgElement.dataset.disabled = 'all';
+      break;
+
+    case 'debug':
+      imgElement.dataset.disabled = 'none';
+      imgElement.dataset.debugDrawRegions = 'on';
+      break;
+
+    case 'on':
+    default:
+      imgElement.dataset.disabled = 'none';
+      imgElement.dataset.debugDrawRegions = 'off';
+      break;
+  }
+
+  document.querySelectorAll('.mode-selector').forEach(element => {
+    if (element.id === buttonId) {
+      element.classList.add('purple');
+    } else {
+      element.classList.remove('purple');
+    }
+  });
+}
+
 picSelectorClicked('skater');
+modeSelectorClicked('on');

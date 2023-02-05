@@ -77,7 +77,7 @@
 
       <div>
         <div class="distanced">
-          <div class="ui buttons">
+          <div class="ui compact buttons">
             <button
               class="ui button pic-selector"
               id="skater"
@@ -100,14 +100,29 @@
               Surfer
             </button>
           </div>
-          <div>
-            <div class="ui toggle checkbox distanced-top">
-              <input
-                type="checkbox"
-                id="checkbox"
-                onchange="drawRegionsCheckboxChanged();"
-              />
-              <label>Regions</label>
+          <div class="distanced-top compact">
+            <div class="ui compact buttons">
+              <button
+                class="ui button mode-selector"
+                id="off"
+                onclick="modeSelectorClicked('off')"
+              >
+                Off
+              </button>
+              <button
+                class="ui button mode-selector"
+                id="on"
+                onclick="modeSelectorClicked('on')"
+              >
+                On
+              </button>
+              <button
+                class="ui button mode-selector"
+                id="debug"
+                onclick="modeSelectorClicked('debug')"
+              >
+                Debug
+              </button>
             </div>
           </div>
           <div class="distanced qr">
