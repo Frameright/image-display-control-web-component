@@ -1,4 +1,5 @@
 [<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="right" width="64" height="64">](https://frameright.io)
+[![npm version](https://badge.fury.io/js/@frameright%2Fimage-display-control-web-component.svg)](https://www.npmjs.com/package/@frameright/image-display-control-web-component)
 [![validate-on-push](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml)
 
 &nbsp;
