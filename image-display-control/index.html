@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Frameright Web Component</title>
 
     <!-- Demo targetted at mobile, designed to be served with a simple static
          web server, e.g. with:
@@ -14,9 +15,7 @@
          or just by running ../createZipForNetlify.sh and uploading to Netlify.
     -->
 
-    <!-- Contains some trivial logic common to several examples, but not central
-         to the examples themselves. -->
-    <script type="text/javascript" src="demo/common.js"></script>
+    <script type="text/javascript" src="demo/assets/js/common.js"></script>
 
     <!-- https://interactjs.io/ for a resizable div on mobile -->
     <script src="https://cdn.jsdelivr.net/npm/interactjs/dist/interact.min.js"></script>
@@ -37,101 +36,12 @@
     <!-- Polyfill for Safari, see https://github.com/ungap/custom-elements -->
     <script src="https://unpkg.com/@ungap/custom-elements/es.js"></script>
 
-    <style>
-      body {
-        font-size: min(5vw, 5vh, 25px);
-      }
-
-      div.flex-container {
-        display: flex;
-        flex-wrap: wrap;
-      }
-
-      .distanced {
-        margin: 1em;
-      }
-
-      .distanced-left {
-        margin-left: 1em;
-      }
-
-      .distanced-right {
-        margin-right: 1em;
-      }
-
-      .distanced-top {
-        margin-top: 1em;
-      }
-
-      .distanced-bottom {
-        margin-bottom: 1em;
-      }
-
-      div.resizable {
-        width: min(70vw, 70vh);
-        aspect-ratio: 1.5;
-
-        /* See https://interactjs.io/docs/resizable/ */
-        touch-action: none;
-        user-select: none;
-      }
-
-      div.overflow-hider {
-        /* Follow the parent resizable div: */
-        width: 100%;
-        height: 100%;
-
-        border-radius: 0.3em;
-        overflow: hidden;
-      }
-
-      #myimg {
-        /* Follow the parent resizable div: */
-        width: 100%;
-        height: 100%;
-      }
-
-      div.resizer {
-        float: right;
-        position: relative;
-        left: 2em;
-        z-index: 999;
-
-        background-color: #7f0f82;
-        border-radius: 50%;
-        width: 2em;
-        height: 2em;
-      }
-
-      div.hint {
-        font-size: 0.7em;
-        white-space: nowrap;
-        text-align: center;
-      }
-
-      img.logo {
-        width: 2em;
-        height: 2em;
-      }
-
-      div.qr {
-        text-align: center;
-      }
-
-      img.qr {
-        width: min(40vw, 40vh);
-        aspect-ratio: 1;
-      }
-
-      a {
-        color: unset !important;
-      }
-    </style>
+    <link rel="stylesheet" href="demo/assets/css/50-mobile-demo.css" />
   </head>
 
   <body>
     <div class="flex-container">
-      <div class="flex-item">
+      <div>
         <div class="distanced">
           <span class="distanced-right">
             <a href="https://frameright.io">
@@ -157,7 +67,7 @@
             <img
               id="myimg"
               is="image-display-control"
-              src="demo/assets/skater.webp"
+              src="demo/assets/pics/skater.webp"
               data-image-regions='[{
                 "id": "horizontalbanner",
                 "names": ["Horizontal banner"],
@@ -197,10 +107,13 @@
           <div>
             <div class="resizer"></div>
           </div>
-          <div class="hint">Drag the purple dot around &nbsp; &gt;&gt;</div>
+          <div class="hint">
+            <span>Drag the purple dot around &nbsp; &gt;&gt;</span>
+          </div>
         </div>
       </div>
-      <div class="flex-item">
+
+      <div>
         <div class="distanced">
           <div class="ui buttons">
             <button class="ui button">Skater</button>
@@ -217,7 +130,7 @@
               <label>Regions</label>
             </div>
           </div>
-          <div class="distanced-top qr">
+          <div class="distanced qr">
             <a href="https://frameright.lourot.dev">
               <img
                 class="qr"
@@ -234,29 +147,9 @@
       type="module"
       src="dist/src/image-display-control-without-external-deps.js"
     ></script>
-    <script>
-      // See https://interactjs.io/docs/resizable/
-
-      // eslint-disable-next-line no-undef
-      interact('.resizable').resizable({
-        edges: { bottom: '.resizer', right: '.resizer' },
-        listeners: {
-          move(event) {
-            let { x, y } = event.target.dataset;
-
-            x = (parseFloat(x) || 0) + event.deltaRect.left;
-            y = (parseFloat(y) || 0) + event.deltaRect.top;
-
-            Object.assign(event.target.style, {
-              width: `${event.rect.width}px`,
-              height: `${event.rect.height}px`,
-              transform: `translate(${x}px, ${y}px)`,
-            });
-
-            Object.assign(event.target.dataset, { x, y });
-          },
-        },
-      });
-    </script>
+    <script
+      type="text/javascript"
+      src="demo/assets/js/50-mobile-demo.js"
+    ></script>
   </body>
 </html>

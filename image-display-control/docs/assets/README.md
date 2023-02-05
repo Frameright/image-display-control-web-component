@@ -1,1 +1,1 @@
-../../demo/assets/README.md
+../../demo/assets/pics/README.md

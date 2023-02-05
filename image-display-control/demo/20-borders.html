@@ -2,33 +2,28 @@
 <html lang="en-GB">
   <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Frameright Web Component</title>
 
     <!-- Contains some trivial logic common to several examples, but not central
          to the examples themselves. -->
-    <link rel="stylesheet" href="common.css" />
-    <script type="text/javascript" src="common.js"></script>
+    <link rel="stylesheet" href="assets/css/common.css" />
+    <script type="text/javascript" src="assets/js/common.js"></script>
 
     <style>
       div.resizable {
         width: 400px;
-        height: 200px;
+        height: 600px;
         resize: both;
         overflow: hidden; /* needed in order the get a bottom-right resize handle */
       }
 
       img {
         /* Follow the parent resizable div: */
+        box-sizing: border-box;
+        border: 5px dashed red;
         width: 100%;
         height: 100%;
-      }
-
-      td {
-        vertical-align: bottom;
-        padding-right: 2em;
-      }
-
-      td.resize-hint {
-        text-align: right;
       }
     </style>
   </head>
@@ -40,16 +35,8 @@
     </p>
     <ul class="explanation">
       <li>
-        The web component supports
-        <a
-          href="https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement/srcset"
-          >pixel-density-specific image candidates</a
-        >, defined with the <code>srcset=</code> and <code>sizes=</code>
-        attributes. Start with a small viewport, then resize the component to
-        have it zoom in on the region defined in the
-        <code>data-image-regions=</code> attribute. Now progressively increase
-        the width of the viewport to see the browser fetch higher-definition
-        images while the component remains zoomed in on the region.
+        Borders and paddings are supported, however they disappear when the
+        component zooms in on a region.
       </li>
     </ul>
     <table>
@@ -59,24 +46,30 @@
             <img
               id="myimg"
               is="image-display-control"
-              src="assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg"
-              alt="Hello world!"
-              srcset="
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1.jpg          2000w,
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1-1024x512.jpg 1024w,
-                assets/iptc/IPTC-PhotometadataRef-Std2021.1-768x384.jpg   768w
-              "
-              sizes="(max-width: 2000px) 100vw, 2000px"
-              data-loglevel="warn"
+              src="assets/pics/deer.jpg"
+              title="Hello my deer"
+              alt="Deer being cute in the nature"
+              data-loglevel="debug"
               data-image-regions='[{
-                "id": "persltr2",
-                "names": ["Listener 1"],
+                "id": "oneanimal",
+                "names": ["One animal"],
                 "shape": "rectangle",
                 "unit": "relative",
-                "x": "0.31",
-                "y": "0.18",
-                "width": "0.127",
-                "height": "0.385"
+                "x": "0.217",
+                "y": "0.708",
+                "width": "0.239",
+                "height": "0.1467"
+              }, {
+                "id": "threeanimals",
+                "names": ["Three animals"],
+                "shape": "rectangle",
+                "unit": "pixel",
+                "imageWidth": "1000",
+                "imageHeight": "1500",
+                "x": "245",
+                "y": "1087",
+                "width": "419",
+                "height": "182"
               }]'
             />
           </div>
@@ -99,6 +92,11 @@
         </td>
       </tr>
     </table>
+
+    <div class="spacer">
+      (Space at the bottom so you can drag and increase the height of the web
+      component)
+    </div>
 
     <script type="module" src="../dist/src/image-display-control.js"></script>
   </body>
