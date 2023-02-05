@@ -142,9 +142,9 @@ function picSelectorClicked(buttonId) {
 
   document.querySelectorAll('.pic-selector').forEach(element => {
     if (element.id === buttonId) {
-      element.classList.add('active');
+      element.classList.add('purple');
     } else {
-      element.classList.remove('active');
+      element.classList.remove('purple');
     }
   });
 }
