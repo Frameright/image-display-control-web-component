@@ -176,6 +176,10 @@ npm start
 
 ### Changelog
 
+**0.0.6** (2023-02-07):
+  * Removed [Safari polyfill](https://github.com/ungap/custom-elements) from
+    minified bundle to be served on CDNs.
+
 **0.0.5** (2023-02-07):
   * Implemented `data-debug-draw-regions=` attribute.
   * Added `dist/image-display-control.min.js` to NPM package in order for it to

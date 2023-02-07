@@ -25,7 +25,7 @@ export default {
       patterns: [],
     }),
   ],
-  input: './dist/src/image-display-control.js',
+  input: './dist/src/image-display-control-without-external-deps.js',
   output: {
     file: './dist/image-display-control.min.js',
   },
