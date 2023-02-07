@@ -56,7 +56,7 @@ npm install
 npm start  # interactive watch mode
 ```
 
-&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
+&emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
 ## :bookmark_tabs: Documenting
 

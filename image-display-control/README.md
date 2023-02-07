@@ -16,6 +16,8 @@ An easy way to do [Image Display Control](https://frameright.io) in your HTML
 page. Made with :heart: by [Frameright](https://frameright.io). Power to the
 pictures!
 
+&emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
+
 ### Table of Contents
 
 <!-- toc -->
@@ -95,7 +97,7 @@ The resulting HTML element is
 and will automatically reassess the best region to zoom in on when it gets
 resized, e.g. when the user turns their phone from portrait to landscape.
 
-&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
+&emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
 ### Installation
 
@@ -164,7 +166,7 @@ npm start
 
 &emsp; :wrench: [Contributing](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/contributing.md)
 
-&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
+&emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
 ### Dependency tree / credits
 

@@ -10,4 +10,4 @@ npm start
 
 ![Demo](../docs/assets/demo.gif)
 
-&emsp; :sparkles: [Live mobile demo](https://frameright.lourot.dev)
+&emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
