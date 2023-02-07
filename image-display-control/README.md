@@ -174,6 +174,12 @@ npm start
 
 ### Changelog
 
+**0.0.5** (2023-02-07):
+  * Implemented `data-debug-draw-regions=` attribute.
+  * Added `dist/image-display-control.min.js` to NPM package in order for it to
+    be served on CDNs like [jsDelivr](https://www.jsdelivr.com/).
+  * Fixed a bug where `data-disabled=none` would be ignored.
+
 **0.0.4** (2023-02-02):
   * Improved NPM documentation.
 

@@ -14,6 +14,7 @@
 - [:gift: Releasing](#gift-releasing)
   * [Version number](#version-number)
   * [Changelog](#changelog)
+  * [Update `package-lock.json`](#update-package-lockjson)
   * [Last tweaks and checks](#last-tweaks-and-checks)
   * [Git tag](#git-tag)
   * [Build the package locally](#build-the-package-locally)
@@ -93,6 +94,13 @@ Describe the changes made compared to the last released version in the
 [changelog](../README.md). Browse the git history to make sure nothing has
 been left out.
 
+### Update `package-lock.json`
+
+```bash
+rm -rf node_modules/ package-lock.json
+npm install
+```
+
 ### Last tweaks and checks
 
 Format and validate the source one last time:
@@ -149,3 +157,6 @@ npm publish
 
 And check that the package looks well-formed at
 `https://www.npmjs.com/package/@frameright/image-display-control-web-component/v/1.2.3`.
+
+Also check that the web component is available via CDN at
+`https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.2.3/dist/image-display-control.min.js`.
