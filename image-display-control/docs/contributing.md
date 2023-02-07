@@ -88,6 +88,11 @@ Choose the next version number according to the rules of
 [Semantic Versioning](https://semver.org/) and set it in
 [package.json](../package.json).
 
+Also update the examples in the documentation to use the new version number in:
+
+* [`../README.md`](../README.md)
+* [`explanation/importing.md`](explanation/importing.md)
+
 ### Changelog
 
 Describe the changes made compared to the last released version in the

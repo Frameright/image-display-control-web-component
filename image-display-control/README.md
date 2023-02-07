@@ -109,6 +109,16 @@ project with:
 npm install @frameright/image-display-control-web-component
 ```
 
+or get it from a
+[CDN](https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component/):
+
+```html
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.6/dist/image-display-control.min.js"
+></script>
+```
+
 &emsp; :floppy_disk:
 [Importing in your project](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/importing.md)
 
