@@ -67,7 +67,7 @@ export class Logger {
   }
 
   private _consoleText(text: string) {
-    return this._id ? `[${this._id}] ${text}` : text;
+    return this._id ? `[idc:${this._id}] ${text}` : `[idc] ${text}`;
   }
 
   private _id: string;
