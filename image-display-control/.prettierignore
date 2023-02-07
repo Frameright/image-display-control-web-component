@@ -12,5 +12,4 @@ custom-elements.json
 node_modules/
 package-lock.json
 storybook-static
-thirdparty/
 *.md
