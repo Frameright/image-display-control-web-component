@@ -10,7 +10,7 @@ limitations.
 
 - [`object-*:`, `transform*:` and `clip-path:` properties](#object--transform-and-clip-path-properties)
 - [`border:` and `padding:` properties](#border-and-padding-properties)
-- [`contain:` property on the parent element](#contain-property-on-the-parent-element)
+- [`contain:` and `overflow:` properties on the parent element](#contain-and-overflow-properties-on-the-parent-element)
 
 <!-- tocstop -->
 
@@ -50,12 +50,14 @@ applying borders and padding to that instead.
 the web component will always disable borders and padding. See the
 [Attribute reference](../reference/attributes.md) for more details.
 
-## `contain:` property on the parent element
+## `contain:` and `overflow:` properties on the parent element
 
 Zooming in on a region by using CSS `transform: scale(...); clip-path: ...;`
 would normally cause an overflow and thus unwanted scrollbars. To prevent this,
 the web component sets CSS `contain: paint;` on its parent element.
 
-You can disable this behavior by setting the
-`<img data-disabled="css-contain" />` HTML attribute. See the
+On older browsers and depending on the `data-disabled=` and
+`data-css-contain-fallback=` HTML attributes it may set `overflow: hidden;` on
+its parent element instead. See
+[Browser support](browsers.md) and
 [Attribute reference](../reference/attributes.md) for more details.

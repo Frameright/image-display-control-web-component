@@ -30,28 +30,19 @@
     </p>
     <ul class="explanation">
       <li>
-        Zooming in on a region by using CSS <code>transform*</code> and
-        <code>clip-path</code> would normally cause an overflow and thus
-        unwanted scrollbars. To prevent this, the web component sets CSS
-        containment (<code>contain: paint;</code>) on its parent. This does not
-        prevent scrollbars altogether: the scrollbars caused by other elements
-        are still there.
+        <code>contain: paint;</code> might not be supported on old browsers.
+        This can be simulated by setting the
+        <code>data-disabled="css-contain"</code> HTML attribute. Test it by
+        clicking the <code>Enable CSS containment</code> checkbox.
       </li>
       <li>
-        This behavior can be disabled by setting the
-        <code>data-disabled="css-contain"</code> and
-        <code>data-css-contain-fallback="disable-containment"</code> HTML
-        attributes. Test it by clicking the <code>Enable CSS containment</code>
-        checkbox.
+        By setting the <code>data-css-contain-fallback="overflow-hidden"</code>
+        HTML attribute, the web component will fall back to setting
+        <code>overflow: hidden</code> on its parent. This works well when the
+        component is the only child of its parent, otherwise it will suppress
+        scrollbars too aggressively, as can be seen in this example.
       </li>
     </ul>
-    <p class="explanation">
-      <i
-        ><b>NOTE:</b> on Safari, toggling the checkbox has no effect until the
-        viewport gets resized or the component's CSS <code>transform*</code> is
-        touched.</i
-      >
-    </p>
     <div>
       <label>
         <input
@@ -63,38 +54,36 @@
         Enable CSS containment
       </label>
     </div>
-    <div>
-      <img
-        id="myimg"
-        is="image-display-control"
-        src="assets/pics/deer.jpg"
-        title="Hello my deer"
-        alt="Deer being cute in the nature"
-        data-loglevel="debug"
-        data-image-regions='[{
-          "id": "oneanimal",
-          "names": ["One animal"],
-          "shape": "rectangle",
-          "unit": "relative",
-          "x": "0.217",
-          "y": "0.708",
-          "width": "0.239",
-          "height": "0.1467"
-        }, {
-          "id": "threeanimals",
-          "names": ["Three animals"],
-          "shape": "rectangle",
-          "unit": "pixel",
-          "imageWidth": "1000",
-          "imageHeight": "1500",
-          "x": "245",
-          "y": "1087",
-          "width": "419",
-          "height": "182"
-        }]'
-        data-css-contain-fallback="disable-containment"
-      />
-    </div>
+    <img
+      id="myimg"
+      is="image-display-control"
+      src="assets/pics/deer.jpg"
+      title="Hello my deer"
+      alt="Deer being cute in the nature"
+      data-loglevel="debug"
+      data-image-regions='[{
+        "id": "oneanimal",
+        "names": ["One animal"],
+        "shape": "rectangle",
+        "unit": "relative",
+        "x": "0.217",
+        "y": "0.708",
+        "width": "0.239",
+        "height": "0.1467"
+      }, {
+        "id": "threeanimals",
+        "names": ["Three animals"],
+        "shape": "rectangle",
+        "unit": "pixel",
+        "imageWidth": "1000",
+        "imageHeight": "1500",
+        "x": "245",
+        "y": "1087",
+        "width": "419",
+        "height": "182"
+      }]'
+      data-css-contain-fallback="overflow-hidden"
+    />
     <p class="bigfont">
       <b>Text designed to provoke a scrollbar.</b><br />
       Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy

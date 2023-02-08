@@ -29,6 +29,7 @@ pictures!
 - [Usage](#usage)
 - [Local demo](#local-demo)
 - [Dependency tree / credits](#dependency-tree--credits)
+- [Browser support](#browser-support)
 - [Changelog](#changelog)
 
 <!-- tocstop -->
@@ -183,6 +184,18 @@ npm start
 - [ungap/custom-elements](https://github.com/ungap/custom-elements), a polyfill
   for web components on Safari. Many thanks to
   [WebReflection](https://github.com/WebReflection)!
+
+### Browser support
+
+From scratch the web component should work on:
+
+* Chrome 64+ (2018)
+* Firefox 69+ (2019)
+* Safari 15.4+ (2022)
+
+More support can be achieved with a few tweaks:
+
+&emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
 
 ### Changelog
 

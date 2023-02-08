@@ -7,6 +7,7 @@ For a more high-level overview of the attributes, see the
 
 - [`data-image-regions=`](#data-image-regions)
 - [`data-image-region-id=`](#data-image-region-id)
+- [`data-css-contain-fallback=`](#data-css-contain-fallback)
 - [`data-disabled=`](#data-disabled)
 - [`data-loglevel=`](#data-loglevel)
 - [`data-debug-draw-regions=`](#data-debug-draw-regions)
@@ -58,8 +59,32 @@ the current element size.
 
 To force the web component not to zoom in on any region, essentially behaving
 like a standard `<img>` tag with `object-fit: cover`, you can set this attribute
-to `data-image-region-id="<no region>"`. This is essentially the same as setting
+to `data-image-region-id="<no region>"`. This is roughly the same as setting
 `data-disabled="all"`, although the CSS containment will still be applied.
+
+> **NOTE**: The web component uses CSS `transform*` and `clip-path` properties
+> in order to zoom in on a region, which would normally cause an overflow and
+> thus unwanted scrollbars. To prevent this, the web component sets
+> [CSS containment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment)
+> (`contain: paint;`) on its parent element.
+
+## `data-css-contain-fallback=`
+
+Type: string.
+
+Supported values:
+
+* `disable-component` (default): When the browser doesn't support
+  `contain: paint;`, fall back to disabling the web component.
+* `overflow-hidden`: Fall back to setting `overflow: hidden;` on the parent
+  element instead. This works well if the component is the only child its parent
+  element, otherwise it may remove scrollbars too aggressively.
+* `disable-containment`: Fall back to not touching the parent element. This may
+  cause rogue scrollbars.
+* `force`: Even if the browser is known not to support `contain: paint;`, set
+  it anyway.
+
+See [Browser support](../explanation/browsers.md) for more information.
 
 ## `data-disabled=`
 
@@ -71,15 +96,9 @@ Supported values:
   expected.
 * `all`: All functionality disabled. The web component will behave like a
   standard `<img>` tag.
-* `css-contain`: CSS containment disabled. The web component will behave as
-  expected, but will not set CSS containment on its parent element, which may
-  lead to rogue scrollbars.
-
-> **NOTE**: The web component uses CSS `transform*` and `clip-path` properties
-> in order to zoom in on a region, which would normally cause an overflow and
-> thus unwanted scrollbars. To prevent this, the web component sets
-> [CSS containment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment)
-> (`contain: paint;`) on its parent element.
+* `css-contain`: Use of CSS `contain:` disabled. The web component will behave
+  as if this feature wasn't supported by the browser and follow the fallback
+  behavior set by the `data-css-contain-fallback=` attribute.
 
 ## `data-loglevel=`
 

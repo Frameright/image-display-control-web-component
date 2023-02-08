@@ -8,6 +8,12 @@ import { SizeInPixels } from './SizeInPixels.js';
 import { SizeInRelativeCoord } from './SizeInRelativeCoord.js';
 import { Transformation } from './Transformation.js';
 
+interface BrowserFeatures {
+  cssInset: boolean;
+  resizeObserver: boolean;
+  cssContain: boolean;
+}
+
 export class ImageDisplayControl extends HTMLImageElement {
   // See
   // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#using_the_lifecycle_callbacks
@@ -19,6 +25,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       'data-image-regions', // JSON array of image regions
       'data-image-region-id', // forces zooming on a specific image region
       'data-debug-draw-regions', // 'off' (default) or 'on'
+      'data-css-contain-fallback', // 'disable-component' (default), 'disable-containment', 'overflow-hidden' or 'force'
     ];
   }
 
@@ -53,24 +60,22 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'data-disabled':
+      case 'data-debug-draw-regions':
+      case 'data-css-contain-fallback':
         this._behaviorChanged();
         break;
 
       case 'data-image-regions':
         this._populateRectangleImageRegions();
-        if (this.dataset.disabled !== 'all') {
+        if (!this._isDisabled()) {
           this._panAndZoomToBestRegion();
         }
         break;
 
       case 'data-image-region-id':
-        if (this.dataset.disabled !== 'all') {
+        if (!this._isDisabled()) {
           this._panAndZoomToBestRegion();
         }
-        break;
-
-      case 'data-debug-draw-regions':
-        this._behaviorChanged();
         break;
 
       default:
@@ -82,48 +87,39 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Called whenever the element should start/stop having some of its intended
   // custom behaviors.
   private _behaviorChanged() {
+    this._populateBrowserFeatures();
+
     const debugDrawRegionsStr: string = this.dataset.debugDrawRegions || 'off';
     const debugDrawRegions: boolean = debugDrawRegionsStr === 'on';
 
-    const disabled: string = this.dataset.disabled || 'none';
-    switch (disabled) {
-      case 'all':
-        // We should behave like a normal <img> element.
-        this._logger.debug('Disabled');
+    if (this._isDisabled()) {
+      // We should behave like a normal <img> element.
+      this._logger.debug('Disabled');
+      if (this._sizeObserver) {
         this._sizeObserver.unobserve(this);
-        this._restoreOriginalBorderAndPadding();
+        this._sizeObserver = null;
+      }
+      this._restoreOriginalBorderAndPadding();
+      this._removeDebugRegionOverlays();
+      this._setCssToMiddleCropOriginalImage();
+      this._restoreOriginalParentCssContainment();
+    } else {
+      this._logger.debug('Enabled');
+      this._adaptParentCssContainment();
+
+      if (debugDrawRegions) {
+        this._recreateDebugRegionOverlays();
+      } else {
         this._removeDebugRegionOverlays();
-        this._setCssToMiddleCropOriginalImage();
-        this._restoreOriginalParentCssContainment();
-        break;
+      }
 
-      case 'css-contain':
-        this._logger.debug('Disabled CSS containment only');
-        this._restoreOriginalParentCssContainment();
-
-        if (debugDrawRegions) {
-          this._recreateDebugRegionOverlays();
-          this._panAndZoomToBestRegion();
-        } else {
-          this._removeDebugRegionOverlays();
-        }
-
-        break;
-
-      case 'none':
-      default:
-        this._logger.debug('Enabled');
-        this._adaptParentCssContainment();
-
-        if (debugDrawRegions) {
-          this._recreateDebugRegionOverlays();
-        } else {
-          this._removeDebugRegionOverlays();
-        }
-
-        this._panAndZoomToBestRegion();
+      this._panAndZoomToBestRegion();
+      if (!this._sizeObserver) {
+        this._sizeObserver = new ResizeObserver(
+          this._resizeCallback.bind(this)
+        );
         this._sizeObserver.observe(this);
-        break;
+      }
     }
   }
 
@@ -340,26 +336,61 @@ export class ImageDisplayControl extends HTMLImageElement {
   }
 
   private _adaptParentCssContainment() {
+    const containmentStrategy = this._currentCssContainmentStrategy();
+    if (containmentStrategy === 'none') {
+      this._restoreOriginalParentCssContainment();
+      return;
+    }
+
     this._parentElement = this.parentElement;
     if (this._parentElement) {
-      if (
-        this._parentElement.style.contain !== 'paint' &&
-        this._parentElement.style.contain !== 'layout' &&
-        this._parentElement.style.contain !== 'content'
-      ) {
-        if (this._parentCssContainToRestore === null) {
-          this._parentCssContainToRestore = this._parentElement.style.contain;
+      if (containmentStrategy === 'contain') {
+        if (
+          this._parentElement.style.contain !== 'paint' &&
+          this._parentElement.style.contain !== 'layout' &&
+          this._parentElement.style.contain !== 'content'
+        ) {
+          if (this._parentCssContainToRestore === null) {
+            this._parentCssContainToRestore = this._parentElement.style.contain;
+          }
+          this._parentElement.style.contain = 'paint';
         }
-        this._parentElement.style.contain = 'paint';
+        this._restoreOriginalParentCssOverflow();
+      } else if (containmentStrategy === 'overflow') {
+        if (
+          this._parentElement.style.overflow !== 'hidden' &&
+          this._parentElement.style.overflow !== 'clip'
+        ) {
+          if (this._parentCssOverflowToRestore === null) {
+            this._parentCssOverflowToRestore =
+              this._parentElement.style.overflow;
+          }
+          this._parentElement.style.overflow = 'hidden';
+        }
+        this._restoreOriginalParentCssContain();
       }
     }
   }
 
   private _restoreOriginalParentCssContainment() {
+    this._restoreOriginalParentCssContain();
+    this._restoreOriginalParentCssOverflow();
+  }
+
+  private _restoreOriginalParentCssContain() {
     if (this._parentElement) {
       if (this._parentCssContainToRestore !== null) {
         this._parentElement.style.contain = this._parentCssContainToRestore;
         this._parentCssContainToRestore = null;
+      }
+    }
+  }
+
+  private _restoreOriginalParentCssOverflow() {
+    if (this._parentElement) {
+      if (this._parentCssOverflowToRestore !== null) {
+        this._parentElement.style.overflow = this._parentCssOverflowToRestore;
+        this._parentCssOverflowToRestore = null;
       }
     }
   }
@@ -469,12 +500,110 @@ export class ImageDisplayControl extends HTMLImageElement {
     return nextStyle;
   }
 
+  private _populateBrowserFeatures() {
+    // The web component requires the following features:
+    // - CSS `translate()` (Chrome 1+, Firefox 3.5+, Safari 3.1+, 2009+)
+    // - CSS `scale()` (Chrome 1+, Firefox 3.5+, Safari 3.1+, 2009+)
+    // - HTMLElement.dataset (Chrome 8+, Firefox 6+, Safari 5.1+, 2011+)
+    // - CSS `object-fit` (Chrome 32+, Firefox 36+, Safari 10+, 2016+)
+    // - CSS `clip-path` (Chrome 55+, Firefox 3.5+, Safari 9.1+, 2016+)
+    // - CSS `transform-origin` (Chrome 36+, Firefox 16+, Safari 9+, 2016+)
+    // - CSS `transform` (Chrome 36+, Firefox 16+, Safari 9+, 2016+)
+    // - CSS `object-position` (Chrome 32+, Firefox 36+, Safari 10+, 2016+)
+    // - CSS `inset()` (Chrome 37+, Firefox 54+, Safari 10.1+, 2017+)
+    // - ResizeObserver (Chrome 64+, Firefox 69+, Safari 13.1+, 2020+)
+    //
+    // Optionally required features:
+    // - CSS `contain` (Chrome 52+, Firefox 69+, Safari 15.4+, 2022+)
+
+    const cssInset = CSS.supports('clip-path: inset(5px)');
+    if (!cssInset) {
+      this._logger.error(
+        'CSS `clip-path: inset()` is not supported. ' +
+          'Disabling the web component'
+      );
+    }
+
+    const resizeObserver = typeof ResizeObserver !== 'undefined';
+    if (!resizeObserver) {
+      this._logger.error(
+        'ResizeObserver is not supported. Disabling the web component.' +
+          ' Consider using a polyfill like ' +
+          ' https://github.com/juggle/resize-observer'
+      );
+    }
+
+    const cssContain = CSS.supports('contain: paint');
+    if (!cssContain && !this.dataset.cssContainFallback) {
+      this._logger.warn(
+        'CSS containment is not supported. Consider using ' +
+          'the `css-contain-fallback=` attribute'
+      );
+    }
+
+    this._browserFeatures = {
+      cssInset,
+      resizeObserver,
+      cssContain,
+    };
+  }
+
+  private _cssContainFallbackStrategy() {
+    if (
+      this.dataset.cssContainFallback === 'disable-containment' ||
+      this.dataset.cssContainFallback === 'overflow-hidden' ||
+      this.dataset.cssContainFallback === 'force'
+    ) {
+      return this.dataset.cssContainFallback;
+    }
+    return 'disable-component';
+  }
+
+  private _isDisabled(): boolean {
+    return (
+      this.dataset.disabled === 'all' ||
+      !this._browserFeatures.cssInset ||
+      !this._browserFeatures.resizeObserver ||
+      (this._isCssContainUnsupportedOrDisabled() &&
+        this._cssContainFallbackStrategy() === 'disable-component')
+    );
+  }
+
+  private _isCssContainUnsupportedOrDisabled(): boolean {
+    return (
+      !this._browserFeatures.cssContain ||
+      this.dataset.disabled === 'css-contain'
+    );
+  }
+
+  private _currentCssContainmentStrategy() {
+    if (this._isDisabled()) {
+      return 'none';
+    }
+
+    if (!this._isCssContainUnsupportedOrDisabled()) {
+      return 'contain';
+    }
+
+    const fallbackStrategy = this._cssContainFallbackStrategy();
+    if (fallbackStrategy === 'overflow-hidden') {
+      return 'overflow';
+    }
+    if (fallbackStrategy === 'disable-containment') {
+      return 'none';
+    }
+
+    // At this point, fallbackStrategy === 'force'.
+    return 'contain';
+  }
+
   // Sanitized version of the 'data-image-regions' HTML attribute.
   // Populated by _populateRectangleImageRegions().
   private _rectangleImageRegions: RectangleImageRegion[] = [];
 
-  // Observer that watches for changes in the element's size.
-  private _sizeObserver = new ResizeObserver(this._resizeCallback.bind(this));
+  // Observer that watches for changes in the element's size. Populated by
+  // _behaviorChanged().
+  private _sizeObserver: ResizeObserver | null = null;
 
   // Last observed size of the element in pixels. Populated by
   // _resizeCallback().
@@ -516,6 +645,17 @@ export class ImageDisplayControl extends HTMLImageElement {
   // * https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment
   private _parentCssContainToRestore: string | null = null;
 
+  // Old CSS `overflow:` value that we have touched on our parent and want to
+  // restore later.
+  //
+  // If CSS `contain: paint;` is not supported, and
+  // `data-css-contain-fallback="overflow-hidden"` has been set, we fall back to
+  // using `overflow: hidden;` on the parent element. This will work well if the
+  // web component is the only child of the parent element. However, if the
+  // parent element has other children, this might end up removing scrollbars
+  // too aggressively.
+  private _parentCssOverflowToRestore: string | null = null;
+
   // Old CSS `border:` and `padding:` values that we have touched and want to
   // restore later.
   //
@@ -529,6 +669,13 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _cssPaddingToRestore: string | null = null;
 
   private _logger: Logger = new Logger(this.id, this.dataset.loglevel);
+
+  // Populated by _populateFittedImageSize().
+  private _browserFeatures: BrowserFeatures = {
+    cssInset: false,
+    resizeObserver: false,
+    cssContain: false,
+  };
 
   // Sibling element of the web component that we use as a parent to <div>
   // elements displaying regions as overlays over the web component.
