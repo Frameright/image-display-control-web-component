@@ -116,7 +116,7 @@ or get it from a
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.6/dist/image-display-control.min.js"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.7/dist/image-display-control.min.js"
 ></script>
 ```
 
@@ -198,6 +198,10 @@ More support can be achieved with a few tweaks:
 &emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
 
 ### Changelog
+
+**0.0.7** (2023-02-09):
+  * Added handling of missing browser features.
+  * Added `data-css-contain-fallback=` attribute.
 
 **0.0.6** (2023-02-07):
   * Removed [Safari polyfill](https://github.com/ungap/custom-elements) from

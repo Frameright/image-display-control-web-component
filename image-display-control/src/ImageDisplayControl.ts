@@ -512,8 +512,6 @@ export class ImageDisplayControl extends HTMLImageElement {
     // - CSS `object-position` (Chrome 32+, Firefox 36+, Safari 10+, 2016+)
     // - CSS `inset()` (Chrome 37+, Firefox 54+, Safari 10.1+, 2017+)
     // - ResizeObserver (Chrome 64+, Firefox 69+, Safari 13.1+, 2020+)
-    //
-    // Optionally required features:
     // - CSS `contain` (Chrome 52+, Firefox 69+, Safari 15.4+, 2022+)
 
     const cssInset = CSS.supports('clip-path: inset(5px)');
