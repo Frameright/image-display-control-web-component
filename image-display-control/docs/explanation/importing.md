@@ -84,5 +84,5 @@ npm install @frameright/image-display-control-web-component
 and then import it in your front-end code with:
 
 ```js
-import "@frameright/image-display-control-web-component/dist/image-display-control.js";
+import "@frameright/image-display-control-web-component/image-display-control.js";
 ```
