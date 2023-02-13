@@ -25,7 +25,7 @@ pictures!
 - [Overview](#overview)
   * [Without this web component](#without-this-web-component)
   * [Basic usage](#basic-usage)
-  * [Image Display Control metadata](#image-display-control-metadata)
+- [Image Display Control metadata](#image-display-control-metadata)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Local demo](#local-demo)
@@ -101,11 +101,11 @@ resized, e.g. when the user turns their phone from portrait to landscape.
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
-#### Image Display Control metadata
+### Image Display Control metadata
 
-Nowadays an image file (e.g. JPEG, PNG) can contain such image regions in their
-metadata according to a
-[standard](https://iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#image-region).
+Nowadays an image file (e.g. JPEG, PNG) can contain this type of image regions
+in their metadata according to
+[the IPTC standard](https://iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#image-region).
 The back-end would typically be responsible for extracting them from the image
 file and placing them in the front-end's `<img data-image-regions="` attribute.
 This is for example what
