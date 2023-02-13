@@ -38,11 +38,13 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   connectedCallback() {
     this._logger.debug('Connected');
+    this.addEventListener('load', this._imageLoadedLateCallback);
     this._behaviorChanged();
   }
 
   disconnectedCallback() {
     this._logger.debug('Disconnected');
+    this.removeEventListener('load', this._imageLoadedLateCallback);
     this._restoreOriginalParentCssContainment();
   }
 
@@ -126,11 +128,20 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Called whenever the element size has changed. Guaranteed to be called at
   // least once after the observer has been started.
   private _resizeCallback(entries: ResizeObserverEntry[]) {
+    if (this._isDisabled()) {
+      this._logger.warn(
+        'Component disabled, spurious call to _resizeCallback()'
+      );
+      return;
+    }
+
     // If several resize events are coming at once, we only want to handle the
     // last one.
     const entry = entries.pop();
     if (!entry) {
-      this._logger.warn('No ResizeObserverEntry, spurious call?');
+      this._logger.warn(
+        'No ResizeObserverEntry, spurious call to _resizeCallback()'
+      );
       return;
     }
     if (entry.target !== this) {
@@ -161,6 +172,15 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._populateFittedImageSize();
       this._panAndZoomToBestRegion();
     }
+  }
+
+  // Called once when the image has been loaded. May not be called however if
+  // the image is already loaded early when the component is created. See
+  // https://stackoverflow.com/questions/280049/how-to-create-a-javascript-callback-for-knowing-when-an-image-is-loaded
+  private _imageLoadedLateCallback() {
+    this._logger.debug('Image loaded late');
+    this._populateFittedImageSize();
+    this._panAndZoomToBestRegion();
   }
 
   // Populates this._rectangleImageRegions based on the 'data-image-regions'
@@ -205,6 +225,13 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Populates this._fittedImageSize and this._fittedImageBottomRightMargin
   // based on this._elementSize.
   private _populateFittedImageSize() {
+    if (this.naturalWidth <= 0 && this.naturalHeight <= 0) {
+      // The image hasn't been loaded yet. When this happens, both values
+      // are 0 (at least on Chrome).
+      this._logger.debug('Natural image size unknown, deferring.');
+      return;
+    }
+
     const naturalImageSize = new SizeInPixels(
       this.naturalWidth,
       this.naturalHeight
