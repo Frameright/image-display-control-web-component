@@ -25,6 +25,7 @@ pictures!
 - [Overview](#overview)
   * [Without this web component](#without-this-web-component)
   * [Basic usage](#basic-usage)
+  * [Image Display Control metadata](#image-display-control-metadata)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Local demo](#local-demo)
@@ -99,6 +100,22 @@ and will automatically reassess the best region to zoom in on when it gets
 resized, e.g. when the user turns their phone from portrait to landscape.
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
+
+#### Image Display Control metadata
+
+Nowadays an image file (e.g. JPEG, PNG) can contain such image regions in their
+metadata according to a
+[standard](https://iptc.org/std/photometadata/specification/IPTC-PhotoMetadata#image-region).
+The back-end would typically be responsible for extracting them from the image
+file and placing them in the front-end's `<img data-image-regions="` attribute.
+This is for example what
+[this WordPress plugin](https://wordpress.org/plugins/image-display-control/)
+does, with the help of [a PHP library](https://github.com/Frameright/image) for
+extracting image metadata.
+
+Photographers, or anyone else, can use the
+[Frameright app](https://frameright.app/) to define and store image regions in
+the metadata of their pictures.
 
 ### Installation
 
