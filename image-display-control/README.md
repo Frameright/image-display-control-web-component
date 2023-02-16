@@ -133,7 +133,7 @@ or get it from a
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.7/dist/image-display-control.min.js"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.8/dist/image-display-control.min.js"
 ></script>
 ```
 
@@ -215,6 +215,9 @@ More support can be achieved with a few tweaks:
 &emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
 
 ### Changelog
+
+**0.0.8** (2023-02-16):
+  * Fixed race condition when the image takes time to load.
 
 **0.0.7** (2023-02-09):
   * Added handling of missing browser features.
