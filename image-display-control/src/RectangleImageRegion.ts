@@ -18,6 +18,15 @@ export interface ImageRegionFromHtmlAttr {
 }
 
 export class RectangleImageRegion {
+  // Returns the current size of the image on screen, given the currently
+  // applied transformation, in order to zoom in on a region.
+  static getTransformedImageSize(
+    originalImageRegionSize: SizeInPixels,
+    transformation: Transformation // current image transformation being applied
+  ): SizeInPixels {
+    return originalImageRegionSize.getScaled(transformation.factor);
+  }
+
   constructor(
     id?: string,
     position?: PositionInRelativeCoord,
@@ -302,8 +311,9 @@ export class RectangleImageRegion {
       -transformation.origin.x * transformation.factor,
       -transformation.origin.y * transformation.factor
     );
-    const transformedImageSize = originalImageRegionSize.getScaled(
-      transformation.factor
+    const transformedImageSize = RectangleImageRegion.getTransformedImageSize(
+      originalImageRegionSize,
+      transformation
     );
 
     const regionPositionInTransformedImage =

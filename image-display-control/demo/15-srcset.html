@@ -58,9 +58,22 @@
         >, defined with the <code>srcset=</code> and <code>sizes=</code>
         attributes. Start with a small viewport, then resize the component to
         have it zoom in on the region defined in the
-        <code>data-image-regions=</code> attribute. Now progressively increase
-        the width of the viewport to see the browser fetch higher-definition
-        images while the component remains zoomed in on the region.
+        <code>data-image-regions=</code> attribute. Notice how the
+        <code>sizes=</code> attribute responsively gets adjusted in order to let
+        the browser fetch an image with high-enough definition for the requested
+        zoom. Now progressively increase the width of the viewport to see the
+        browser fetch even higher definition images while the component remains
+        zoomed in on the region.
+      </li>
+      <li>
+        The <code>sizes=</code> attribute gets reset to its original value when
+        setting the <code>data-disabled="all"</code> attribute. Test it by
+        clicking the <code>Enable web component</code> checkbox.
+      </li>
+      <li>
+        The <code>sizes=</code> attribute also gets reset to its original value
+        when the component decides not to zoom in on any specific region. Test
+        it by resizing the component.
       </li>
     </ul>
     <table>

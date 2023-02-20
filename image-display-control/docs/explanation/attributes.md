@@ -109,6 +109,10 @@ which the regions are defined. See the
 Any changes to the `srcset=` and `sizes=` attributes will be picked up by the
 web component.
 
+When zooming in on a region, the web component will make sure to fetch a source
+image with a large enough resolution. It achieves this by responsively
+overriding the `sizes=` attribute.
+
 ### `id=` attribute
 
 The `id=` attribute is supported and is used, if set, in the prefix for the

@@ -20,6 +20,8 @@ export class ImageDisplayControl extends HTMLImageElement {
   static get observedAttributes() {
     return [
       'id',
+      'src',
+      'srcset',
       'data-loglevel',
       'data-disabled', // 'none' (default), 'all' or 'css-contain'
       'data-image-regions', // JSON array of image regions
@@ -38,13 +40,13 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   connectedCallback() {
     this._logger.debug('Connected');
-    this.addEventListener('load', this._imageLoadedLateCallback);
+    this._registerImageLoadedLateCallback();
     this._behaviorChanged();
   }
 
   disconnectedCallback() {
     this._logger.debug('Disconnected');
-    this.removeEventListener('load', this._imageLoadedLateCallback);
+    this._unregisterImageLoadedLateCallback();
     this._restoreOriginalParentCssContainment();
   }
 
@@ -55,6 +57,14 @@ export class ImageDisplayControl extends HTMLImageElement {
     switch (attributeName) {
       case 'id':
         this._logger.setId(this.id);
+        break;
+
+      case 'src':
+      case 'srcset':
+        if (!this._isDisabled()) {
+          this._registerImageLoadedLateCallback();
+          this._panAndZoomToBestRegion();
+        }
         break;
 
       case 'data-loglevel':
@@ -96,11 +106,13 @@ export class ImageDisplayControl extends HTMLImageElement {
 
     if (this._isDisabled()) {
       // We should behave like a normal <img> element.
+      this._unregisterImageLoadedLateCallback();
       this._logger.debug('Disabled');
       if (this._sizeObserver) {
         this._sizeObserver.unobserve(this);
         this._sizeObserver = null;
       }
+      this._restoreOriginalSizesAttribute();
       this._restoreOriginalBorderAndPadding();
       this._removeDebugRegionOverlays();
       this._setCssToMiddleCropOriginalImage();
@@ -178,9 +190,23 @@ export class ImageDisplayControl extends HTMLImageElement {
   // the image is already loaded early when the component is created. See
   // https://stackoverflow.com/questions/280049/how-to-create-a-javascript-callback-for-knowing-when-an-image-is-loaded
   private _imageLoadedLateCallback() {
+    this._unregisterImageLoadedLateCallback();
+
     this._logger.debug('Image loaded late');
     this._populateFittedImageSize();
     this._panAndZoomToBestRegion();
+  }
+
+  private _registerImageLoadedLateCallback() {
+    this.addEventListener('load', this._imageLoadedLateCallback);
+  }
+
+  // _imageLoadedLateCallback() would also be called each time the `sizes=`
+  // attribute is set, leading that attribute being set again by
+  // _panAndZoomToBestRegion(), leading to an infinite loop. To avoid this, we
+  // unregister this callback at strategic places in the code.
+  private _unregisterImageLoadedLateCallback() {
+    this.removeEventListener('load', this._imageLoadedLateCallback);
   }
 
   // Populates this._rectangleImageRegions based on the 'data-image-regions'
@@ -311,6 +337,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id &&
       !this._debugRegionOverlayContainer
     ) {
+      this._restoreOriginalSizesAttribute();
       this._restoreOriginalBorderAndPadding();
       this._setCssToMiddleCropOriginalImage();
     } else {
@@ -332,6 +359,22 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._setCssToPanAndZoomToRegion(transformation);
       if (this._debugRegionOverlayContainer) {
         this._drawDebugRegionOverlays(transformation);
+      }
+
+      // Stash away the original `sizes=` attribute and set it to a value that
+      // makes sure the browser will load an image with high enough resolution
+      // for the selected region:
+      if (this.srcset.length > 0 && this.sizes.length > 0) {
+        if (this._sizesAttributeToRestore === null) {
+          this._sizesAttributeToRestore = this.sizes;
+        }
+
+        const neededImageWidth = RectangleImageRegion.getTransformedImageSize(
+          this._fittedImageSize,
+          transformation
+        ).getWidth();
+        this._unregisterImageLoadedLateCallback();
+        this.sizes = `${Math.ceil(neededImageWidth)}px`;
       }
     }
   }
@@ -419,6 +462,13 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._parentElement.style.overflow = this._parentCssOverflowToRestore;
         this._parentCssOverflowToRestore = null;
       }
+    }
+  }
+
+  private _restoreOriginalSizesAttribute() {
+    if (this._sizesAttributeToRestore !== null) {
+      this.sizes = this._sizesAttributeToRestore;
+      this._sizesAttributeToRestore = null;
     }
   }
 
@@ -680,6 +730,14 @@ export class ImageDisplayControl extends HTMLImageElement {
   // parent element has other children, this might end up removing scrollbars
   // too aggressively.
   private _parentCssOverflowToRestore: string | null = null;
+
+  // Old `sizes=` attribute value that we have touched and want to restore
+  // later.
+  //
+  // Indeed if `srcset=` and `sizes=` are used, when zooming in on a region,
+  // we need to override `sizes=` to make sure that the browser picks an image
+  // with high enough resolution.
+  private _sizesAttributeToRestore: string | null = null;
 
   // Old CSS `border:` and `padding:` values that we have touched and want to
   // restore later.
