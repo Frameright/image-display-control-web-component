@@ -112,7 +112,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._sizeObserver.unobserve(this);
         this._sizeObserver = null;
       }
-      this._restoreOriginalSizesAttribute();
+      this._setDebounceSizesAttribute(/* restore */);
       this._restoreOriginalBorderAndPadding();
       this._removeDebugRegionOverlays();
       this._setCssToMiddleCropOriginalImage();
@@ -337,7 +337,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       ImageDisplayControl._ORIGINAL_IMAGE_REGION.id === bestRegion.id &&
       !this._debugRegionOverlayContainer
     ) {
-      this._restoreOriginalSizesAttribute();
+      this._setDebounceSizesAttribute(/* restore */);
       this._restoreOriginalBorderAndPadding();
       this._setCssToMiddleCropOriginalImage();
     } else {
@@ -365,16 +365,11 @@ export class ImageDisplayControl extends HTMLImageElement {
       // makes sure the browser will load an image with high enough resolution
       // for the selected region:
       if (this.srcset.length > 0 && this.sizes.length > 0) {
-        if (this._sizesAttributeToRestore === null) {
-          this._sizesAttributeToRestore = this.sizes;
-        }
-
         const neededImageWidth = RectangleImageRegion.getTransformedImageSize(
           this._fittedImageSize,
           transformation
         ).getWidth();
-        this._unregisterImageLoadedLateCallback();
-        this.sizes = `${Math.ceil(neededImageWidth)}px`;
+        this._setDebounceSizesAttribute(neededImageWidth);
       }
     }
   }
@@ -465,10 +460,44 @@ export class ImageDisplayControl extends HTMLImageElement {
     }
   }
 
-  private _restoreOriginalSizesAttribute() {
-    if (this._sizesAttributeToRestore !== null) {
-      this.sizes = this._sizesAttributeToRestore;
-      this._sizesAttributeToRestore = null;
+  // Sets the `sizes=` attribute to `${newValuePx}px` after a debounce timer.
+  // If newValuePx is undefined, the attribute is restored to its original
+  // value.
+  private _setDebounceSizesAttribute(newValuePx?: number) {
+    this._unregisterImageLoadedLateCallback();
+
+    if (this._sizesAttributeDebounceTimer !== null) {
+      clearTimeout(this._sizesAttributeDebounceTimer);
+    }
+
+    const debounceMs = 200;
+    if (typeof newValuePx !== 'undefined') {
+      this._sizesAttributeDebounceTimer = window.setTimeout(() => {
+        this._sizesAttributeDebounceTimer = null;
+
+        if (this._sizesAttributeToRestore === null) {
+          this._sizesAttributeToRestore = this.sizes;
+        }
+
+        if (
+          this._sizesAttributeLastSet === null ||
+          this._sizesAttributeLastSet < newValuePx
+        ) {
+          this.sizes = `${Math.ceil(newValuePx)}px`;
+          this._sizesAttributeLastSet = newValuePx;
+        }
+      }, debounceMs);
+    } else {
+      this._sizesAttributeDebounceTimer = window.setTimeout(() => {
+        this._sizesAttributeDebounceTimer = null;
+
+        if (this._sizesAttributeToRestore !== null) {
+          this.sizes = this._sizesAttributeToRestore;
+          this._sizesAttributeToRestore = null;
+        }
+
+        this._sizesAttributeLastSet = null;
+      }, debounceMs);
     }
   }
 
@@ -738,6 +767,18 @@ export class ImageDisplayControl extends HTMLImageElement {
   // we need to override `sizes=` to make sure that the browser picks an image
   // with high enough resolution.
   private _sizesAttributeToRestore: string | null = null;
+
+  // We use a debounce function when setting the `sizes=` attribute, as setting
+  // it while the component's size changes provokes some blinking on Chrome.
+  //
+  // See https://davidwalsh.name/javascript-debounce-function
+  private _sizesAttributeDebounceTimer: number | null = null;
+
+  // We remember the last set value in order to make sure we always increase it,
+  // but never decrease it as it would be useless. The goal of increasing is to
+  // let the browser fetch a higher resolution image when needed, and asking for
+  // lower resolution later on would be useless.
+  private _sizesAttributeLastSet: number | null = null;
 
   // Old CSS `border:` and `padding:` values that we have touched and want to
   // restore later.
