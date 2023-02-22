@@ -381,14 +381,22 @@ export class ImageDisplayControl extends HTMLImageElement {
     let smallestRatioDiff = this._elementSize.ratioDiffFactor(
       this._fittedImageSize
     );
+    this._logger.debug(
+      `Element ratio: ${this._elementSize.getSafeRatio().toFixed(3)}`
+    );
+    this._logger.debug(
+      `Original image ratio: ${this._fittedImageSize.getSafeRatio().toFixed(3)}`
+    );
 
     // It's only worth looking for an image region if the element ratio and
     // the original image ratio differ enough:
     if (smallestRatioDiff > 1.1) {
       this._rectangleImageRegions.forEach(region => {
-        const ratioDiff = this._elementSize.ratioDiffFactor(
-          region.size.getSizeInPixels(this._fittedImageSize)
+        const regionSize = region.size.getSizeInPixels(this._fittedImageSize);
+        this._logger.debug(
+          `${region.id} region ratio: ${regionSize.getSafeRatio().toFixed(3)}`
         );
+        const ratioDiff = this._elementSize.ratioDiffFactor(regionSize);
         if (ratioDiff < smallestRatioDiff) {
           smallestRatioDiff = ratioDiff;
           bestRegion = region;
