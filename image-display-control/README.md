@@ -220,7 +220,7 @@ More support can be achieved with a few tweaks:
   * Added `data-avoid-no-region=` attribute.
   * Added
     [debounce function](https://davidwalsh.name/javascript-debounce-function)
-    when setting the `sizes=` attribute in order not avoid blinking on Chrome.
+    when setting the `sizes=` attribute in order to avoid blinking on Chrome.
 
 **0.0.9** (2023-02-20):
   * Implemented overriding responsively the `sizes=` attribute in order to fetch
