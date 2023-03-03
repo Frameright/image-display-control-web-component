@@ -133,7 +133,7 @@ or get it from a
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.0.9/dist/image-display-control.min.js"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@0.1.0/dist/image-display-control.min.js"
 ></script>
 ```
 
@@ -215,6 +215,12 @@ More support can be achieved with a few tweaks:
 &emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
 
 ### Changelog
+
+**0.1.0** (2023-03-03):
+  * Added `data-avoid-no-region=` attribute.
+  * Added
+    [debounce function](https://davidwalsh.name/javascript-debounce-function)
+    when setting the `sizes=` attribute in order not avoid blinking on Chrome.
 
 **0.0.9** (2023-02-20):
   * Implemented overriding responsively the `sizes=` attribute in order to fetch

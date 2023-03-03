@@ -7,6 +7,7 @@ For a more high-level overview of the attributes, see the
 
 - [`data-image-regions=`](#data-image-regions)
 - [`data-image-region-id=`](#data-image-region-id)
+- [`data-avoid-no-region=`](#data-avoid-no-region)
 - [`data-css-contain-fallback=`](#data-css-contain-fallback)
 - [`data-disabled=`](#data-disabled)
 - [`data-loglevel=`](#data-loglevel)
@@ -67,6 +68,23 @@ to `data-image-region-id="<no region>"`. This is roughly the same as setting
 > thus unwanted scrollbars. To prevent this, the web component sets
 > [CSS containment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment)
 > (`contain: paint;`) on its parent element.
+
+## `data-avoid-no-region=`
+
+Type: string.
+
+Supported values:
+
+* `off`: The web component considers the full original image as a region valid
+  region to select. If the component's ratio and the image's ratio are very
+  close, the component will decide it's best not to zoom in on any region.
+* `on` (default): The web component will always prefer to zoom in on a region
+  if possible, rather than selecting the full original image.
+
+> **NOTE**: `data-avoid-no-region="on"` is not a guarantee that the web
+> component will always zoom in on a region. For example if there are no
+> regions, or if `data-image-region-id="<no region>"` is set at the same time,
+> the web component will still select the full original image.
 
 ## `data-css-contain-fallback=`
 

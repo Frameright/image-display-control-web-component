@@ -26,6 +26,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       'data-disabled', // 'none' (default), 'all' or 'css-contain'
       'data-image-regions', // JSON array of image regions
       'data-image-region-id', // forces zooming on a specific image region
+      'data-avoid-no-region', // 'on' (default) or 'off'
       'data-debug-draw-regions', // 'off' (default) or 'on'
       'data-css-contain-fallback', // 'disable-component' (default), 'disable-containment', 'overflow-hidden' or 'force'
     ];
@@ -85,6 +86,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         break;
 
       case 'data-image-region-id':
+      case 'data-avoid-no-region':
         if (!this._isDisabled()) {
           this._panAndZoomToBestRegion();
         }
@@ -387,6 +389,12 @@ export class ImageDisplayControl extends HTMLImageElement {
     this._logger.debug(
       `Original image ratio: ${this._fittedImageSize.getSafeRatio().toFixed(3)}`
     );
+
+    if (!this.dataset.avoidNoRegion || this.dataset.avoidNoRegion !== 'off') {
+      // The original image region is to be avoided. Setting smallestRatioDiff
+      // to an absurdly bad value:
+      smallestRatioDiff = 999;
+    }
 
     // It's only worth looking for an image region if the element ratio and
     // the original image ratio differ enough:

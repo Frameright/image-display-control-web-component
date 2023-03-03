@@ -8,6 +8,16 @@ function enableCheckboxChanged() {
 }
 
 // eslint-disable-next-line no-unused-vars
+function avoidNoRegionCheckboxChanged() {
+  const checkbox = document.getElementById('checkbox');
+  const imgElement = document.getElementById(_IMG_ELEMENT_ID);
+  imgElement.setAttribute(
+    'data-avoid-no-region',
+    checkbox.checked ? 'on' : 'off'
+  );
+}
+
+// eslint-disable-next-line no-unused-vars
 function cssCheckboxChanged() {
   const checkbox = document.getElementById('checkbox');
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);

@@ -42,36 +42,19 @@
     </p>
     <ul class="explanation">
       <li>
-        When resizing the web component (<code>&lt;img&gt;</code> element) to a
-        ratio close to one of the depicted image regions (green and red
-        rectangles), the component will automatically zoom in on it. If you have
-        a mouse, you can resize the element by dragging its bottom-right corner.
-        Otherwise you can click the <code>Resize me</code> button.
+        With <code>data-avoid-no-region="off"</code>, the component considers
+        the full original image as a region valid region to select. If the
+        component's ratio and the image's ratio are very close, the component
+        will decide it's best not to zoom in on any region.
       </li>
       <li>
-        Thanks to the <code>data-avoid-no-region="off"</code> attribute, the
-        component may also decide not to zoom in on any region, if its ratio is
-        close to the full original image's ratio.
+        With <code>data-avoid-no-region="on"</code>, the component will always
+        prefer to zoom in on a region rather than selecting the full original
+        image.
       </li>
       <li>
-        The component achieves zooming in on a region by simply changing the
-        following styles: <code>object-*</code>, <code>transform*</code>, and
-        <code>clip-path</code>.
-      </li>
-      <li>
-        These attributes get reset into a middle-cropping behavior (<code
-          >object-fit: cover</code
-        >) when setting the <code>data-disabled="all"</code> attribute. Test it
-        by clicking the <code>Enable web component</code> checkbox.
-      </li>
-      <li>
-        Regions are defined in the JSON-formatted
-        <code>data-image-regions=</code> attribute, either as relative or pixel
-        coordinates.
-      </li>
-      <li>
-        Logs are enabled via the <code>data-loglevel=</code> attribute. Log
-        entries are prefixed with the element's <code>id</code>.
+        Toggle the behavior by clicking the <code>Avoid no region</code>
+        checkbox.
       </li>
     </ul>
     <table>
@@ -117,10 +100,9 @@
             <input
               type="checkbox"
               id="checkbox"
-              onchange="enableCheckboxChanged();"
-              checked
+              onchange="avoidNoRegionCheckboxChanged();"
             />
-            Enable web component
+            Avoid no region
           </label>
         </td>
         <td class="resize-hint">
