@@ -1,6 +1,6 @@
 ## editors
 /.idea
-/.vscode
+# LA_TODO /.vscode
 
 ## system files
 .DS_Store
