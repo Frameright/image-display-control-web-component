@@ -110,7 +110,8 @@ The back-end would typically be responsible for extracting them from the image
 file and placing them in the front-end's `<img data-image-regions="` attribute.
 This is for example what
 [this WordPress plugin](https://wordpress.org/plugins/image-display-control/)
-does, with the help of [a PHP library](https://github.com/Frameright/image) for
+does, with the help of
+[a PHP library](https://github.com/Frameright/php-image-metadata-parser) for
 extracting image metadata.
 
 Photographers, or anyone else, can use the
