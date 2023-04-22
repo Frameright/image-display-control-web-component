@@ -112,7 +112,9 @@ This is for example what
 [this WordPress plugin](https://wordpress.org/plugins/image-display-control/)
 does, with the help of
 [a PHP library](https://github.com/Frameright/php-image-metadata-parser) for
-extracting image metadata.
+extracting image metadata. This can also be achieved on a Node.js back-end with
+the help of
+[this TypeScript library](https://github.com/Frameright/image-display-control-metadata-parser).
 
 Photographers, or anyone else, can use the
 [Frameright app](https://frameright.app/) to define and store image regions in
