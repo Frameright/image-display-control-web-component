@@ -25,6 +25,7 @@ pictures!
 - [Overview](#overview)
   * [Without this web component](#without-this-web-component)
   * [Basic usage](#basic-usage)
+  * [Why a custom `img` element?](#why-a-custom-img-element)
 - [Image Display Control metadata](#image-display-control-metadata)
 - [Installation](#installation)
 - [Usage](#usage)
@@ -100,6 +101,37 @@ and will automatically reassess the best region to zoom in on when it gets
 resized, e.g. when the user turns their phone from portrait to landscape.
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
+
+#### Why a custom `img` element?
+
+In order to have existing CSS rules in a project able to target indifferently
+classic `<img>` elements and our web component, two options exist:
+
+1. Invent a custom `<img is="image-display-control" src="...">` element implementing
+   [HTMLImageElement](https://developer.mozilla.org/en-US/docs/Web/API/HTMLImageElement),
+   or
+2. Invent a custom
+   `<image-display-control><img src="..."></image-display-control>` element
+   based on an
+   [HTML template with a `<slot>` element](https://developer.mozilla.org/en-US/docs/Web/API/Web_Components/Using_templates_and_slots).
+
+The problem with the second option is that it puts the `<img>` tag inside a new
+parent element `<image-display-control>` and CSS rules such as
+
+```css
+img {
+  /* fill the parent element */
+  width: 100%;
+  height: 100%;
+}
+```
+
+won't have the intended results, because the parent element hasn't been
+instructed to fill its own parent. This would force developers to adapt their
+CSS rules to also target the new parent, which is not ideal.
+
+This is why we went with the first option, which doesn't require any CSS changes
+in existing projects.
 
 ### Image Display Control metadata
 
