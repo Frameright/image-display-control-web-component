@@ -168,7 +168,7 @@ or get it from a
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.0.0/dist/image-display-control.min.js"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.1.0/dist/image-display-control.min.js"
 ></script>
 ```
 
@@ -251,8 +251,11 @@ More support can be achieved with a few tweaks:
 
 ### Changelog
 
+**1.1.0** (2023-05-05):
+  * Added one more export path inside `package.json`.
+
 **1.0.0** (2023-05-05):
-  * Export minified bundle inside `package.json`.
+  * Exported minified bundle inside `package.json`.
 
 **0.1.0** (2023-03-03):
   * Added `data-avoid-no-region=` attribute.
