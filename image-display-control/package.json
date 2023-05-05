@@ -22,12 +22,13 @@
     "email": "hello@frameright.io",
     "url": "https://frameright.io/"
   },
-  "version": "0.1.0",
+  "version": "1.0.0",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {
     ".": "./dist/src/index.js",
-    "./image-display-control.js": "./dist/src/image-display-control.js"
+    "./image-display-control.js": "./dist/src/image-display-control.js",
+    "./image-display-control.min.js": "./dist/image-display-control.min.js"
   },
   "scripts": {
     "analyze": "cem analyze",
