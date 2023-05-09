@@ -64,6 +64,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       case 'srcset':
         if (!this._isDisabled()) {
           this._registerImageLoadedLateCallback();
+          this._populateFittedImageSize();
           this._panAndZoomToBestRegion();
         }
         break;
@@ -196,7 +197,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   }
 
   // _imageLoadedLateCallback() would also be called each time the `sizes=`
-  // attribute is set, leading that attribute being set again by
+  // attribute is set, leading to that attribute being set again by
   // _panAndZoomToBestRegion(), leading to an infinite loop. To avoid this, we
   // unregister this callback at strategic places in the code.
   private _unregisterImageLoadedLateCallback() {
