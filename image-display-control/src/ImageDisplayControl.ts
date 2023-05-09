@@ -81,6 +81,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       case 'data-image-regions':
         this._populateRectangleImageRegions();
         if (!this._isDisabled()) {
+          this._resetDebugRegionOverlays();
           this._panAndZoomToBestRegion();
         }
         break;
@@ -103,9 +104,6 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _behaviorChanged() {
     this._populateBrowserFeatures();
 
-    const debugDrawRegionsStr: string = this.dataset.debugDrawRegions || 'off';
-    const debugDrawRegions: boolean = debugDrawRegionsStr === 'on';
-
     if (this._isDisabled()) {
       // We should behave like a normal <img> element.
       this._unregisterImageLoadedLateCallback();
@@ -122,13 +120,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     } else {
       this._logger.debug('Enabled');
       this._adaptParentCssContainment();
-
-      if (debugDrawRegions) {
-        this._recreateDebugRegionOverlays();
-      } else {
-        this._removeDebugRegionOverlays();
-      }
-
+      this._resetDebugRegionOverlays();
       this._panAndZoomToBestRegion();
       if (!this._sizeObserver) {
         this._sizeObserver = new ResizeObserver(
@@ -556,7 +548,17 @@ export class ImageDisplayControl extends HTMLImageElement {
       `${transformation.insetClipFromTopLeft.getWidth()}px)`;
   }
 
-  private _recreateDebugRegionOverlays() {
+  private _resetDebugRegionOverlays() {
+    const debugDrawRegionsStr: string = this.dataset.debugDrawRegions || 'off';
+    const debugDrawRegions: boolean = debugDrawRegionsStr === 'on';
+    if (debugDrawRegions) {
+      this._recreateEmptyDebugRegionOverlays();
+    } else {
+      this._removeDebugRegionOverlays();
+    }
+  }
+
+  private _recreateEmptyDebugRegionOverlays() {
     if (this._debugRegionOverlayContainer) {
       this._removeDebugRegionOverlays();
     }
