@@ -193,6 +193,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   }
 
   private _registerImageLoadedLateCallback() {
+    this._logger.debug('Registering "Image loaded late" callback...');
     this.addEventListener('load', this._imageLoadedLateCallback);
   }
 
@@ -201,6 +202,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   // _panAndZoomToBestRegion(), leading to an infinite loop. To avoid this, we
   // unregister this callback at strategic places in the code.
   private _unregisterImageLoadedLateCallback() {
+    this._logger.debug('Unregistering "Image loaded late" callback...');
     this.removeEventListener('load', this._imageLoadedLateCallback);
   }
 
@@ -473,8 +475,6 @@ export class ImageDisplayControl extends HTMLImageElement {
   // If newValuePx is undefined, the attribute is restored to its original
   // value.
   private _setDebounceSizesAttribute(newValuePx?: number) {
-    this._unregisterImageLoadedLateCallback();
-
     if (this._sizesAttributeDebounceTimer !== null) {
       clearTimeout(this._sizesAttributeDebounceTimer);
     }
@@ -492,7 +492,10 @@ export class ImageDisplayControl extends HTMLImageElement {
           this._sizesAttributeLastSet === null ||
           this._sizesAttributeLastSet < newValuePx
         ) {
-          this.sizes = `${Math.ceil(newValuePx)}px`;
+          this._unregisterImageLoadedLateCallback();
+          const newValuePxStr = `${Math.ceil(newValuePx)}px`;
+          this._logger.debug(`Increasing sizes= to ${newValuePxStr}`);
+          this.sizes = newValuePxStr;
           this._sizesAttributeLastSet = newValuePx;
         }
       }, debounceMs);
@@ -501,6 +504,10 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._sizesAttributeDebounceTimer = null;
 
         if (this._sizesAttributeToRestore !== null) {
+          this._unregisterImageLoadedLateCallback();
+          this._logger.debug(
+            `Resetting sizes= to ${this._sizesAttributeToRestore}`
+          );
           this.sizes = this._sizesAttributeToRestore;
           this._sizesAttributeToRestore = null;
         }

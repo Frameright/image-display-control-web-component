@@ -66,7 +66,7 @@ If you just want to quickly try out the web component, you can get it from a
 
     <script
       type="module"
-      src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.1.2/dist/image-display-control.min.js"
+      src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.1.3/dist/image-display-control.min.js"
     ></script>
   </body>
 </html>
