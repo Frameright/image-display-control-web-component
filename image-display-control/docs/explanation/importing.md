@@ -6,6 +6,7 @@
 
 - [From a CDN](#from-a-cdn)
 - [Inside a project with a bundler](#inside-a-project-with-a-bundler)
+  * [Inside a Vite project](#inside-a-vite-project)
   * [Inside a Next.js project](#inside-a-nextjs-project)
 
 <!-- tocstop -->
@@ -88,6 +89,24 @@ and then import it in your front-end code with:
 import "@frameright/image-display-control-web-component/image-display-control.js";
 ```
 
+### Inside a Vite project
+
+If you are using [Vite](https://vitejs.dev/), you can serve the web component's
+to the front-end by simply importing it in your React component's
+implementation:
+
+```js
+// src/MyComponent.tsx
+
+import "@frameright/image-display-control-web-component/image-display-control.js";
+
+export default function MyComponent() {
+  return (
+    <img is="image-display-control" ... />
+  );
+}
+```
+
 ### Inside a Next.js project
 
 If you are using [Next.js](https://nextjs.org/), you can serve the web
@@ -110,7 +129,7 @@ if (typeof window !== "undefined") {
 // Your page's implementation
 export default function MyPage() {
   return (
-    <Image ... />
+    <Image is="image-display-control" ... />
   );
 }
 ```
