@@ -38,3 +38,4 @@ Node.js
 HTMLImageElement
 Next.js
 Vite
+vite-plugin-ssr

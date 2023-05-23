@@ -7,6 +7,7 @@
 - [From a CDN](#from-a-cdn)
 - [Inside a project with a bundler](#inside-a-project-with-a-bundler)
   * [Inside a Vite project](#inside-a-vite-project)
+    + [With SSR](#with-ssr)
   * [Inside a Next.js project](#inside-a-nextjs-project)
 
 <!-- tocstop -->
@@ -99,6 +100,30 @@ implementation:
 // src/MyComponent.tsx
 
 import "@frameright/image-display-control-web-component/image-display-control.js";
+
+export default function MyComponent() {
+  return (
+    <img is="image-display-control" ... />
+  );
+}
+```
+
+#### With SSR
+
+If you are using [vite-plugin-ssr](https://vite-plugin-ssr.com/), you can serve
+the web component's code to the front-end by conditionally importing it in your
+React component's implementation:
+
+```js
+// src/MyComponent.tsx
+
+// Import only in the browser, not in the back-end
+if (typeof window !== "undefined") {
+  // Defines the <img is="image-display-control"> web component.
+  import(
+    "@frameright/image-display-control-web-component/dist/src/image-display-control.js"
+  );
+}
 
 export default function MyComponent() {
   return (
