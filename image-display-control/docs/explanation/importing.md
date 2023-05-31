@@ -90,6 +90,9 @@ and then import it in your front-end code with:
 import "@frameright/image-display-control-web-component/image-display-control.js";
 ```
 
+[This React component](https://github.com/Frameright/react-image-display-control/blob/main/src/index.tsx)
+is an example of doing that.
+
 ### Inside a Vite project
 
 If you are using [Vite](https://vitejs.dev/), you can serve the web component's
