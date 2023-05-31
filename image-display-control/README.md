@@ -18,6 +18,10 @@ pictures!
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
+> **NOTE**: if you are using React, you may want to have a look at the
+> [Image Display Control React component](https://github.com/Frameright/react-image-display-control)
+> instead.
+
 ### Table of Contents
 
 <!-- toc -->
@@ -147,6 +151,9 @@ does, with the help of
 extracting image metadata. This can also be achieved on a Node.js back-end with
 the help of
 [this TypeScript library](https://github.com/Frameright/image-display-control-metadata-parser).
+In fact we have created
+[this React component](https://github.com/Frameright/react-image-display-control)
+that combines that does all this for you.
 
 Photographers, or anyone else, can use the
 [Frameright app](https://frameright.app/) to define and store image regions in
