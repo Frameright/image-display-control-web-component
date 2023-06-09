@@ -1,5 +1,9 @@
 # HTML attributes
 
+&emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
+
+## Table of Contents
+
 <!-- toc -->
 
 - [Standard `img` attributes](#standard-img-attributes)

@@ -4,6 +4,8 @@ The usual ways of styling an `<img>` element are supported, e.g. `width:`,
 `border:`, `padding:`, etc. However the following CSS properties have now
 limitations.
 
+&emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
+
 ## Table of Contents
 
 <!-- toc -->
