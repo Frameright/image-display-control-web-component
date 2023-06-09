@@ -27,7 +27,7 @@ If you just want to quickly try out the web component, you can get it from a
   <body>
     <img
       is="image-display-control"
-      src="https://webc.frameright.io/assets/pics/skater.webp"
+      src="https://webc.frameright.io/assets/pics/skater.jpg"
       width="200"
       height="200"
       data-image-regions='[{
