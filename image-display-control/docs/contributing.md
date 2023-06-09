@@ -1,5 +1,7 @@
 # Contributing
 
+&emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
+
 ## Table of Contents
 
 <!-- toc -->

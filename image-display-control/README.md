@@ -18,6 +18,8 @@ pictures!
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
+&emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
+
 > **NOTE**: if you are using React, you may want to have a look at the
 > [Image Display Control React component](https://github.com/Frameright/react-image-display-control)
 > instead.
@@ -235,6 +237,8 @@ npm start
 ![Demo](https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/demo.gif)
 
 &emsp; :wrench: [Contributing](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/contributing.md)
+
+&emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
