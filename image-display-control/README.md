@@ -157,7 +157,8 @@ the help of
 [this TypeScript library](https://github.com/Frameright/image-display-control-metadata-parser).
 In fact we have created
 [this React component](https://github.com/Frameright/react-image-display-control)
-that combines that does all this for you.
+that does all this for you by serving the web component and running the
+TypeScript library either on your Node.js back-end or in the browser.
 
 Photographers, or anyone else, can use the
 [Frameright app](https://frameright.app/) to define and store image regions in
@@ -263,6 +264,9 @@ More support can be achieved with a few tweaks:
 &emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
 
 ### Changelog
+
+**1.1.4** (2023-06-11):
+  * Improved documentation.
 
 **1.1.3** (2023-05-10):
   * Fixed bug where the web component would not always re-assess the new image
