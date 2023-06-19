@@ -17,7 +17,7 @@ interface BrowserFeatures {
 export class ImageDisplayControl extends HTMLImageElement {
   // See
   // https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_custom_elements#using_the_lifecycle_callbacks
-  static get observedAttributes() {
+  public static get observedAttributes() {
     return [
       'id',
       'src',
@@ -39,13 +39,13 @@ export class ImageDisplayControl extends HTMLImageElement {
     new SizeInRelativeCoord(1, 1)
   );
 
-  connectedCallback() {
+  public connectedCallback() {
     this._logger.debug('Connected');
     this._registerImageLoadedLateCallback();
     this._behaviorChanged();
   }
 
-  disconnectedCallback() {
+  public disconnectedCallback() {
     this._logger.debug('Disconnected');
     this._unregisterImageLoadedLateCallback();
     this._restoreOriginalParentCssContainment();
@@ -54,7 +54,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Called whenever an HTML attribute of the element has changed. Guaranteed
   // to be called at least once for each explicitly set attribute after the
   // element has been created.
-  attributeChangedCallback(attributeName: string) {
+  public attributeChangedCallback(attributeName: string) {
     switch (attributeName) {
       case 'id':
         this._logger.setId(this.id);
@@ -98,6 +98,13 @@ export class ImageDisplayControl extends HTMLImageElement {
         this._logger.warn(`Unexpected attribute mutation: ${attributeName}`);
         break;
     }
+  }
+
+  // For accessing private members from tests. Do not use in production.
+  // eslint-disable-next-line class-methods-use-this
+  public _getInternal(expr: string) {
+    // eslint-disable-next-line no-eval
+    return eval(expr);
   }
 
   // Called whenever the element should start/stop having some of its intended

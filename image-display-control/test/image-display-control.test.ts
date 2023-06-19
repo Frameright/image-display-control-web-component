@@ -1,23 +1,17 @@
-// TODO import { fixture, expect } from '@open-wc/testing';
-// TODO import { ImageDisplayControl } from '../src/ImageDisplayControl.js';
+import { fixture, expect, html } from '@open-wc/testing';
+import { ImageDisplayControl } from '../src/ImageDisplayControl.js';
 import '../src/image-display-control.js';
 
 describe('ImageDisplayControl', () => {
-  /* FIXME these tests are for testing a component written with lit
-  it('can set the id via attribute', async () => {
-    const el = await fixture<ImageDisplayControl>(
-      html`<img id="myid"></image-display-control>`
+  it('detects browser features', async () => {
+    const element = await fixture<ImageDisplayControl>(
+      html`<img is="image-display-control" alt="description" />`
     );
 
-    expect(el._id).to.equal('myid');
+    expect(element._getInternal('this._browserFeatures')).to.deep.equal({
+      cssInset: true,
+      resizeObserver: true,
+      cssContain: true,
+    });
   });
-
-  it('passes the a11y audit', async () => {
-    const el = await fixture<ImageDisplayControl>(
-      html`<image-display-control></image-display-control>`
-    );
-
-    expect(el).shadowDom.to.be.accessible();
-  });
-  */
 });
