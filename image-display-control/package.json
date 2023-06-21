@@ -17,12 +17,13 @@
     "image-publishing"
   ],
   "license": "MIT",
+  "repository": "https://github.com/Frameright/image-display-control-web-component",
   "author": {
     "name": "Frameright (Coberg Ltd)",
     "email": "hello@frameright.io",
     "url": "https://frameright.io/"
   },
-  "version": "1.1.4",
+  "version": "1.1.5",
   "main": "dist/src/index.js",
   "module": "dist/src/index.js",
   "exports": {

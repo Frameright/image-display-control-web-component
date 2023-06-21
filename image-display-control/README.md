@@ -265,6 +265,9 @@ More support can be achieved with a few tweaks:
 
 ### Changelog
 
+**1.1.5** (2023-06-21):
+  * Improved documentation.
+
 **1.1.4** (2023-06-11):
   * Improved documentation.
 
