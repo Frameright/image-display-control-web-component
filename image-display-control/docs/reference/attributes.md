@@ -67,11 +67,7 @@ like a standard `<img>` tag with `object-fit: cover`, you can set this attribute
 to `data-image-region-id="<no region>"`. This is roughly the same as setting
 `data-disabled="all"`, although the CSS containment will still be applied.
 
-> **NOTE**: The web component uses CSS `transform*` and `clip-path` properties
-> in order to zoom in on a region, which would normally cause an overflow and
-> thus unwanted scrollbars. To prevent this, the web component sets
-> [CSS containment](https://developer.mozilla.org/en-US/docs/Web/CSS/CSS_Containment)
-> (`contain: paint;`) on its parent element.
+See [CSS containment](../explanation/css-containment.md) for more information.
 
 ## `data-avoid-no-region=`
 
@@ -106,7 +102,8 @@ Supported values:
 * `force`: Even if the browser is known not to support `contain: paint;`, set
   it anyway.
 
-See [Browser support](../explanation/browsers.md) for more information.
+See [Browser support](../explanation/browsers.md) and
+[CSS containment](../explanation/css-containment.md) for more information.
 
 ## `data-disabled=`
 
@@ -121,6 +118,9 @@ Supported values:
 * `css-contain`: Use of CSS `contain:` disabled. The web component will behave
   as if this feature wasn't supported by the browser and follow the fallback
   behavior set by the `data-css-contain-fallback=` attribute.
+
+See [Browser support](../explanation/browsers.md) and
+[CSS containment](../explanation/css-containment.md) for more information.
 
 ## `data-loglevel=`
 
