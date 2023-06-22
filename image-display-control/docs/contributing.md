@@ -60,6 +60,8 @@ npm start  # interactive watch mode
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
+&emsp; 💻 [CodeSandbox](https://codesandbox.io/s/image-display-control-web-component-6hzmq5)
+
 ## :bookmark_tabs: Documenting
 
 ### Spellchecking the documentation

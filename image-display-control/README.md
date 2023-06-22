@@ -19,6 +19,8 @@ pictures!
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
+&emsp; 💻 [CodeSandbox](https://codesandbox.io/s/image-display-control-web-component-6hzmq5)
+
 &emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
 
 > **NOTE**: if you are using React, you may want to have a look at the
@@ -108,6 +110,8 @@ and will automatically reassess the best region to zoom in on when it gets
 resized, e.g. when the user turns their phone from portrait to landscape.
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
+
+&emsp; 💻 [CodeSandbox](https://codesandbox.io/s/image-display-control-web-component-6hzmq5)
 
 &emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
 

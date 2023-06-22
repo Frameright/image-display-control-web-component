@@ -13,3 +13,5 @@ npm start
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
 &emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
+
+&emsp; 💻 [CodeSandbox](https://codesandbox.io/s/image-display-control-web-component-6hzmq5)
