@@ -58,5 +58,6 @@ window.ResizeObserver = window.ResizeObserver || ResizeObserverPonyfill;
 Even if the browser does not support the `contain` CSS property, it is possible
 to make use of the web component by telling it what to do instead when this
 browser feature isn't available. This can be done by setting the
-`data-css-contain-fallback=` HTML attribute. See the
+`data-css-contain-fallback=` HTML attribute. See
+[CSS containment](css-containment.md) and the
 [Attribute reference](../reference/attributes.md) for more information.
