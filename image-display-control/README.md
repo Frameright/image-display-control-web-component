@@ -195,7 +195,7 @@ or get it from a
 ```
 
 &emsp; :floppy_disk:
-[Importing in your project](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/importing.md)
+[Importing in your project](https://docs.frameright.io/web-component/importing)
 
 ### Usage
 
@@ -237,13 +237,13 @@ or get it from a
 ![Demo](https://docs.frameright.io/img/web-component/demo.gif)
 
 &emsp; :airplane:
-[Advanced usage](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/usage.md)
+[Advanced usage](https://docs.frameright.io/web-component/usage)
 
-&emsp; :sparkles: [Local demo](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/demo/)
+&emsp; :sparkles: [Local demo](https://docs.frameright.io/web-component/demo)
 
-&emsp; :wrench: [Contributing](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/contributing.md)
+&emsp; :wrench: [Contributing](https://docs.frameright.io/web-component/contributing)
 
-&emsp; 📝 [Changelog](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/reference/changelog.md)
+&emsp; 📝 [Changelog](https://docs.frameright.io/web-component/changelog)
 
 &emsp; :bulb: [GitHub Discussions](https://github.com/Frameright/image-display-control-web-component/discussions)
 
@@ -265,4 +265,4 @@ From scratch the web component should work on:
 
 More support can be achieved with a few tweaks:
 
-&emsp; :mag: [Browser support](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/explanation/browsers.md)
+&emsp; :mag: [Browser support](https://docs.frameright.io/web-component/browsers)
