@@ -8,6 +8,5 @@
 
 .editorconfig
 .prettier*
-.spelling
 .vscode/
 tsconfig.tsbuildinfo

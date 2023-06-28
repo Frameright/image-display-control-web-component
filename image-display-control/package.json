@@ -41,8 +41,7 @@
     "format": "eslint --ext .ts,.html . --fix --ignore-path .gitignore && prettier --write .",
     "test": "tsc && wtr --coverage",
     "test:watch": "tsc && concurrently -k -r \"tsc --watch --preserveWatchOutput\" \"wtr --watch\"",
-    "gentoc": "./bin/gentoc.sh",
-    "spellcheck": "npx mdspell '**/*.md' '!**/node_modules/**' --ignore-acronyms --ignore-numbers --no-suggestions --en-us"
+    "gentoc": "./bin/gentoc.sh"
   },
   "dependencies": {
     "@ungap/custom-elements": "^1.1.1"

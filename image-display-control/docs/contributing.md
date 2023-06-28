@@ -11,7 +11,6 @@
   * [Running the unit tests](#running-the-unit-tests)
   * [Running the local demo](#running-the-local-demo)
 - [:bookmark_tabs: Documenting](#bookmark_tabs-documenting)
-  * [Spellchecking the documentation](#spellchecking-the-documentation)
   * [(Re-)generating tables of contents](#re-generating-tables-of-contents)
 - [:gift: Releasing](#gift-releasing)
   * [Version number](#version-number)
@@ -64,16 +63,6 @@ npm start  # interactive watch mode
 
 ## :bookmark_tabs: Documenting
 
-### Spellchecking the documentation
-
-Pull and run [`mdspell`](https://github.com/lukeapage/node-markdown-spellcheck)
-with:
-
-```bash
-npm install
-npm run spellcheck
-```
-
 ### (Re-)generating tables of contents
 
 Pull and run [`markdown-toc`](https://github.com/jonschlinkert/markdown-toc)
@@ -117,7 +106,6 @@ Format and validate the source one last time:
 ```bash
 npm run format
 npm run gentoc
-npm run spellcheck
 npm run test
 ```
 
