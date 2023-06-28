@@ -5,9 +5,16 @@
 
 &nbsp;
 
-<!-- Note: make sure all URLs in this document are absolute, and not relative
-     within GitHub, as we are publishing this file to NPM and want URLs to
-     remain valid there. -->
+<!--
+WARNINGS:
+* Bits of information here are duplicated in several places:
+    * https://docs.frameright.io/web-component
+    * https://github.com/Frameright/image-display-control-web-component
+  Make sure to keep them in sync.
+* Make sure all URLs in this document are absolute, and not relative within
+  GitHub, as we are publishing this file to NPM and want URLs to remain valid
+  there.
+-->
 
 # `<img is="image-display-control">`
 

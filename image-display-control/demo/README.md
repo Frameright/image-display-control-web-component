@@ -1,5 +1,12 @@
 # Local demo
 
+<!--
+WARNING: Bits of information here are duplicated in several places:
+  * https://docs.frameright.io/web-component/demo
+  * https://github.com/Frameright/image-display-control-web-component/blob/main/demo/README.md
+Make sure to keep them in sync.
+-->
+
 Run me with:
 
 ```bash
