@@ -59,7 +59,7 @@ offer nowadays is to use the
 [`object-fit: cover;`](https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit)
 CSS property in order to scale and middle-crop it:
 
-<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/middlecrop.png" align="right">
+<img src="https://docs.frameright.io/img/web-component/middlecrop.png" align="right">
 
 ```html
 <img
@@ -79,7 +79,7 @@ middle-crop.
 This web component extends the `<img>` tag with the ability to accept a list of
 image regions, and to zoom in on the best one for the current element size:
 
-<img src="https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/oneanimal.png" align="right">
+<img src="https://docs.frameright.io/img/web-component/oneanimal.png" align="right">
 
 ```html
 <img
@@ -234,7 +234,7 @@ or get it from a
 </html>
 ```
 
-![Demo](https://raw.githubusercontent.com/Frameright/image-display-control-web-component/main/image-display-control/docs/assets/demo.gif)
+![Demo](https://docs.frameright.io/img/web-component/demo.gif)
 
 &emsp; :airplane:
 [Advanced usage](https://github.com/Frameright/image-display-control-web-component/blob/main/image-display-control/docs/usage.md)

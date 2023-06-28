@@ -15,7 +15,7 @@ npm install
 npm start
 ```
 
-![Demo](../docs/assets/demo.gif)
+![Demo](https://docs.frameright.io/img/web-component/demo.gif)
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
