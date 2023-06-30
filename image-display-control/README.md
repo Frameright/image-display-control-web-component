@@ -20,6 +20,8 @@ WARNINGS:
 
 ## Image Display Control Web Component
 
+> **➡️ See this document rendered at [docs.frameright.io/web-component](https://docs.frameright.io/web-component)**
+
 An easy way to do [Image Display Control](https://frameright.io) in your HTML
 page. Made with :heart: by [Frameright](https://frameright.io). Power to the
 pictures!
