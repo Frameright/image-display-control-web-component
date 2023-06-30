@@ -171,7 +171,7 @@ that does all this for you by serving the web component and running the
 TypeScript library either on your Node.js back-end or in the browser.
 
 Photographers, or anyone else, can use the
-[Frameright app](https://frameright.app/) to define and store image regions in
+[Frameright webapp](https://frameright.app/) to define and store image regions in
 the metadata of their pictures.
 
 ### Installation
