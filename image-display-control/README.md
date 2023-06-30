@@ -109,10 +109,9 @@ image regions, and to zoom in on the best one for the current element size:
 />
 ```
 
-The resulting HTML element is
-[responsive](https://developer.mozilla.org/en-US/docs/Learn/CSS/CSS_layout/Responsive_Design)
-and will automatically reassess the best region to zoom in on when it gets
-resized, e.g. when the user turns their phone from portrait to landscape.
+The resulting HTML element is responsive and will automatically reassess the
+best region to zoom in on when it gets resized, e.g. when the user turns their
+phone from portrait to landscape.
 
 &emsp; :sparkles: [Live mobile demo](https://webc.frameright.io)
 
