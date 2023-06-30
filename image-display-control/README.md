@@ -258,9 +258,9 @@ or get it from a
 
 From scratch the web component should work on:
 
-* Chrome 64+ (2018)
-* Firefox 69+ (2019)
-* Safari 15.4+ (2022)
+* Chrome 64+ (2018 or newer)
+* Firefox 69+ (2019 or newer)
+* Safari 15.4+ (2022 or newer)
 
 More support can be achieved with a few tweaks:
 
