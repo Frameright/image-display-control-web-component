@@ -47,6 +47,7 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   public disconnectedCallback() {
     this._logger.debug('Disconnected');
+    this._removeDebugRegionOverlays();
     this._unregisterImageLoadedLateCallback();
     this._restoreOriginalParentCssContainment();
   }
@@ -574,9 +575,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   }
 
   private _recreateEmptyDebugRegionOverlays() {
-    if (this._debugRegionOverlayContainer) {
-      this._removeDebugRegionOverlays();
-    }
+    this._removeDebugRegionOverlays();
     this._debugRegionOverlayContainer = document.createElement('div');
 
     // Let the container take no space, so we don't affect the web component's
@@ -587,7 +586,11 @@ export class ImageDisplayControl extends HTMLImageElement {
 
   private _removeDebugRegionOverlays() {
     if (this._debugRegionOverlayContainer) {
-      this._parentElement?.removeChild(this._debugRegionOverlayContainer);
+      try {
+        this._parentElement?.removeChild(this._debugRegionOverlayContainer);
+      } catch (e) {
+        // Should never happen, but just in case.
+      }
       this._debugRegionOverlayContainer = null;
     }
     this._debugRegionOverlays.clear();
