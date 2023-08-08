@@ -8,21 +8,7 @@ updates:
     schedule:
       interval: "daily"
 
-    # Do not get one pull request per version bump. Instead get one pull request
-    # bumping several dependency versions at once:
-    groups:
-      all-deps:
-        patterns:
-          - "*"
-
   - package-ecosystem: "npm"
     directory: "/image-display-control"
     schedule:
       interval: "daily"
-
-    # Do not get one pull request per version bump. Instead get one pull request
-    # bumping several dependency versions at once:
-    groups:
-      all-deps:
-        patterns:
-          - "*"
