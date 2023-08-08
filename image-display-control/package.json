@@ -47,7 +47,7 @@
     "@ungap/custom-elements": "^1.1.1"
   },
   "devDependencies": {
-    "@custom-elements-manifest/analyzer": "^0.4.17",
+    "@custom-elements-manifest/analyzer": "^0.8.4",
     "@open-wc/eslint-config": "^8.0.2",
     "@open-wc/testing": "^3.1.6",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
