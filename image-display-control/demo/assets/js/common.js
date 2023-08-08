@@ -13,7 +13,7 @@ function avoidNoRegionCheckboxChanged() {
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
   imgElement.setAttribute(
     'data-avoid-no-region',
-    checkbox.checked ? 'on' : 'off'
+    checkbox.checked ? 'on' : 'off',
   );
 }
 
@@ -23,7 +23,7 @@ function cssCheckboxChanged() {
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
   imgElement.setAttribute(
     'data-disabled',
-    checkbox.checked ? 'none' : 'css-contain'
+    checkbox.checked ? 'none' : 'css-contain',
   );
 }
 
@@ -33,7 +33,7 @@ function drawRegionsCheckboxChanged() {
   const imgElement = document.getElementById(_IMG_ELEMENT_ID);
   imgElement.setAttribute(
     'data-debug-draw-regions',
-    checkbox.checked ? 'on' : 'off'
+    checkbox.checked ? 'on' : 'off',
   );
 }
 

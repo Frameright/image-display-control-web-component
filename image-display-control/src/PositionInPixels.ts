@@ -15,7 +15,7 @@ export class PositionInPixels {
 
     return new PositionInRelativeCoord(
       this.x / baseSize.getSafeWidth(),
-      this.y / baseSize.getSafeHeight()
+      this.y / baseSize.getSafeHeight(),
     );
   }
 

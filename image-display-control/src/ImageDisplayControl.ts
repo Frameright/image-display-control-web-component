@@ -36,7 +36,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   private static readonly _ORIGINAL_IMAGE_REGION = new RectangleImageRegion(
     '<no region>',
     new PositionInRelativeCoord(0, 0),
-    new SizeInRelativeCoord(1, 1)
+    new SizeInRelativeCoord(1, 1),
   );
 
   public connectedCallback() {
@@ -133,7 +133,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._panAndZoomToBestRegion();
       if (!this._sizeObserver) {
         this._sizeObserver = new ResizeObserver(
-          this._resizeCallback.bind(this)
+          this._resizeCallback.bind(this),
         );
         this._sizeObserver.observe(this);
       }
@@ -145,7 +145,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   private _resizeCallback(entries: ResizeObserverEntry[]) {
     if (this._isDisabled()) {
       this._logger.warn(
-        'Component disabled, spurious call to _resizeCallback()'
+        'Component disabled, spurious call to _resizeCallback()',
       );
       return;
     }
@@ -155,7 +155,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     const entry = entries.pop();
     if (!entry) {
       this._logger.warn(
-        'No ResizeObserverEntry, spurious call to _resizeCallback()'
+        'No ResizeObserverEntry, spurious call to _resizeCallback()',
       );
       return;
     }
@@ -170,12 +170,12 @@ export class ImageDisplayControl extends HTMLImageElement {
       // https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
       newElementSize = new SizeInPixels(
         entry.contentBoxSize[0].inlineSize,
-        entry.contentBoxSize[0].blockSize
+        entry.contentBoxSize[0].blockSize,
       );
     } else {
       newElementSize = new SizeInPixels(
         entry.contentRect.width,
-        entry.contentRect.height
+        entry.contentRect.height,
       );
     }
 
@@ -243,7 +243,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._logger.debug(
         `Rectangle region found: id=${rectangleImageRegion.id}, ` +
           `position=${rectangleImageRegion.position}, ` +
-          `size=${rectangleImageRegion.size}`
+          `size=${rectangleImageRegion.size}`,
       );
       this._rectangleImageRegions.push(rectangleImageRegion);
     });
@@ -265,7 +265,7 @@ export class ImageDisplayControl extends HTMLImageElement {
 
     const naturalImageSize = new SizeInPixels(
       this.naturalWidth,
-      this.naturalHeight
+      this.naturalHeight,
     );
 
     let fittingFactor = 1;
@@ -291,17 +291,17 @@ export class ImageDisplayControl extends HTMLImageElement {
 
     this._fittedImageSize = new SizeInPixels(
       this.naturalWidth * fittingFactor,
-      this.naturalHeight * fittingFactor
+      this.naturalHeight * fittingFactor,
     );
 
     this._fittedImageBottomRightMargin = new SizeInPixels(
       this._elementSize.getWidth() - this._fittedImageSize.getWidth(),
-      this._elementSize.getHeight() - this._fittedImageSize.getHeight()
+      this._elementSize.getHeight() - this._fittedImageSize.getHeight(),
     );
 
     this._logger.debug(`Fitted image size: ${this._fittedImageSize}`);
     this._logger.debug(
-      `Fitted image margin: ${this._fittedImageBottomRightMargin}`
+      `Fitted image margin: ${this._fittedImageBottomRightMargin}`,
     );
   }
 
@@ -326,7 +326,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         bestRegion = ImageDisplayControl._ORIGINAL_IMAGE_REGION;
       } else {
         bestRegion = this._rectangleImageRegions.find(
-          region => region.id === this.dataset.imageRegionId
+          region => region.id === this.dataset.imageRegionId,
         );
       }
     }
@@ -359,7 +359,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       const transformation = bestRegion.getTransformation(
         this._elementSize,
         this._fittedImageSize,
-        this._fittedImageBottomRightMargin
+        this._fittedImageBottomRightMargin,
       );
       this._setCssToPanAndZoomToRegion(transformation);
       if (this._debugRegionOverlayContainer) {
@@ -372,7 +372,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       if (this.srcset.length > 0 && this.sizes.length > 0) {
         const neededImageWidth = RectangleImageRegion.getTransformedImageSize(
           this._fittedImageSize,
-          transformation
+          transformation,
         ).getWidth();
         this._setDebounceSizesAttribute(neededImageWidth);
       }
@@ -384,13 +384,15 @@ export class ImageDisplayControl extends HTMLImageElement {
     // Determining the best image region for the current element size.
     let bestRegion = ImageDisplayControl._ORIGINAL_IMAGE_REGION;
     let smallestRatioDiff = this._elementSize.ratioDiffFactor(
-      this._fittedImageSize
+      this._fittedImageSize,
     );
     this._logger.debug(
-      `Element ratio: ${this._elementSize.getSafeRatio().toFixed(3)}`
+      `Element ratio: ${this._elementSize.getSafeRatio().toFixed(3)}`,
     );
     this._logger.debug(
-      `Original image ratio: ${this._fittedImageSize.getSafeRatio().toFixed(3)}`
+      `Original image ratio: ${this._fittedImageSize
+        .getSafeRatio()
+        .toFixed(3)}`,
     );
 
     if (!this.dataset.avoidNoRegion || this.dataset.avoidNoRegion !== 'off') {
@@ -405,7 +407,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._rectangleImageRegions.forEach(region => {
         const regionSize = region.size.getSizeInPixels(this._fittedImageSize);
         this._logger.debug(
-          `${region.id} region ratio: ${regionSize.getSafeRatio().toFixed(3)}`
+          `${region.id} region ratio: ${regionSize.getSafeRatio().toFixed(3)}`,
         );
         const ratioDiff = this._elementSize.ratioDiffFactor(regionSize);
         if (ratioDiff < smallestRatioDiff) {
@@ -514,7 +516,7 @@ export class ImageDisplayControl extends HTMLImageElement {
         if (this._sizesAttributeToRestore !== null) {
           this._unregisterImageLoadedLateCallback();
           this._logger.debug(
-            `Resetting sizes= to ${this._sizesAttributeToRestore}`
+            `Resetting sizes= to ${this._sizesAttributeToRestore}`,
           );
           this.sizes = this._sizesAttributeToRestore;
           this._sizesAttributeToRestore = null;
@@ -550,12 +552,12 @@ export class ImageDisplayControl extends HTMLImageElement {
     this.style.objectPosition = 'top left';
 
     this.style.transformOrigin = `${transformation.origin.x.toFixed(
-      3
+      3,
     )}px ${transformation.origin.y.toFixed(3)}px`;
     this.style.transform = `translate(${-transformation.origin.x.toFixed(
-      3
+      3,
     )}px, ${-transformation.origin.y.toFixed(
-      3
+      3,
     )}px) scale(${transformation.factor.toFixed(3)})`;
     this.style.clipPath =
       `inset(${transformation.insetClipFromTopLeft.getHeight()}px ` +
@@ -608,7 +610,7 @@ export class ImageDisplayControl extends HTMLImageElement {
   // Then move it to the correct position.
   private _drawDebugRegionOverlay(
     region: RectangleImageRegion,
-    transformation: Transformation
+    transformation: Transformation,
   ) {
     let overlay = this._debugRegionOverlays.get(region.id);
     if (!overlay) {
@@ -624,7 +626,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     const boundingBox = region.getBoundingBox(
       this._elementSize,
       this._fittedImageSize,
-      transformation
+      transformation,
     );
     overlay.style.left = `${boundingBox.position.x}px`;
     overlay.style.top = `${boundingBox.position.y}px`;
@@ -660,7 +662,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     if (!cssInset) {
       this._logger.error(
         'CSS `clip-path: inset()` is not supported. ' +
-          'Disabling the web component'
+          'Disabling the web component',
       );
     }
 
@@ -669,7 +671,7 @@ export class ImageDisplayControl extends HTMLImageElement {
       this._logger.error(
         'ResizeObserver is not supported. Disabling the web component.' +
           ' Consider using a polyfill like ' +
-          ' https://github.com/juggle/resize-observer'
+          ' https://github.com/juggle/resize-observer',
       );
     }
 
@@ -677,7 +679,7 @@ export class ImageDisplayControl extends HTMLImageElement {
     if (!cssContain && !this.dataset.cssContainFallback) {
       this._logger.warn(
         'CSS containment is not supported. Consider using ' +
-          'the `css-contain-fallback=` attribute'
+          'the `css-contain-fallback=` attribute',
       );
     }
 

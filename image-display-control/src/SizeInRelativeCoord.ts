@@ -20,7 +20,7 @@ export class SizeInRelativeCoord {
 
   toString() {
     return `{width=${this._width.toFixed(3)}, height=${this._height.toFixed(
-      3
+      3,
     )}}`;
   }
 

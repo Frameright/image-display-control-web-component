@@ -81,13 +81,13 @@ export class SizeInPixels {
 
     return new SizeInRelativeCoord(
       this._width / baseSize.getSafeWidth(),
-      this._height / baseSize.getSafeHeight()
+      this._height / baseSize.getSafeHeight(),
     );
   }
 
   toString() {
     return `{width=${this._width.toFixed(3)}px, height=${this._height.toFixed(
-      3
+      3,
     )}px}`;
   }
 

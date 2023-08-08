@@ -5,7 +5,7 @@ import '../src/image-display-control.js';
 describe('ImageDisplayControl', () => {
   it('detects browser features', async () => {
     const element = await fixture<ImageDisplayControl>(
-      html`<img is="image-display-control" alt="description" />`
+      html`<img is="image-display-control" alt="description" />`,
     );
 
     expect(element._getInternal('this._browserFeatures')).to.deep.equal({

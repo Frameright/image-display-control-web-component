@@ -22,7 +22,7 @@ export class RectangleImageRegion {
   // applied transformation, in order to zoom in on a region.
   static getTransformedImageSize(
     originalImageRegionSize: SizeInPixels,
-    transformation: Transformation // current image transformation being applied
+    transformation: Transformation, // current image transformation being applied
   ): SizeInPixels {
     return originalImageRegionSize.getScaled(transformation.factor);
   }
@@ -30,7 +30,7 @@ export class RectangleImageRegion {
   constructor(
     id?: string,
     position?: PositionInRelativeCoord,
-    size?: SizeInRelativeCoord
+    size?: SizeInRelativeCoord,
   ) {
     this.id = id ?? '';
     this.position = position ?? new PositionInRelativeCoord();
@@ -65,14 +65,14 @@ export class RectangleImageRegion {
     if (unit === 'pixel') {
       if (values.imageWidth == null || values.imageHeight == null) {
         logger.warn(
-          `Region ${values.id} has missing imageWidth or imageHeight, skipping.`
+          `Region ${values.id} has missing imageWidth or imageHeight, skipping.`,
         );
         this._unknown = true;
         return;
       }
       baseSize = new SizeInPixels(
         parseFloat(`${values.imageWidth}`),
-        parseFloat(`${values.imageHeight}`)
+        parseFloat(`${values.imageHeight}`),
       );
     }
 
@@ -83,7 +83,7 @@ export class RectangleImageRegion {
       values.height == null
     ) {
       logger.warn(
-        `Region ${values.id} has missing x, y, width or height, skipping.`
+        `Region ${values.id} has missing x, y, width or height, skipping.`,
       );
       this._unknown = true;
       return;
@@ -100,7 +100,7 @@ export class RectangleImageRegion {
       Number.isNaN(height)
     ) {
       logger.warn(
-        `Region ${values.id} has non-numeric x, y, width or height, skipping.`
+        `Region ${values.id} has non-numeric x, y, width or height, skipping.`,
       );
       this._unknown = true;
       return;
@@ -108,7 +108,7 @@ export class RectangleImageRegion {
 
     if (x < 0 || y < 0 || width <= 0 || height <= 0) {
       logger.warn(
-        `Region ${values.id} has negative/zero x, y, width or height, skipping.`
+        `Region ${values.id} has negative/zero x, y, width or height, skipping.`,
       );
       this._unknown = true;
       return;
@@ -135,10 +135,10 @@ export class RectangleImageRegion {
   getTransformation(
     currentComponentSize: SizeInPixels, // component = <img> element
     originalImageRegionSize: SizeInPixels,
-    bottomRightClipMargins: SizeInPixels
+    bottomRightClipMargins: SizeInPixels,
   ): Transformation {
     const regionPos = this.position.getPositionInPixels(
-      originalImageRegionSize
+      originalImageRegionSize,
     );
     const regionSize = this.size.getSizeInPixels(originalImageRegionSize);
     const regionWidth = regionSize.getSafeWidth();
@@ -284,7 +284,7 @@ export class RectangleImageRegion {
 
     const origin = new PositionInPixels(
       regionPos.x - xOffset,
-      regionPos.y - yOffset
+      regionPos.y - yOffset,
     );
 
     return {
@@ -295,7 +295,7 @@ export class RectangleImageRegion {
       insetClipFromTopLeft: new SizeInPixels(origin.x, origin.y),
       insetClipFromBottomRight: new SizeInPixels(
         regionXFromRight - xOffset + bottomRightClipMargins.getWidth(),
-        regionYFromBottom - yOffset + bottomRightClipMargins.getHeight()
+        regionYFromBottom - yOffset + bottomRightClipMargins.getHeight(),
       ),
     };
   }
@@ -305,15 +305,15 @@ export class RectangleImageRegion {
   getBoundingBox(
     currentComponentSize: SizeInPixels, // component = <img> element
     originalImageRegionSize: SizeInPixels,
-    transformation: Transformation // current image transformation being applied
+    transformation: Transformation, // current image transformation being applied
   ) {
     const transformedImagePositionInComponent = new PositionInPixels(
       -transformation.origin.x * transformation.factor,
-      -transformation.origin.y * transformation.factor
+      -transformation.origin.y * transformation.factor,
     );
     const transformedImageSize = RectangleImageRegion.getTransformedImageSize(
       originalImageRegionSize,
-      transformation
+      transformation,
     );
 
     const regionPositionInTransformedImage =
@@ -324,7 +324,7 @@ export class RectangleImageRegion {
         regionPositionInTransformedImage.x +
           transformedImagePositionInComponent.x,
         regionPositionInTransformedImage.y +
-          transformedImagePositionInComponent.y
+          transformedImagePositionInComponent.y,
       ),
       size: this.size.getSizeInPixels(transformedImageSize),
     };
