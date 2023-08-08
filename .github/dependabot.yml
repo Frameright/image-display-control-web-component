@@ -4,11 +4,13 @@
 version: 2
 updates:
   - package-ecosystem: "npm"
-    directory: "/"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "npm"
     directory: "/image-display-control"
     schedule:
-      interval: "daily"
+      interval: "weekly"
+
+    # Do not get one pull request per version bump. Instead get one pull request
+    # bumping several dependency versions at once:
+    groups:
+      all-deps:
+        patterns:
+          - "*"
