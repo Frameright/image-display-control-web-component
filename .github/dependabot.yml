@@ -7,6 +7,8 @@ updates:
     directory: "/image-display-control"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore: "
 
     # Do not get one pull request per version bump. Instead get one pull request
     # bumping several dependency versions at once:
