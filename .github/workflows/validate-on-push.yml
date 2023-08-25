@@ -1,5 +1,7 @@
 name: validate-on-push
-on: [push]
+on:
+  - push
+  - pull_request
 jobs:
   validate-build-upload:
     runs-on: ubuntu-latest
