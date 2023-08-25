@@ -1,4 +1,4 @@
-name: validate-on-push
+name: validate
 on:
   - push
   - pull_request
