@@ -1,6 +1,5 @@
 [<img src="https://avatars.githubusercontent.com/u/35964478?s=200&v=4" align="right" width="64" height="64">](https://frameright.io)
 [![npm version](https://img.shields.io/npm/v/@frameright/image-display-control-web-component)](https://www.npmjs.com/package/@frameright/image-display-control-web-component)
-[![validate-on-push](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml/badge.svg)](https://github.com/Frameright/image-display-control-web-component/actions/workflows/validate-on-push.yml)
 [![Published on webcomponents.org](https://img.shields.io/badge/webcomponents.org-published-blue.svg)](https://www.webcomponents.org/element/@frameright/image-display-control-web-component)
 
 &nbsp;
