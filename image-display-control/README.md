@@ -190,7 +190,7 @@ or get it from a
 ```html
 <script
   type="module"
-  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.1.3/dist/image-display-control.min.js"
+  src="https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component@1.1.8/dist/image-display-control.min.js"
 ></script>
 ```
 
