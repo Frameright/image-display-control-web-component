@@ -87,7 +87,8 @@
         {
           "ignorePackages": true
         }
-      ]
+      ],
+      "lit/no-classfield-shadowing": "off"
     }
   },
   "lint-staged": {
