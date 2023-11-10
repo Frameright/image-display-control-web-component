@@ -27,6 +27,11 @@ updates:
       - dependency-name: "rollup"
         update-types: ["version-update:semver-major"]
 
+      # @open-wc/testing 4.0.0 fails with
+      # Could not find a declaration file for module '@open-wc/scoped-elements/html-element.js'
+      - dependency-name: "@open-wc/testing"
+        update-types: ["version-update:semver-major"]
+
     # Do not get one pull request per version bump. Instead get one pull request
     # bumping several dependency versions at once:
     groups:
