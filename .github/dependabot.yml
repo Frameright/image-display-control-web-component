@@ -15,6 +15,10 @@ updates:
       - dependency-name: "@open-wc/testing"
         update-types: ["version-update:semver-major"]
 
+      # eslint's CLI changed a lot in eslint@9. Staying on eslint@8 for now.
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+
     # Do not get one pull request per version bump. Instead get one pull request
     # bumping several dependency versions at once:
     groups:

@@ -59,8 +59,9 @@
     "@web/rollup-plugin-copy": "^0.5.0",
     "@web/test-runner": "^0.18.0",
     "concurrently": "^8.2.0",
-    "eslint": "^9.1.0",
+    "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-import": "^2.29.1",
     "lint-staged": "^15.0.1",
     "markdown-toc": "^1.2.0",
     "prettier": "^3.0.1",
@@ -99,9 +100,6 @@
     ]
   },
   "overrides": {
-    "@typescript-eslint/eslint-plugin": {
-      "eslint": "^9.1.0"
-    },
     "rollup-plugin-summary": {
       "rollup": "^4.16.2"
     }
