@@ -10,26 +10,13 @@ updates:
     commit-message:
       prefix: "chore: "
     ignore:
-      # We can't upgrade to rollup 4 just yet, as we then get a version range
-      # clash at the moment otherwise:
-      # npm ERR! While resolving: rollup-plugin-summary@2.0.0
-      # npm ERR! Found: rollup@4.0.2
-      # npm ERR! node_modules/rollup
-      # npm ERR!   dev rollup@"^4.0.2" from the root project
-      # npm ERR!   peerOptional rollup@"^2.78.0||^3.0.0||^4.0.0" from @rollup/plugin-node-resolve@15.2.3
-      # npm ERR!   node_modules/@rollup/plugin-node-resolve
-      # npm ERR!     dev @rollup/plugin-node-resolve@"^15.2.3" from the root project
-      # npm ERR!     @rollup/plugin-node-resolve@"^15.0.1" from @web/dev-server-rollup@0.5.2
-      # npm ERR!     node_modules/@web/dev-server-rollup
-      # npm ERR!       @web/dev-server-rollup@"^0.5.1" from @web/dev-server@0.3.2
-      # npm ERR!       node_modules/@web/dev-server
-      # npm ERR!         dev @web/dev-server@"^0.3.0" from the root project
-      - dependency-name: "rollup"
-        update-types: ["version-update:semver-major"]
-
       # @open-wc/testing 4.0.0 fails with
       # Could not find a declaration file for module '@open-wc/scoped-elements/html-element.js'
       - dependency-name: "@open-wc/testing"
+        update-types: ["version-update:semver-major"]
+
+      # eslint's CLI changed a lot in eslint@9. Staying on eslint@8 for now.
+      - dependency-name: "eslint"
         update-types: ["version-update:semver-major"]
 
     # Do not get one pull request per version bump. Instead get one pull request
