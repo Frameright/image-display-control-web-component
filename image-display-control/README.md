@@ -25,6 +25,8 @@ An easy way to do [Image Display Control](https://frameright.io) in your HTML
 page. Made with :heart: by [Frameright](https://frameright.io). Power to the
 pictures!
 
+> **Less than 20kB in your final client-side bundle.**
+
 &emsp; :sparkles: [Live demo](https://webc.frameright.io)
 
 &emsp; 💻 [CodeSandbox](https://codesandbox.io/s/image-display-control-web-component-6hzmq5)
@@ -183,6 +185,8 @@ project with:
 ```bash
 npm install @frameright/image-display-control-web-component
 ```
+
+> **Less than 20kB in your final client-side bundle.**
 
 or get it from a
 [CDN](https://cdn.jsdelivr.net/npm/@frameright/image-display-control-web-component/):
