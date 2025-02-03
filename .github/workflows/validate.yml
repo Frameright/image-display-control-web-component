@@ -15,7 +15,7 @@ jobs:
       - run: npm run test
       - run: npm run build
       - run: npm pack
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: image-display-control
           path: image-display-control/frameright-image-display-control-web-component-*.tgz
